@@ -1,0 +1,23 @@
+{
+  "lanceur": {},
+  "projets": [
+    {
+      "nom": "ParisView",
+      "sous_titre": "Métro de Paris · lignes 3bis et 7bis · OMSI 2 / openOMSI",
+      "jeu": "omsi2",
+      "fichier_version": "ParisView_version.txt",
+      "liste": "ParisView_fichiers_installes.txt",
+      "marque": "maps\\ParisView",
+      "description": "Le métro parisien pour OMSI 2 et openOMSI : la ligne 3bis en MF 67 et la ligne 7bis en MF 88, avec leurs stations, leurs horaires et leurs rames IA.\n\nÀ lire avant de jouer :\n•  C'est une carte d'expérience, pas un projet sérieux.\n•  Elle est en bêta : beaucoup de choses manquent et des bugs restent.\n•  Elle ne cherche pas à reproduire la réalité à 100 %.\n\nPrendre son service : sur l'écran de cabine, « 1  Prise de service », code à 4 chiffres puis VAL. Inverseur, manipulateur, et respectez la vitesse CMC (aiguille rouge).\nConseil : jouez de nuit dans les souterrains (de jour, openOMSI éclaire les tunnels au soleil).\n\nSons réels : Wikimedia Commons (Lodai, Litlok - CC BY-SA 4.0 ; Clicsouris - CC BY-SA 3.0) et vidéo de la ligne 3bis par The Masked Man.",
+      "id": "parisview",
+      "version": "Béta V1.1.0",
+      "date": "07/11/2026 21:11",
+      "md5": "aa0c8d4dc34433996a703f94808e3df9",
+      "zip": "https://github.com/Dreams9972/TPS-Studios/releases/download/parisview-v1.1.0/ParisView.zip",
+      "sha256": "316475734bfd001e6ef7b43f5a3f4d3774b09419b0081b4be24f79172675b008",
+      "taille": 163568561,
+      "image": "https://raw.githubusercontent.com/Dreams9972/TPS-Studios/main/images/parisview.jpg",
+      "notes": "Nouveau : le lanceur TPS Studios.\\n•  Installation, mises à jour et lancement directement depuis le lanceur.\\n•  Lumières : quand c'est éteint, c'est vraiment noir.\\n•  Éclairage de nuit adouci sur toute la carte.\\n•  MF 67 et MF 88 : même éclairage, plus réaliste.\\n•  Affiches des rames dans le bon sens.\\n•  Feux à détection, trajets dépôt et capacité des rames (V1.0.1)."
+    }
+  ]
+}
