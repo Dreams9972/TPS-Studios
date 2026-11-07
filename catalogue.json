@@ -1,5 +1,9 @@
 {
-  "lanceur": {},
+  "lanceur": {
+    "version": "1.0.0",
+    "url": "https://github.com/Dreams9972/TPS-Studios/releases/download/lanceur-v1.0.0/TPS.Studios.exe",
+    "sha256": "061117b50aef160d7148f49e98286510e161fdad24deb6462d5981a4f59f74c8"
+  },
   "projets": [
     {
       "nom": "ParisView",
