@@ -27,6 +27,29 @@
       "taille": 163483238,
       "image": "https://raw.githubusercontent.com/Dreams9972/TPS-Studios/main/images/parisview.jpg",
       "notes": "Correctif lumières et textures.\\n•  Les lumières sortent enfin de leurs luminaires, partout sur la carte (halos et éclairage posés sur les tubes, même dans les stations en courbe).\\n•  MF 67 et MF 88 : les rampes du plafond brillent et éclairent la salle ; le plafonnier de cabine éclaire vraiment ; noir quand c'est éteint.\\n•  Louis Blanc, Place des Fêtes et couloirs : vrais plafonniers.\\n•  Textures corrigées : inox, barrières, mains courantes, signaux et nez des rames ne sont plus étirés."
+    },
+    {
+      "nom": "Paris 25",
+      "sous_titre": "Bus RATP / IDFM · ligne 25 Vitry-sur-Seine – Paris 13e · par annamathys",
+      "jeu": "omsi2",
+      "fichier_version": "Paris25_version.txt",
+      "liste": "Paris25_fichiers_installes.txt",
+      "marque": "maps\\Paris 25",
+      "description": "Paris 25 reproduit la ligne de bus 25, qui relie Vitry-sur-Seine au 13e arrondissement de Paris (5 km, 15 à 20 minutes). L'environnement est celui de 2024/2025 ; certains endroits ont pu être interprétés autrement.\n\nDeux périodes Chrono :\n•  « RATP », jusqu'au 31 juillet 2026 (HOF « Paris 25 Old »).\n•  « IDFM », à partir du 1er août 2026 (HOF « Paris 25 »).\n\nAvant de jouer : copiez l'HOF qui convient dans le dossier de votre bus (Addons\\Paris 25\\Hofs : Krueger++pc, Rollband Agora pour le Renault Agora RATP, Global pour les autres bus). Le « 4GB Patch » est vivement conseillé.\n\nCarte réalisée par annamathys (Kalinkowski), avec Nicolas, ibk.cis5, Péri, Fabian, VeesGuy, Sobol, TPS Studios et Jihem. Les objets du dossier Sceneryobjects\\Paris_25\\batiment ne doivent pas être réutilisés ; la carte peut être modifiée mais pas repartagée.",
+      "carte": "maps/Paris 25/global.cfg",
+      "meteo": "",
+      "bus_defaut": "Vehicles/MAN_NL_NG/MAN_EN92_main.bus",
+      "hof_defaut": "Paris 25",
+      "consigne": "Choisissez votre bus, l'HOF « Paris 25 » (période IDFM) ou « Paris 25 Old » (période RATP), puis lancez.",
+      "id": "paris25",
+      "version": "V1.0.0",
+      "date": "07/11/2026 23:34",
+      "md5": "fcda83ec3333fc127cf223da8ac3e798",
+      "zip": "https://github.com/Dreams9972/TPS-Studios/releases/download/paris25-v1.0.0/Paris25.zip",
+      "sha256": "ffa4d4e05351b3786c948002295566808283b994cd86caa1b83edf2dba4f9d4c",
+      "taille": 865328991,
+      "image": "https://raw.githubusercontent.com/Dreams9972/TPS-Studios/main/images/paris25.jpg",
+      "notes": "Première version de Paris 25 dans le lanceur TPS Studios (archive officielle 1.0 d'annamathys)."
     }
   ]
 }
