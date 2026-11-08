@@ -54,7 +54,8 @@
       "image": "https://raw.githubusercontent.com/Dreams9972/TPS-Studios/main/images/paris25.jpg",
       "notes": "Première version de Paris 25 dans le lanceur TPS Studios (archive officielle 1.0 d'annamathys).",
       "categorie": "cartes",
-      "statut": "bientot"
+      "a_la_une": true,
+      "ordre": 1
     }
   ]
 }
