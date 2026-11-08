@@ -68,7 +68,7 @@
     {
       "id": "saint-vausonne",
       "nom": "Saint-Vausonne",
-      "sous_titre": "Ville fictive et ses lignes de bus régionales",
+      "sous_titre": "5 lignes de bus régionales · Saint-François, Belmont et La Source",
       "jeu": "omsi2",
       "categorie": "cartes",
       "fichier_version": "SaintVausonne_version.txt",
@@ -103,7 +103,7 @@
     {
       "id": "region-parisienne",
       "nom": "Région Parisienne",
-      "sous_titre": "Lignes de bus RATP dans Paris",
+      "sous_titre": "11 lignes de bus dans Paris · de la 23 à la 149",
       "jeu": "omsi2",
       "categorie": "cartes",
       "fichier_version": "RegionParisienne_version.txt",
