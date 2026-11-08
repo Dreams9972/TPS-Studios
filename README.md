@@ -3,7 +3,7 @@
 **Le lanceur de TPS Studios : l'endroit où tous nos projets et leurs contenus sont réunis.**
 Cartes, livrées, bus, girouettes, packs IA… Un seul programme pour tout trouver, installer, mettre à jour et lancer.
 
-## ⬇️ [Télécharger le lanceur TPS Studios](https://github.com/Dreams9972/TPS-Studios/releases/latest/download/TPS.Studios.exe)
+## ⬇️ [Télécharger le lanceur TPS Studios](https://raw.githubusercontent.com/Dreams9972/TPS-Studios/main/lanceur/TPS.Studios.exe)
 
 1. Téléchargez **TPS.Studios.exe** et lancez-le. Il crée un raccourci « TPS Studios » sur le bureau.
 2. Choisissez votre jeu, ouvrez la bibliothèque, sélectionnez un projet puis cliquez sur **INSTALLER**.
