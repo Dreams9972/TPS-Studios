@@ -99,6 +99,46 @@
       "image": "https://raw.githubusercontent.com/Dreams9972/TPS-Studios/main/images/saint-vausonne.jpg",
       "notes": "Saint-Vausonne V2.1",
       "statut": "publie"
+    },
+    {
+      "id": "region-parisienne",
+      "nom": "Région Parisienne",
+      "sous_titre": "Lignes de bus RATP dans Paris",
+      "jeu": "omsi2",
+      "categorie": "cartes",
+      "fichier_version": "RegionParisienne_version.txt",
+      "liste": "RegionParisienne_fichiers_installes.txt",
+      "marque": "maps\\Region Parisienne V1.1",
+      "carte": "maps/Region Parisienne V1.1/global.cfg",
+      "meteo": "",
+      "bus_defaut": "",
+      "hof_defaut": "",
+      "consigne": "Choisissez votre bus et la ligne, puis lancez.",
+      "description": "Lignes de Paris:\n23 Gare de Lyon <-> Gare de l'Est\n34 Gare de Lyon <-> Chatelet\n36 Republique <-> Nation\n41 Opera <-> Chatelet\n50 Gare de Lyon <-> Porte de la Muette\n65 Chatelet <-> Gare de l'Est/Bastille\n78 Bastille <-> Porte de la Muette\n79 Clemenceau <-> Nation\n81 Etoile <-> Denfert-Rochereau\n90 Gare de Lyon <-> Charles de Gaulle Etoile\n149 Etoile <-> Bercy\n\nCarte réalisée par TPS Studios.",
+      "editeur": "TPS Studios",
+      "version": "V1.1",
+      "date": "08/11/2026 12:04",
+      "md5": "6d379ddf0a2e58a62e695e537ab37639",
+      "zip": "",
+      "sha256": "",
+      "taille": 2419254815,
+      "parties": [
+        {
+          "url": "https://github.com/Dreams9972/TPS-Studios/releases/download/region-parisienne-v1.1/region-parisienne_partie1.zip",
+          "sha256": "8ce84e69745b2d006c9dd05f7cc4a1edf096b8b50a343a6034c9664f4eda8e99",
+          "taille": 1853738419
+        },
+        {
+          "url": "https://github.com/Dreams9972/TPS-Studios/releases/download/region-parisienne-v1.1/region-parisienne_partie2.zip",
+          "sha256": "b032794da2aefb2e2ea6b7950e00f8d63cad1500637ca71e011c69bda55ce67f",
+          "taille": 565516396
+        }
+      ],
+      "dlc": "405430 | OMSI 2 Add-on Berlin X10\n434060 | OMSI 2 Add-on Downloadpack Vol. 1 - KI-Fahrzeuge\n434065 | OMSI 2 Add-on Rheinhausen\n689870 | OMSI 2 Add-on Downloadpack Vol. 3 – KI-Menschen\n708170 | OMSI 2 Add-on Express 91.06\n708172 | OMSI 2 Add-on Downloadpack Vol. 5 – KI-Menschen\n880282 | OMSI 2 Add-on Downloadpack Vol. 6 - KI-Menschen\n1196041 | OMSI 2 Add-on Downloadpack Vol. 8 – KI-Menschen\n1457750 | OMSI 2 Add-on Saint-Servan\n1481770 | OMSI 2 Add-on Heuliez Bus-Pack Access Bus GX327\n1640310 | OMSI 2 Add-on Enhanced Environment Pack\n2253860 | OMSI 2 Add-on IVECO Bus-Familie Urbanway",
+      "prerequis": "OMSI 2 + 12 DLC Steam (liste ci-dessous)",
+      "image": "https://raw.githubusercontent.com/Dreams9972/TPS-Studios/main/images/region-parisienne.jpg",
+      "notes": "Région Parisienne V1.1",
+      "statut": "publie"
     }
   ],
   "communaute": {
