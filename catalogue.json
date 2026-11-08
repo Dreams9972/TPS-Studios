@@ -57,5 +57,8 @@
       "a_la_une": true,
       "ordre": 1
     }
-  ]
+  ],
+  "communaute": {
+    "serveur": "https://tps-studios-social.theouf94.workers.dev"
+  }
 }
