@@ -66,41 +66,6 @@
       "image": "https://raw.githubusercontent.com/Dreams9972/TPS-Studios/main/images/strasbourg.jpg?v=639297114777263819"
     },
     {
-      "id": "saint-vausonne",
-      "nom": "Saint-Vausonne",
-      "sous_titre": "5 lignes de bus régionales · Saint-François, Belmont et La Source",
-      "jeu": "omsi2",
-      "categorie": "cartes",
-      "fichier_version": "SaintVausonne_version.txt",
-      "liste": "SaintVausonne_fichiers_installes.txt",
-      "marque": "maps\\Saint-Vausonne V2.1",
-      "carte": "maps/Saint-Vausonne V2.1/global.cfg",
-      "meteo": "",
-      "bus_defaut": "",
-      "hof_defaut": "",
-      "consigne": "Choisissez votre bus et la ligne, puis lancez.",
-      "description": "Lignes de la Region:\n1802 Belmont Gare RER <-> Belmont Gare RER\n1822 Mairie de Saint-François <-> Belmont Gare RER\n1803 Saint-François Gare RER <-> C.C Cap Nord\n1804 Saint-François Gare RER <-> La Source\n1820 Saint-François Gare RER <-> Belmont Gare RER\n\nCarte réalisée par TPS Studios.",
-      "editeur": "TPS Studios",
-      "version": "V2.1",
-      "date": "08/11/2026 12:03",
-      "md5": "f949fe1f289d80abf63b34b74b4642c8",
-      "zip": "",
-      "sha256": "",
-      "taille": 794072471,
-      "parties": [
-        {
-          "url": "https://github.com/Dreams9972/TPS-Studios/releases/download/saint-vausonne-v2.1/saint-vausonne_partie1.zip",
-          "sha256": "4d9119f6509648975578b7a744f2c4f28b10bb13c02e8d61e896278a29434beb",
-          "taille": 794072471
-        }
-      ],
-      "dlc": "434060 | OMSI 2 Add-on Downloadpack Vol. 1 - KI-Fahrzeuge\n708170 | OMSI 2 Add-on Express 91.06\n935511 | OMSI 2 Add-On Urbino Stadtbusfamilie | facultatif\n1457750 | OMSI 2 Add-on Saint-Servan\n2253860 | OMSI 2 Add-on IVECO Bus-Familie Urbanway",
-      "prerequis": "OMSI 2 + 4 DLC obligatoires (1 facultatif)",
-      "image": "https://raw.githubusercontent.com/Dreams9972/TPS-Studios/main/images/saint-vausonne.jpg",
-      "notes": "Saint-Vausonne V2.1",
-      "statut": "publie"
-    },
-    {
       "id": "region-parisienne",
       "nom": "Région Parisienne",
       "sous_titre": "11 lignes de bus dans Paris · de la 23 à la 149",
@@ -178,6 +143,60 @@
       "prerequis": "OMSI 2 + 5 DLC obligatoires",
       "image": "https://raw.githubusercontent.com/Dreams9972/TPS-Studios/main/images/perigueux.jpg",
       "notes": "Périgueux V1.0",
+      "statut": "publie"
+    },
+    {
+      "id": "saint-vausonne",
+      "nom": "Saint-Vausonne",
+      "sous_titre": "5 lignes de bus régionales · Saint-François, Belmont et La Source",
+      "jeu": "omsi2",
+      "categorie": "cartes",
+      "fichier_version": "SaintVausonne_version.txt",
+      "liste": "SaintVausonne_fichiers_installes.txt",
+      "marque": "maps\\Saint-Vausonne V2.1",
+      "carte": "maps/Saint-Vausonne V2.1/global.cfg",
+      "meteo": "",
+      "bus_defaut": "",
+      "hof_defaut": "",
+      "consigne": "Choisissez votre bus et la ligne, puis lancez.",
+      "description": "Lignes de la Region:\n1802 Belmont Gare RER <-> Belmont Gare RER\n1822 Mairie de Saint-François <-> Belmont Gare RER\n1803 Saint-François Gare RER <-> C.C Cap Nord\n1804 Saint-François Gare RER <-> La Source\n1820 Saint-François Gare RER <-> Belmont Gare RER\n\nCarte réalisée par TPS Studios.",
+      "editeur": "TPS Studios",
+      "version": "V2.1",
+      "date": "08/11/2026 12:21",
+      "md5": "f949fe1f289d80abf63b34b74b4642c8",
+      "zip": "",
+      "sha256": "",
+      "taille": 794072537,
+      "parties": [
+        {
+          "url": "https://github.com/Dreams9972/TPS-Studios/releases/download/saint-vausonne-v2.1/saint-vausonne_partie1.zip",
+          "sha256": "a78c00c1f94249713970b7bd471ea391f3dde683c65d75cb390f2b0297dccdb2",
+          "taille": 260567591,
+          "miroir": "https://pub-57f6254ba36046f5b82a8dace6aee679.r2.dev/saint-vausonne/saint-vausonne_partie1.zip"
+        },
+        {
+          "url": "https://github.com/Dreams9972/TPS-Studios/releases/download/saint-vausonne-v2.1/saint-vausonne_partie2.zip",
+          "sha256": "6650efe793b5397fddf1fcd0799988bd9f45ef1c18606c6a14135532a36e1cd7",
+          "taille": 260606238,
+          "miroir": "https://pub-57f6254ba36046f5b82a8dace6aee679.r2.dev/saint-vausonne/saint-vausonne_partie2.zip"
+        },
+        {
+          "url": "https://github.com/Dreams9972/TPS-Studios/releases/download/saint-vausonne-v2.1/saint-vausonne_partie3.zip",
+          "sha256": "36e97654fcc93c87bdda02b514f4d5b6dbf7bff3c7191bed7446e086590d6a40",
+          "taille": 262247074,
+          "miroir": "https://pub-57f6254ba36046f5b82a8dace6aee679.r2.dev/saint-vausonne/saint-vausonne_partie3.zip"
+        },
+        {
+          "url": "https://github.com/Dreams9972/TPS-Studios/releases/download/saint-vausonne-v2.1/saint-vausonne_partie4.zip",
+          "sha256": "4436ff781595c63acbd613240324fb651fec855fec46385d0e6e02b7bab317dd",
+          "taille": 10651634,
+          "miroir": "https://pub-57f6254ba36046f5b82a8dace6aee679.r2.dev/saint-vausonne/saint-vausonne_partie4.zip"
+        }
+      ],
+      "dlc": "434060 | OMSI 2 Add-on Downloadpack Vol. 1 - KI-Fahrzeuge\n708170 | OMSI 2 Add-on Express 91.06\n935511 | OMSI 2 Add-On Urbino Stadtbusfamilie\n1457750 | OMSI 2 Add-on Saint-Servan\n2253860 | OMSI 2 Add-on IVECO Bus-Familie Urbanway",
+      "prerequis": "OMSI 2 + 5 DLC Steam (liste ci-dessous)",
+      "image": "https://raw.githubusercontent.com/Dreams9972/TPS-Studios/main/images/saint-vausonne.jpg",
+      "notes": "Saint-Vausonne V2.1",
       "statut": "publie"
     }
   ],
