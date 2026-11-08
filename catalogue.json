@@ -1,8 +1,8 @@
 {
   "lanceur": {
-    "version": "2.4.0",
-    "url": "https://github.com/Dreams9972/TPS-Studios/releases/download/lanceur-v2.4.0/TPS.Studios.exe",
-    "sha256": "c19ae7200014e455251a5a922cded0cdc7de60575f631135890790d0287aab1a"
+    "version": "2.4.1",
+    "url": "https://github.com/Dreams9972/TPS-Studios/releases/download/lanceur-v2.4.1/TPS.Studios.exe",
+    "sha256": "66e00bca773a63ed59bbdd6ab8f39b4bb9ac7caae46a2f28790d7d5d27feaa05"
   },
   "projets": [
     {
