@@ -67,6 +67,7 @@
     }
   ],
   "communaute": {
-    "serveur": "https://tps-studios-social.theouf94.workers.dev"
+    "serveur": "https://tps-studios-social.theouf94.workers.dev",
+    "discord_app": "1568930912341725256"
   }
 }
