@@ -66,46 +66,6 @@
       "image": "https://raw.githubusercontent.com/Dreams9972/TPS-Studios/main/images/strasbourg.jpg?v=639297114777263819"
     },
     {
-      "id": "region-parisienne",
-      "nom": "Région Parisienne",
-      "sous_titre": "11 lignes de bus dans Paris · de la 23 à la 149",
-      "jeu": "omsi2",
-      "categorie": "cartes",
-      "fichier_version": "RegionParisienne_version.txt",
-      "liste": "RegionParisienne_fichiers_installes.txt",
-      "marque": "maps\\Region Parisienne V1.1",
-      "carte": "maps/Region Parisienne V1.1/global.cfg",
-      "meteo": "",
-      "bus_defaut": "",
-      "hof_defaut": "",
-      "consigne": "Choisissez votre bus et la ligne, puis lancez.",
-      "description": "Lignes de Paris:\n23 Gare de Lyon <-> Gare de l'Est\n34 Gare de Lyon <-> Chatelet\n36 Republique <-> Nation\n41 Opera <-> Chatelet\n50 Gare de Lyon <-> Porte de la Muette\n65 Chatelet <-> Gare de l'Est/Bastille\n78 Bastille <-> Porte de la Muette\n79 Clemenceau <-> Nation\n81 Etoile <-> Denfert-Rochereau\n90 Gare de Lyon <-> Charles de Gaulle Etoile\n149 Etoile <-> Bercy\n\nCarte réalisée par TPS Studios.",
-      "editeur": "TPS Studios",
-      "version": "V1.1",
-      "date": "08/11/2026 12:04",
-      "md5": "6d379ddf0a2e58a62e695e537ab37639",
-      "zip": "",
-      "sha256": "",
-      "taille": 2419254815,
-      "parties": [
-        {
-          "url": "https://github.com/Dreams9972/TPS-Studios/releases/download/region-parisienne-v1.1/region-parisienne_partie1.zip",
-          "sha256": "8ce84e69745b2d006c9dd05f7cc4a1edf096b8b50a343a6034c9664f4eda8e99",
-          "taille": 1853738419
-        },
-        {
-          "url": "https://github.com/Dreams9972/TPS-Studios/releases/download/region-parisienne-v1.1/region-parisienne_partie2.zip",
-          "sha256": "b032794da2aefb2e2ea6b7950e00f8d63cad1500637ca71e011c69bda55ce67f",
-          "taille": 565516396
-        }
-      ],
-      "dlc": "405430 | OMSI 2 Add-on Berlin X10\n434060 | OMSI 2 Add-on Downloadpack Vol. 1 - KI-Fahrzeuge\n434065 | OMSI 2 Add-on Rheinhausen\n689870 | OMSI 2 Add-on Downloadpack Vol. 3 – KI-Menschen | facultatif\n708170 | OMSI 2 Add-on Express 91.06\n708172 | OMSI 2 Add-on Downloadpack Vol. 5 – KI-Menschen | facultatif\n880282 | OMSI 2 Add-on Downloadpack Vol. 6 - KI-Menschen | facultatif\n1196041 | OMSI 2 Add-on Downloadpack Vol. 8 – KI-Menschen | facultatif\n1457750 | OMSI 2 Add-on Saint-Servan\n1481770 | OMSI 2 Add-on Heuliez Bus-Pack Access Bus GX327\n1640310 | OMSI 2 Add-on Enhanced Environment Pack\n2253860 | OMSI 2 Add-on IVECO Bus-Familie Urbanway",
-      "prerequis": "OMSI 2 + 8 DLC obligatoires (4 facultatifs)",
-      "image": "https://raw.githubusercontent.com/Dreams9972/TPS-Studios/main/images/region-parisienne.jpg",
-      "notes": "Région Parisienne V1.1",
-      "statut": "publie"
-    },
-    {
       "id": "perigueux",
       "nom": "Périgueux",
       "sous_titre": "Réseau Péribus · Périgueux et son agglomération (Dordogne)",
@@ -197,6 +157,96 @@
       "prerequis": "OMSI 2 + 5 DLC Steam (liste ci-dessous)",
       "image": "https://raw.githubusercontent.com/Dreams9972/TPS-Studios/main/images/saint-vausonne.jpg",
       "notes": "Saint-Vausonne V2.1",
+      "statut": "publie"
+    },
+    {
+      "id": "region-parisienne",
+      "nom": "Région Parisienne",
+      "sous_titre": "11 lignes de bus dans Paris · de la 23 à la 149",
+      "jeu": "omsi2",
+      "categorie": "cartes",
+      "fichier_version": "RegionParisienne_version.txt",
+      "liste": "RegionParisienne_fichiers_installes.txt",
+      "marque": "maps\\Region Parisienne V1.1",
+      "carte": "maps/Region Parisienne V1.1/global.cfg",
+      "meteo": "",
+      "bus_defaut": "",
+      "hof_defaut": "",
+      "consigne": "Choisissez votre bus et la ligne, puis lancez.",
+      "description": "Lignes de Paris:\n23 Gare de Lyon <-> Gare de l'Est\n34 Gare de Lyon <-> Chatelet\n36 Republique <-> Nation\n41 Opera <-> Chatelet\n50 Gare de Lyon <-> Porte de la Muette\n65 Chatelet <-> Gare de l'Est/Bastille\n78 Bastille <-> Porte de la Muette\n79 Clemenceau <-> Nation\n81 Etoile <-> Denfert-Rochereau\n90 Gare de Lyon <-> Charles de Gaulle Etoile\n149 Etoile <-> Bercy\n\nCarte réalisée par TPS Studios.",
+      "editeur": "TPS Studios",
+      "version": "V1.1",
+      "date": "08/11/2026 12:22",
+      "md5": "6d379ddf0a2e58a62e695e537ab37639",
+      "zip": "",
+      "sha256": "",
+      "taille": 2419254990,
+      "parties": [
+        {
+          "url": "https://github.com/Dreams9972/TPS-Studios/releases/download/region-parisienne-v1.1/region-parisienne_partie1.zip",
+          "sha256": "c68c08119e24b713be1f89e5f8baaf2ab058e6a758566c9d21196645c6903323",
+          "taille": 262722439,
+          "miroir": "https://pub-57f6254ba36046f5b82a8dace6aee679.r2.dev/region-parisienne/region-parisienne_partie1.zip"
+        },
+        {
+          "url": "https://github.com/Dreams9972/TPS-Studios/releases/download/region-parisienne-v1.1/region-parisienne_partie2.zip",
+          "sha256": "ea09834d8e5afc7bacddd691796cddd0724f19f123a92e4bfab69661e4012a7a",
+          "taille": 260455561,
+          "miroir": "https://pub-57f6254ba36046f5b82a8dace6aee679.r2.dev/region-parisienne/region-parisienne_partie2.zip"
+        },
+        {
+          "url": "https://github.com/Dreams9972/TPS-Studios/releases/download/region-parisienne-v1.1/region-parisienne_partie3.zip",
+          "sha256": "c8a86bc740889f5b0aa087d52fb32757dd342e0f83fc57295b621b8247425096",
+          "taille": 260197754,
+          "miroir": "https://pub-57f6254ba36046f5b82a8dace6aee679.r2.dev/region-parisienne/region-parisienne_partie3.zip"
+        },
+        {
+          "url": "https://github.com/Dreams9972/TPS-Studios/releases/download/region-parisienne-v1.1/region-parisienne_partie4.zip",
+          "sha256": "10f7313953514ddf76de39cc3b354a690c1e406f7e3386da05cf27ad19022401",
+          "taille": 260264012,
+          "miroir": "https://pub-57f6254ba36046f5b82a8dace6aee679.r2.dev/region-parisienne/region-parisienne_partie4.zip"
+        },
+        {
+          "url": "https://github.com/Dreams9972/TPS-Studios/releases/download/region-parisienne-v1.1/region-parisienne_partie5.zip",
+          "sha256": "ac9c5047ebd666d1994a2ec43eea8265d9dec85aad9c64870a8611178fa15efb",
+          "taille": 261062241,
+          "miroir": "https://pub-57f6254ba36046f5b82a8dace6aee679.r2.dev/region-parisienne/region-parisienne_partie5.zip"
+        },
+        {
+          "url": "https://github.com/Dreams9972/TPS-Studios/releases/download/region-parisienne-v1.1/region-parisienne_partie6.zip",
+          "sha256": "0e69cf1d95d4ffb293ad3214a802ba4b16a4527243a343cb6114da556cee36cf",
+          "taille": 260552317,
+          "miroir": "https://pub-57f6254ba36046f5b82a8dace6aee679.r2.dev/region-parisienne/region-parisienne_partie6.zip"
+        },
+        {
+          "url": "https://github.com/Dreams9972/TPS-Studios/releases/download/region-parisienne-v1.1/region-parisienne_partie7.zip",
+          "sha256": "e4ca29ac11332e42414f46e6fdba2f616adb30351d34ea3e94ce5423e0844ced",
+          "taille": 260082168,
+          "miroir": "https://pub-57f6254ba36046f5b82a8dace6aee679.r2.dev/region-parisienne/region-parisienne_partie7.zip"
+        },
+        {
+          "url": "https://github.com/Dreams9972/TPS-Studios/releases/download/region-parisienne-v1.1/region-parisienne_partie8.zip",
+          "sha256": "b4536dd6ae196e5764cb979a91faa7911860dbad5c67ec2163a877a31f235a8c",
+          "taille": 264093883,
+          "miroir": "https://pub-57f6254ba36046f5b82a8dace6aee679.r2.dev/region-parisienne/region-parisienne_partie8.zip"
+        },
+        {
+          "url": "https://github.com/Dreams9972/TPS-Studios/releases/download/region-parisienne-v1.1/region-parisienne_partie9.zip",
+          "sha256": "1c655840d47f04c2af271944b181631f919c51d1b3dd9826916a9916defdb188",
+          "taille": 260138924,
+          "miroir": "https://pub-57f6254ba36046f5b82a8dace6aee679.r2.dev/region-parisienne/region-parisienne_partie9.zip"
+        },
+        {
+          "url": "https://github.com/Dreams9972/TPS-Studios/releases/download/region-parisienne-v1.1/region-parisienne_partie10.zip",
+          "sha256": "f2ea243af2a699dab2f7ab2aef35bbd2ac82b7961e5abfc5a53d579a3cde3b14",
+          "taille": 69685691,
+          "miroir": "https://pub-57f6254ba36046f5b82a8dace6aee679.r2.dev/region-parisienne/region-parisienne_partie10.zip"
+        }
+      ],
+      "dlc": "405430 | OMSI 2 Add-on Berlin X10\n434060 | OMSI 2 Add-on Downloadpack Vol. 1 - KI-Fahrzeuge\n434065 | OMSI 2 Add-on Rheinhausen\n689870 | OMSI 2 Add-on Downloadpack Vol. 3 – KI-Menschen\n708170 | OMSI 2 Add-on Express 91.06\n708172 | OMSI 2 Add-on Downloadpack Vol. 5 – KI-Menschen\n880282 | OMSI 2 Add-on Downloadpack Vol. 6 - KI-Menschen\n1196041 | OMSI 2 Add-on Downloadpack Vol. 8 – KI-Menschen\n1457750 | OMSI 2 Add-on Saint-Servan\n1481770 | OMSI 2 Add-on Heuliez Bus-Pack Access Bus GX327\n1640310 | OMSI 2 Add-on Enhanced Environment Pack\n2253860 | OMSI 2 Add-on IVECO Bus-Familie Urbanway",
+      "prerequis": "OMSI 2 + 12 DLC Steam (liste ci-dessous)",
+      "image": "https://raw.githubusercontent.com/Dreams9972/TPS-Studios/main/images/region-parisienne.jpg",
+      "notes": "Région Parisienne V1.1",
       "statut": "publie"
     }
   ],
