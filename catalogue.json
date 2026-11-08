@@ -52,7 +52,9 @@
       "sha256": "ffa4d4e05351b3786c948002295566808283b994cd86caa1b83edf2dba4f9d4c",
       "taille": 865328991,
       "image": "https://raw.githubusercontent.com/Dreams9972/TPS-Studios/main/images/paris25.jpg",
-      "notes": "Première version de Paris 25 dans le lanceur TPS Studios (archive officielle 1.0 d'annamathys)."
+      "notes": "Première version de Paris 25 dans le lanceur TPS Studios (archive officielle 1.0 d'annamathys).",
+      "categorie": "cartes",
+      "statut": "bientot"
     }
   ]
 }
