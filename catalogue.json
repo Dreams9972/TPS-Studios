@@ -316,10 +316,9 @@
         }
       ],
       "dlc": "405430 | OMSI 2 Add-on Berlin X10\n434066 | OMSI 2 Add-On MAN Citybus Series\n612960 | OMSI 2 Add-On Metropole Ruhr\n1457750 | OMSI 2 Add-on Saint-Servan\n1475580 | OMSI 2 Add-on Grand Paris-Moulon",
-      "prerequis": "OMSI 2 + 5 DLC obligatoires",
+      "prerequis": "OMSI 2 + 3 DLC obligatoires",
       "image": "https://raw.githubusercontent.com/Dreams9972/TPS-Studios/main/images/perigueux.jpg",
-      "notes": "Périgueux V1.0",
-      "statut": "publie"
+      "notes": "Périgueux V1.0"
     }
   ],
   "communaute": {
