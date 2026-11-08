@@ -139,6 +139,46 @@
       "image": "https://raw.githubusercontent.com/Dreams9972/TPS-Studios/main/images/region-parisienne.jpg",
       "notes": "Région Parisienne V1.1",
       "statut": "publie"
+    },
+    {
+      "id": "perigueux",
+      "nom": "Périgueux",
+      "sous_titre": "Réseau Péribus · Périgueux et son agglomération (Dordogne)",
+      "jeu": "omsi2",
+      "categorie": "cartes",
+      "fichier_version": "Perigueux_version.txt",
+      "liste": "Perigueux_fichiers_installes.txt",
+      "marque": "maps\\Perigueux",
+      "carte": "maps/Perigueux/global.cfg",
+      "meteo": "",
+      "bus_defaut": "",
+      "hof_defaut": "",
+      "consigne": "Choisissez votre bus et la ligne, puis lancez.",
+      "description": "Périgueux – Map Française pour OMSI 2\n\nPérigueux est une carte française réaliste pour OMSI 2, recréant fidèlement l’ambiance urbaine et périurbaine de la ville de Périgueux (Dordogne) et de sa communauté d’agglomération.\nDéveloppée avec soin par l’équipe Add-On Périgueux, la map propose un environnement immersif, inspiré des véritables lignes et infrastructures de transport de la région.\n\n\nCaractéristiques principales\n\nReproduction fidèle de secteurs réels de Périgueux et de ses environs.\n\nLignes de bus jouables inspirées du réseau urbain local.\n\nHoraires dynamiques et trafic réaliste.\n\nObjets, bâtiments et arrêts personnalisés, créés spécialement pour la map.\n\nAmbiance typiquement française, avec signalisation, mobilier urbain et architecture locale.\n\nOptimisation soignée pour garantir une bonne fluidité sur la majorité des configurations.\n\n\nInformations techniques\n\nVersion actuelle : 1.00\n\nDéveloppeurs : Peri & Peristuff\n\nSite officiel : https://add-on-perigueux.fr/\n\nCarte réalisée par Add-On Périgueux · TPS Studios.",
+      "editeur": "Add-On Périgueux · TPS Studios",
+      "version": "V1.0",
+      "date": "08/11/2026 12:06",
+      "md5": "115747f82b2081caf8f458eb5e121a14",
+      "zip": "",
+      "sha256": "",
+      "taille": 3465726592,
+      "parties": [
+        {
+          "url": "https://github.com/Dreams9972/TPS-Studios/releases/download/perigueux-v1.0/perigueux_partie1.zip",
+          "sha256": "6b1685fb2c2dd8972bd52b26b80bfc640222a4cb3d8cd0333a557f8cf8117f0b",
+          "taille": 1852044896
+        },
+        {
+          "url": "https://github.com/Dreams9972/TPS-Studios/releases/download/perigueux-v1.0/perigueux_partie2.zip",
+          "sha256": "7d86f80268d0b0b299e5100b01794e0fd0e2c2753a093fafaed3c773b9db2a9f",
+          "taille": 1613681696
+        }
+      ],
+      "dlc": "405430 | OMSI 2 Add-on Berlin X10\n434066 | OMSI 2 Add-On MAN Citybus Series\n612960 | OMSI 2 Add-On Metropole Ruhr\n1457750 | OMSI 2 Add-on Saint-Servan\n1475580 | OMSI 2 Add-on Grand Paris-Moulon",
+      "prerequis": "OMSI 2 + 5 DLC Steam (liste ci-dessous)",
+      "image": "https://raw.githubusercontent.com/Dreams9972/TPS-Studios/main/images/perigueux.jpg",
+      "notes": "Périgueux V1.0",
+      "statut": "publie"
     }
   ],
   "communaute": {
