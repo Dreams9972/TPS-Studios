@@ -327,12 +327,18 @@
   },
   "jeux_liste": [
     {
+      "id": "omsi2",
+      "nom": "OMSI 2"
+    },
+    {
       "id": "masterplan",
       "nom": "MasterPlan",
       "sous_titre": "City Transport Master · bâtis ton empire du transport",
       "url": "http://citytransportmaster.fr/",
       "image": "http://citytransportmaster.fr/logo.png",
-      "statut": "bientot"
+      "statut": "bientot",
+      "galerie": "https://raw.githubusercontent.com/Dreams9972/TPS-Studios/main/images/galerie/jeu-masterplan-8df3dda63ace754-1.jpg",
+      "video": "https://youtu.be/eYUHugWgotg?si=_T4CZ33b1rZMmWdy"
     }
   ]
 }
