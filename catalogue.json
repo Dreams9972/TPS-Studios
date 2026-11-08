@@ -14,7 +14,7 @@
       "marque": "maps\\ParisView",
       "description": "Le métro parisien pour OMSI 2 et openOMSI : la ligne 3bis en MF 67 et la ligne 7bis en MF 88, avec leurs stations, leurs horaires et leurs rames IA.\n\nÀ lire avant de jouer :\n•  C'est une carte d'expérience, pas un projet sérieux.\n•  Elle est en bêta : beaucoup de choses manquent et des bugs restent.\n•  Elle ne cherche pas à reproduire la réalité à 100 %.\n\nPrendre son service : sur l'écran de cabine, « 1  Prise de service », code à 4 chiffres puis VAL. Inverseur, manipulateur, et respectez la vitesse CMC (aiguille rouge).\nConseil : jouez de nuit dans les souterrains (de jour, openOMSI éclaire les tunnels au soleil).\n\nSons réels : Wikimedia Commons (Lodai, Litlok - CC BY-SA 4.0 ; Clicsouris - CC BY-SA 3.0) et vidéo de la ligne 3bis par The Masked Man.",
       "carte": "maps/ParisView/global.cfg",
-      "meteo": "Weather/#CAVOK.owt",
+      "meteo": "Weather/ParisView Metro souterrain.owt",
       "bus_defaut": "Vehicles/ParisView MF88/MF88_M1.ovh",
       "hof_defaut": "ParisView 7bis",
       "consigne": "Choisissez la rame (MF 67 ou MF 88) et la ligne (3, 3bis ou 7bis), puis lancez.",
