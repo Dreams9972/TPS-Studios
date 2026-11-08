@@ -69,5 +69,14 @@
   "communaute": {
     "serveur": "https://tps-studios-social.theouf94.workers.dev",
     "discord_app": "1568930912341725256"
-  }
+  },
+  "jeux": [
+    {
+      "id": "masterplan",
+      "nom": "MasterPlan",
+      "sous_titre": "City Transport Master · bâtis ton empire du transport",
+      "url": "http://citytransportmaster.fr/",
+      "image": "http://citytransportmaster.fr/logo.png"
+    }
+  ]
 }
