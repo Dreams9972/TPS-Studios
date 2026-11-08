@@ -56,6 +56,13 @@
       "categorie": "cartes",
       "a_la_une": true,
       "ordre": 1
+    },
+    {
+      "id": "strasbourg",
+      "nom": "Addon Strasbourg",
+      "jeu": "omsi2",
+      "categorie": "cartes",
+      "statut": "bientot"
     }
   ],
   "communaute": {
