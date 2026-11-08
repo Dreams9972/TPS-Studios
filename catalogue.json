@@ -1,9 +1,9 @@
 {
   "lanceur": {
-    "version": "2.7.0",
-    "url": "https://raw.githubusercontent.com/Dreams9972/TPS-Studios/main/lanceur/v2.7.0/TPS.Studios.exe",
-    "url_release": "https://github.com/Dreams9972/TPS-Studios/releases/download/lanceur-v2.7.0/TPS.Studios.exe",
-    "sha256": "0e2669013edddf5104721cb09ec524f85704fe40a8140568e91f5f2a8bd9a4ab"
+    "version": "2.7.1",
+    "url": "https://raw.githubusercontent.com/Dreams9972/TPS-Studios/main/lanceur/v2.7.1/TPS.Studios.exe",
+    "url_release": "https://github.com/Dreams9972/TPS-Studios/releases/download/lanceur-v2.7.1/TPS.Studios.exe",
+    "sha256": "fb9aa8fd09884631b7bff5c23592828f2624016d3edc840e92989e57c51bdf00"
   },
   "projets": [
     {
