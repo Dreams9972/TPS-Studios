@@ -66,46 +66,6 @@
       "image": "https://raw.githubusercontent.com/Dreams9972/TPS-Studios/main/images/strasbourg.jpg?v=639297114777263819"
     },
     {
-      "id": "perigueux",
-      "nom": "Périgueux",
-      "sous_titre": "Réseau Péribus · Périgueux et son agglomération (Dordogne)",
-      "jeu": "omsi2",
-      "categorie": "cartes",
-      "fichier_version": "Perigueux_version.txt",
-      "liste": "Perigueux_fichiers_installes.txt",
-      "marque": "maps\\Perigueux",
-      "carte": "maps/Perigueux/global.cfg",
-      "meteo": "",
-      "bus_defaut": "",
-      "hof_defaut": "",
-      "consigne": "Choisissez votre bus et la ligne, puis lancez.",
-      "description": "Périgueux – Map Française pour OMSI 2\n\nPérigueux est une carte française réaliste pour OMSI 2, recréant fidèlement l’ambiance urbaine et périurbaine de la ville de Périgueux (Dordogne) et de sa communauté d’agglomération.\nDéveloppée avec soin par l’équipe Add-On Périgueux, la map propose un environnement immersif, inspiré des véritables lignes et infrastructures de transport de la région.\n\n\nCaractéristiques principales\n\nReproduction fidèle de secteurs réels de Périgueux et de ses environs.\n\nLignes de bus jouables inspirées du réseau urbain local.\n\nHoraires dynamiques et trafic réaliste.\n\nObjets, bâtiments et arrêts personnalisés, créés spécialement pour la map.\n\nAmbiance typiquement française, avec signalisation, mobilier urbain et architecture locale.\n\nOptimisation soignée pour garantir une bonne fluidité sur la majorité des configurations.\n\n\nInformations techniques\n\nVersion actuelle : 1.00\n\nDéveloppeurs : Peri & Peristuff\n\nSite officiel : https://add-on-perigueux.fr/\n\nCarte réalisée par Add-On Périgueux · TPS Studios.",
-      "editeur": "Add-On Périgueux · TPS Studios",
-      "version": "V1.0",
-      "date": "08/11/2026 12:06",
-      "md5": "115747f82b2081caf8f458eb5e121a14",
-      "zip": "",
-      "sha256": "",
-      "taille": 3465726592,
-      "parties": [
-        {
-          "url": "https://github.com/Dreams9972/TPS-Studios/releases/download/perigueux-v1.0/perigueux_partie1.zip",
-          "sha256": "6b1685fb2c2dd8972bd52b26b80bfc640222a4cb3d8cd0333a557f8cf8117f0b",
-          "taille": 1852044896
-        },
-        {
-          "url": "https://github.com/Dreams9972/TPS-Studios/releases/download/perigueux-v1.0/perigueux_partie2.zip",
-          "sha256": "7d86f80268d0b0b299e5100b01794e0fd0e2c2753a093fafaed3c773b9db2a9f",
-          "taille": 1613681696
-        }
-      ],
-      "dlc": "405430 | OMSI 2 Add-on Berlin X10\n434066 | OMSI 2 Add-On MAN Citybus Series\n612960 | OMSI 2 Add-On Metropole Ruhr\n1457750 | OMSI 2 Add-on Saint-Servan\n1475580 | OMSI 2 Add-on Grand Paris-Moulon",
-      "prerequis": "OMSI 2 + 5 DLC obligatoires",
-      "image": "https://raw.githubusercontent.com/Dreams9972/TPS-Studios/main/images/perigueux.jpg",
-      "notes": "Périgueux V1.0",
-      "statut": "publie"
-    },
-    {
       "id": "saint-vausonne",
       "nom": "Saint-Vausonne",
       "sous_titre": "5 lignes de bus régionales · Saint-François, Belmont et La Source",
@@ -247,6 +207,120 @@
       "prerequis": "OMSI 2 + 12 DLC Steam (liste ci-dessous)",
       "image": "https://raw.githubusercontent.com/Dreams9972/TPS-Studios/main/images/region-parisienne.jpg",
       "notes": "Région Parisienne V1.1",
+      "statut": "publie"
+    },
+    {
+      "id": "perigueux",
+      "nom": "Périgueux",
+      "sous_titre": "Réseau Péribus · Périgueux et son agglomération (Dordogne)",
+      "jeu": "omsi2",
+      "categorie": "cartes",
+      "fichier_version": "Perigueux_version.txt",
+      "liste": "Perigueux_fichiers_installes.txt",
+      "marque": "maps\\Perigueux",
+      "carte": "maps/Perigueux/global.cfg",
+      "meteo": "",
+      "bus_defaut": "",
+      "hof_defaut": "",
+      "consigne": "Choisissez votre bus et la ligne, puis lancez.",
+      "description": "Périgueux – Map Française pour OMSI 2\n\nPérigueux est une carte française réaliste pour OMSI 2, recréant fidèlement l’ambiance urbaine et périurbaine de la ville de Périgueux (Dordogne) et de sa communauté d’agglomération.\nDéveloppée avec soin par l’équipe Add-On Périgueux, la map propose un environnement immersif, inspiré des véritables lignes et infrastructures de transport de la région.\n\n\nCaractéristiques principales\n\nReproduction fidèle de secteurs réels de Périgueux et de ses environs.\n\nLignes de bus jouables inspirées du réseau urbain local.\n\nHoraires dynamiques et trafic réaliste.\n\nObjets, bâtiments et arrêts personnalisés, créés spécialement pour la map.\n\nAmbiance typiquement française, avec signalisation, mobilier urbain et architecture locale.\n\nOptimisation soignée pour garantir une bonne fluidité sur la majorité des configurations.\n\n\nInformations techniques\n\nVersion actuelle : 1.00\n\nDéveloppeurs : Peri & Peristuff\n\nSite officiel : https://add-on-perigueux.fr/\n\nCarte réalisée par Add-On Périgueux · TPS Studios.",
+      "editeur": "Add-On Périgueux · TPS Studios",
+      "version": "V1.0",
+      "date": "08/11/2026 12:25",
+      "md5": "115747f82b2081caf8f458eb5e121a14",
+      "zip": "",
+      "sha256": "",
+      "taille": 3465726856,
+      "parties": [
+        {
+          "url": "https://github.com/Dreams9972/TPS-Studios/releases/download/perigueux-v1.0/perigueux_partie1.zip",
+          "sha256": "f6352d4f06f65391d30fd264d7e575b72f5260604931326573089ff260430e99",
+          "taille": 260407845,
+          "miroir": "https://pub-57f6254ba36046f5b82a8dace6aee679.r2.dev/perigueux/perigueux_partie1.zip"
+        },
+        {
+          "url": "https://github.com/Dreams9972/TPS-Studios/releases/download/perigueux-v1.0/perigueux_partie2.zip",
+          "sha256": "6ada5f6e7ad3ef9e37d7b466dcee88fe6d23a1fc888e7425913388a124533473",
+          "taille": 265563065,
+          "miroir": "https://pub-57f6254ba36046f5b82a8dace6aee679.r2.dev/perigueux/perigueux_partie2.zip"
+        },
+        {
+          "url": "https://github.com/Dreams9972/TPS-Studios/releases/download/perigueux-v1.0/perigueux_partie3.zip",
+          "sha256": "83c2cd051b39e65b463d97a2c180ff84a16ae185d6eb52331f6c27946f7b4d53",
+          "taille": 260858618,
+          "miroir": "https://pub-57f6254ba36046f5b82a8dace6aee679.r2.dev/perigueux/perigueux_partie3.zip"
+        },
+        {
+          "url": "https://github.com/Dreams9972/TPS-Studios/releases/download/perigueux-v1.0/perigueux_partie4.zip",
+          "sha256": "a109e4ed939162564361b7ba5e59e40f83d26e41a88f4619bfd8f836a13dcdb3",
+          "taille": 263038629,
+          "miroir": "https://pub-57f6254ba36046f5b82a8dace6aee679.r2.dev/perigueux/perigueux_partie4.zip"
+        },
+        {
+          "url": "https://github.com/Dreams9972/TPS-Studios/releases/download/perigueux-v1.0/perigueux_partie5.zip",
+          "sha256": "2c3f40703844e6d7e15ac61ec7b06867f7cea3da81a67e533ade4b3693ec22d7",
+          "taille": 260849357,
+          "miroir": "https://pub-57f6254ba36046f5b82a8dace6aee679.r2.dev/perigueux/perigueux_partie5.zip"
+        },
+        {
+          "url": "https://github.com/Dreams9972/TPS-Studios/releases/download/perigueux-v1.0/perigueux_partie6.zip",
+          "sha256": "ce2c79895bc27496ed2fc550734fd9a830e94b47ccbd1f77df34518e8579380b",
+          "taille": 260946984,
+          "miroir": "https://pub-57f6254ba36046f5b82a8dace6aee679.r2.dev/perigueux/perigueux_partie6.zip"
+        },
+        {
+          "url": "https://github.com/Dreams9972/TPS-Studios/releases/download/perigueux-v1.0/perigueux_partie7.zip",
+          "sha256": "8e6da559794fdd9687693ff2f700a667309655df7817fc4c7c4476cfd1c26148",
+          "taille": 260745091,
+          "miroir": "https://pub-57f6254ba36046f5b82a8dace6aee679.r2.dev/perigueux/perigueux_partie7.zip"
+        },
+        {
+          "url": "https://github.com/Dreams9972/TPS-Studios/releases/download/perigueux-v1.0/perigueux_partie8.zip",
+          "sha256": "3d1a21e339309adc3677bbc2c70c39daa1a9e2f655b55a602507c340e3fb1b0f",
+          "taille": 267524795,
+          "miroir": "https://pub-57f6254ba36046f5b82a8dace6aee679.r2.dev/perigueux/perigueux_partie8.zip"
+        },
+        {
+          "url": "https://github.com/Dreams9972/TPS-Studios/releases/download/perigueux-v1.0/perigueux_partie9.zip",
+          "sha256": "fbd3b88123061c2a5f66a50ccfe550bfd382303a4748064b146f5b96c3053cfd",
+          "taille": 260103139,
+          "miroir": "https://pub-57f6254ba36046f5b82a8dace6aee679.r2.dev/perigueux/perigueux_partie9.zip"
+        },
+        {
+          "url": "https://github.com/Dreams9972/TPS-Studios/releases/download/perigueux-v1.0/perigueux_partie10.zip",
+          "sha256": "a898469ccec59f7d741cae3ce0abe82acc7f1c552c8b2f7b5eab19318f671fd7",
+          "taille": 260104286,
+          "miroir": "https://pub-57f6254ba36046f5b82a8dace6aee679.r2.dev/perigueux/perigueux_partie10.zip"
+        },
+        {
+          "url": "https://github.com/Dreams9972/TPS-Studios/releases/download/perigueux-v1.0/perigueux_partie11.zip",
+          "sha256": "afdbea6685a305b86948874842bf0d127469abaeb746135313125d36373f6e0c",
+          "taille": 260040072,
+          "miroir": "https://pub-57f6254ba36046f5b82a8dace6aee679.r2.dev/perigueux/perigueux_partie11.zip"
+        },
+        {
+          "url": "https://github.com/Dreams9972/TPS-Studios/releases/download/perigueux-v1.0/perigueux_partie12.zip",
+          "sha256": "fedc4e9633d5d60291291138673692548e977a7ce45c48619390080a6943c7de",
+          "taille": 261525277,
+          "miroir": "https://pub-57f6254ba36046f5b82a8dace6aee679.r2.dev/perigueux/perigueux_partie12.zip"
+        },
+        {
+          "url": "https://github.com/Dreams9972/TPS-Studios/releases/download/perigueux-v1.0/perigueux_partie13.zip",
+          "sha256": "3cdcc1903b0900a1c2a0da2aaa826406c598055ae1dfcd77325ab13655476fa9",
+          "taille": 260260798,
+          "miroir": "https://pub-57f6254ba36046f5b82a8dace6aee679.r2.dev/perigueux/perigueux_partie13.zip"
+        },
+        {
+          "url": "https://github.com/Dreams9972/TPS-Studios/releases/download/perigueux-v1.0/perigueux_partie14.zip",
+          "sha256": "f91e75f3d7970fdbce3adb0821a56da80eaf5080227405a8c745cc2d0553e82a",
+          "taille": 63758900,
+          "miroir": "https://pub-57f6254ba36046f5b82a8dace6aee679.r2.dev/perigueux/perigueux_partie14.zip"
+        }
+      ],
+      "dlc": "405430 | OMSI 2 Add-on Berlin X10\n434066 | OMSI 2 Add-On MAN Citybus Series\n612960 | OMSI 2 Add-On Metropole Ruhr\n1457750 | OMSI 2 Add-on Saint-Servan\n1475580 | OMSI 2 Add-on Grand Paris-Moulon",
+      "prerequis": "OMSI 2 + 5 DLC Steam (liste ci-dessous)",
+      "image": "https://raw.githubusercontent.com/Dreams9972/TPS-Studios/main/images/perigueux.jpg",
+      "notes": "Périgueux V1.0",
       "statut": "publie"
     }
   ],
