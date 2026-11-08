@@ -113,7 +113,7 @@
           "miroir": "https://pub-57f6254ba36046f5b82a8dace6aee679.r2.dev/saint-vausonne/saint-vausonne_partie4.zip"
         }
       ],
-      "dlc": "434060 | OMSI 2 Add-on Downloadpack Vol. 1 - KI-Fahrzeuge\n708170 | OMSI 2 Add-on Express 91.06\n935511 | OMSI 2 Add-On Urbino Stadtbusfamilie | facultatif\n1457750 | OMSI 2 Add-on Saint-Servan\n2253860 | OMSI 2 Add-on IVECO Bus-Familie Urbanway",
+      "dlc": "708170 | OMSI 2 Add-on Express 91.06\n1457750 | OMSI 2 Add-on Saint-Servan",
       "prerequis": "OMSI 2 + 2 DLC obligatoires",
       "image": "https://raw.githubusercontent.com/Dreams9972/TPS-Studios/main/images/saint-vausonne.jpg",
       "notes": "Saint-Vausonne V2.1"
@@ -202,7 +202,7 @@
           "miroir": "https://pub-57f6254ba36046f5b82a8dace6aee679.r2.dev/region-parisienne/region-parisienne_partie10.zip"
         }
       ],
-      "dlc": "405430 | OMSI 2 Add-on Berlin X10\n434060 | OMSI 2 Add-on Downloadpack Vol. 1 - KI-Fahrzeuge\n434065 | OMSI 2 Add-on Rheinhausen\n689870 | OMSI 2 Add-on Downloadpack Vol. 3 – KI-Menschen | facultatif\n708170 | OMSI 2 Add-on Express 91.06\n708172 | OMSI 2 Add-on Downloadpack Vol. 5 – KI-Menschen | facultatif\n880282 | OMSI 2 Add-on Downloadpack Vol. 6 - KI-Menschen | facultatif\n1196041 | OMSI 2 Add-on Downloadpack Vol. 8 – KI-Menschen | facultatif\n1457750 | OMSI 2 Add-on Saint-Servan\n1481770 | OMSI 2 Add-on Heuliez Bus-Pack Access Bus GX327\n1640310 | OMSI 2 Add-on Enhanced Environment Pack\n2253860 | OMSI 2 Add-on IVECO Bus-Familie Urbanway",
+      "dlc": "708170 | OMSI 2 Add-on Express 91.06\n1457750 | OMSI 2 Add-on Saint-Servan",
       "prerequis": "OMSI 2 + 2 DLC obligatoires",
       "image": "https://raw.githubusercontent.com/Dreams9972/TPS-Studios/main/images/region-parisienne.jpg",
       "notes": "Région Parisienne V1.1"
@@ -315,7 +315,7 @@
           "miroir": "https://pub-57f6254ba36046f5b82a8dace6aee679.r2.dev/perigueux/perigueux_partie14.zip"
         }
       ],
-      "dlc": "405430 | OMSI 2 Add-on Berlin X10\n434066 | OMSI 2 Add-On MAN Citybus Series\n612960 | OMSI 2 Add-On Metropole Ruhr\n1457750 | OMSI 2 Add-on Saint-Servan\n1475580 | OMSI 2 Add-on Grand Paris-Moulon",
+      "dlc": "1475580 | OMSI 2 Add-on Grand Paris-Moulon\n434066 | OMSI 2 Add-On MAN Citybus Series\n1457750 | OMSI 2 Add-on Saint-Servan",
       "prerequis": "OMSI 2 + 3 DLC obligatoires",
       "image": "https://raw.githubusercontent.com/Dreams9972/TPS-Studios/main/images/perigueux.jpg",
       "notes": "Périgueux V1.0"
