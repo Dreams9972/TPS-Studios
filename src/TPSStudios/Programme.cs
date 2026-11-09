@@ -314,6 +314,23 @@ internal static class Programme
 			File.WriteAllText(Environment.GetEnvironmentVariable("TPS_DUTY") + ".resultat.txt", "ok" + text2, Encoding.UTF8);
 			return 0;
 		}
+		if (a.Count >= 2 && a[0] == "/apercu")
+		{
+			Fenetre.ModeCapture = true;
+			Fenetre fenetre0 = new Fenetre();
+			fenetre0.StartPosition = FormStartPosition.Manual;
+			fenetre0.Location = new Point(0, 0);
+			int num0 = a.IndexOf("/taille");
+			if (num0 >= 0 && num0 + 1 < a.Count)
+			{
+				string[] array0 = a[num0 + 1].Split('x');
+				fenetre0.ClientSize = new Size(int.Parse(array0[0]), int.Parse(array0[1]));
+				a.RemoveRange(num0, 2);
+			}
+			fenetre0.Apercu(a[1], (a.Count >= 3) ? a[2] : null);
+			Application.Run(fenetre0);
+			return 0;
+		}
 		if (a.Count >= 2 && a[0] == "/capture")
 		{
 			Fenetre.ModeCapture = true;

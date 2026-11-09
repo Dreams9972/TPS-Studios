@@ -40,3 +40,19 @@ Dans le mode administrateur, sélectionnez une page puis **Publier le paquet…*
 
 En cas de coupure, relancez avec le même numéro de version : la release est réutilisée.
 Le code est dans `TPSStudios/FenPaquet.cs`, `TPSStudios/Paquet.cs` et `TPSStudios/GitHub.cs`.
+
+## Bibliothèque (v2.8.0)
+
+Code dans `TPSStudios/FenetreBiblio.cs` (partie de la classe `Fenetre`). Deux onglets :
+
+- **Bibliothèque** : page du jeu façon Steam (bannière `library_hero.jpg` de Steam si présente,
+  bouton JOUER, statistiques, à propos, actualités des mods) et, à droite, **Mes mods** :
+  les mods installés avec un interrupteur activer / désactiver, « ▶ Jouer » pour lancer
+  openOMSI directement sur une carte, et « Mettre à jour » si besoin.
+- **Mods** : tout le catalogue du jeu (recherche, filtres, catégories) avec un tri
+  par défaut / nom / récents / populaires.
+
+## Aperçu pour le développement
+
+`TPS.Studios.exe /apercu biblio` (ou `/apercu projet <id>`, `/apercu jeux`) ouvre directement
+une page, sans les fenêtres de démarrage. Option : `/taille 1280x720`.

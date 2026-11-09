@@ -23,7 +23,7 @@ using Microsoft.Win32;
 
 namespace TPSStudios;
 
-internal class Fenetre : Form
+internal partial class Fenetre : Form
 {
 	private enum Vue
 	{
@@ -589,7 +589,7 @@ internal class Fenetre : Form
 
 	private List<KeyValuePair<Rectangle, Annonce>> rAnnonces = new List<KeyValuePair<Rectangle, Annonce>>();
 
-	private static readonly string[] NouveautesLanceur = new string[4] { "Amis : code ami, mods et VIP à offrir", "Musique Spotify et Apple Music", "Bandes-annonces vidéo dans les pages", "Neige et transitions plus fluides" };
+	private static readonly string[] NouveautesLanceur = new string[4] { "Nouvelle bibliothèque : page du jeu et « Mes mods »", "Activer ou désactiver un mod en un clic", "Jouer directement sur une carte", "Onglet Mods avec tri (nom, récents, populaires)" };
 
 	private static readonly Font fAnT2 = new Font("Segoe UI Semibold", Zx.P(11f));
 
@@ -4806,8 +4806,12 @@ internal class Fenetre : Form
 	private void PeintBiblio(Graphics g, int dy)
 	{
 		FondPeint(g, pBiblio);
-		EnTete(g, "Bibliothèque", NomJeu(jeuId) + "  ·  " + ((categorie.Length == 0) ? "choisissez un contenu" : Categories.Nom(categorie)), dy, 56);
-		if (txtVide.Length > 0)
+		EnTete(g, "Bibliothèque", NomJeu(jeuId) + "  ·  " + ((ongletB == 0) ? "ma bibliothèque" : ((categorie.Length == 0) ? "tous les mods" : Categories.Nom(categorie))), dy, 56);
+		if (ongletB == 0)
+		{
+			PeindrePageJeu(g, dy);
+		}
+		else if (txtVide.Length > 0)
 		{
 			Lang.DrawText(g, txtVide, fSousT, new Rectangle(xVide, yVide + dy, Math.Max(Zx.P(200), pBiblio.ClientSize.Width - Zx.P(40) - xVide), Zx.P(60)), C.Gris, TextFormatFlags.WordBreak | TextFormatFlags.NoPadding);
 		}
@@ -8469,6 +8473,7 @@ internal class Fenetre : Form
 		{
 			pBiblio.Controls.Add(chip);
 		}
+		ConstruireOngletsBiblio();
 		RemplirBiblio();
 	}
 
@@ -8647,7 +8652,7 @@ internal class Fenetre : Form
 		}
 		if (cat != null)
 		{
-			foreach (Projet projet2 in cat.Projets)
+			foreach (Projet projet2 in ProjetsTries())
 			{
 				if (JeuDe(projet2) != jeuId)
 				{
@@ -8711,7 +8716,7 @@ internal class Fenetre : Form
 		int num = Math.Max(320, Math.Min(440, (int)((double)width * 0.34)));
 		int num2 = Zx.P(132);
 		rJeuB = new Rectangle(Zx.P(40), num2, num, Zx.P(440));
-		int num3 = rJeuB.Right + Zx.P(28);
+		int num3 = ((ongletB == 1) ? Zx.P(40) : (rJeuB.Right + Zx.P(28)));
 		int num4 = width - 40;
 		bChangerJeu.Location = new Point(Zx.P(40), Zx.P(30));
 		bAccueilB.Location = new Point(Zx.P(96), Zx.P(30));
@@ -8793,6 +8798,7 @@ internal class Fenetre : Form
 		int num17 = (int)((double)num16 * 0.9);
 		int num18 = num11 + Zx.P(52);
 		int num19 = 0;
+		rJeuB = Rectangle.Empty;
 		int num20 = Math.Max(1, (num4 - num3 + num13) / (num16 + num13));
 		while (num19 < tuilesB.Count)
 		{
@@ -8810,6 +8816,7 @@ internal class Fenetre : Form
 		}
 		xVide = num3;
 		yVide = num11 + 56;
+		DisposerOngletsBiblio(fTous.Top - Zx.P(2), num4);
 		pBiblio.Invalidate();
 	}
 
@@ -10996,6 +11003,53 @@ internal class Fenetre : Form
 			num++;
 		}
 		return 1200.0 / (double)num;
+	}
+
+	/// <summary>Outil de développement : ouvre directement une page (« /apercu biblio », « /apercu projet parisview »).</summary>
+	public void Apercu(string vue, string arg)
+	{
+		Show();
+		Application.DoEvents();
+		for (int i = 0; i < 80 && cat == null; i++)
+		{
+			Thread.Sleep(100);
+			Application.DoEvents();
+		}
+		switch (vue)
+		{
+		case "jeux":
+			ShowVue(Vue.Jeux);
+			break;
+		case "projet":
+		{
+			Projet projet = (cat != null) ? cat.Projets.Find((Projet x) => x.Id == arg) : null;
+			if (projet != null)
+			{
+				Choisir(projet);
+			}
+			ShowVue(Vue.Projet);
+			break;
+		}
+		case "biblio":
+			ShowVue(Vue.Biblio);
+			break;
+		}
+		System.Windows.Forms.Timer timer = new System.Windows.Forms.Timer();
+		timer.Interval = 1500;
+		timer.Tick += delegate
+		{
+			Action<Control> tout = null;
+			tout = delegate(Control c)
+			{
+				c.Invalidate();
+				foreach (Control control in c.Controls)
+				{
+					tout(control);
+				}
+			};
+			tout(this);
+		};
+		timer.Start();
 	}
 
 	public new void Capture(string dossier)
