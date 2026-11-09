@@ -8760,8 +8760,9 @@ internal partial class Fenetre : Form
 		int num = Math.Max(320, Math.Min(440, (int)((double)width * 0.34)));
 		int num2 = Zx.P(132);
 		rJeuB = new Rectangle(Zx.P(40), num2, num, Zx.P(440));
-		int num3 = ((ongletB == 1) ? Zx.P(40) : (rJeuB.Right + Zx.P(28)));
-		int num4 = width - 40;
+		int margeB = ((ongletB == 1) ? Zx.P(60) : 40);
+		int num3 = ((ongletB == 1) ? margeB : (rJeuB.Right + Zx.P(28)));
+		int num4 = width - margeB;
 		bChangerJeu.Location = new Point(Zx.P(40), Zx.P(30));
 		bAccueilB.Location = new Point(Zx.P(96), Zx.P(30));
 		bool flag = JeuWebCourant() != null;
@@ -8837,8 +8838,8 @@ internal partial class Fenetre : Form
 		}
 		int num13 = Zx.P(20);
 		int num14 = Zx.P(280);
-		int num15 = Math.Max(1, (width - 80 + num13) / (num14 + num13));
-		int num16 = Math.Max(Zx.P(200), (width - Zx.P(80) - (num15 - 1) * num13) / num15);
+		int num15 = Math.Max(1, (width - 2 * margeB + num13) / (num14 + num13));
+		int num16 = Math.Max(Zx.P(200), (width - 2 * margeB - (num15 - 1) * num13) / num15);
 		int num17 = (int)((double)num16 * 0.9);
 		int num18 = num11 + Zx.P(52);
 		int num19 = 0;
@@ -8847,7 +8848,7 @@ internal partial class Fenetre : Form
 		while (num19 < tuilesB.Count)
 		{
 			bool flag2 = num18 < rJeuB.Bottom;
-			int num21 = (flag2 ? num3 : 40);
+			int num21 = (flag2 ? num3 : margeB);
 			int num22 = (flag2 ? num20 : num15);
 			int num23 = 0;
 			while (num23 < num22 && num19 < tuilesB.Count)
