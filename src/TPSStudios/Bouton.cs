@@ -207,8 +207,8 @@ internal class Bouton : Control, ILisse
 	{
 		g.SmoothingMode = SmoothingMode.AntiAlias;
 		g.PixelOffsetMode = PixelOffsetMode.HighQuality;
-		int num = Math.Max(4, Math.Min(10, base.Height / 3));
-		RectangleF r = new RectangleF(0.5f, 0.5f, (float)base.Width - Zx.P(2f), (float)base.Height - Zx.P(2f));
+		int num = Math.Max(Zx.P(4), Math.Min(Zx.P(10), base.Height / 3));
+		RectangleF r = new RectangleF(0.5f, 0.5f, (float)base.Width - 1.5f, (float)base.Height - 1.5f);
 		Color c = Color.White;
 		int y = 0;
 		using (GraphicsPath path = RondF(r, num))
@@ -234,19 +234,16 @@ internal class Bouton : Control, ILisse
 				{
 					g.FillPath(brush2, path);
 				}
-				using (GraphicsPath path2 = RondF(new RectangleF(1.5f, 1.5f, (float)base.Width - Zx.P(4f), (float)(base.Height - Zx.P(3)) * 0.5f), num - 1))
+				GraphicsState gs = g.Save();
+				g.SetClip(path, CombineMode.Intersect);
+				using (LinearGradientBrush brush3 = new LinearGradientBrush(new RectangleF(0f, 0f, base.Width, (float)base.Height * 0.55f + 1f), Color.FromArgb(enfonce ? 10 : ((int)(46f + 30f * hv)), 255, 255, 255), Color.FromArgb(0, 255, 255, 255), 90f))
 				{
-					using LinearGradientBrush brush3 = new LinearGradientBrush(new RectangleF(0f, 1f, base.Width, (float)base.Height * 0.5f + 1f), Color.FromArgb(enfonce ? 8 : ((int)(42f + 26f * hv)), 255, 255, 255), Color.FromArgb(0, 255, 255, 255), 90f);
-					g.FillPath(brush3, path2);
+					g.FillRectangle(brush3, 0f, 0f, base.Width, (float)base.Height * 0.55f);
 				}
-				using (Pen pen2 = new Pen(Color.FromArgb(enfonce ? 60 : 120, ControlPaint.Light(color, 0.5f)), 1f))
+				g.Restore(gs);
+				using (Pen pen2 = new Pen(Color.FromArgb(enfonce ? 70 : ((int)(110f + 70f * hv)), ControlPaint.Light(color, 0.55f)), 1f))
 				{
 					g.DrawPath(pen2, path);
-				}
-				if (!enfonce)
-				{
-					using Pen pen3 = new Pen(Color.FromArgb((int)(90f + 60f * hv), 255, 255, 255), 1f);
-					g.DrawLine(pen3, num, 1.5f, base.Width - num - Zx.P(2), 1.5f);
 				}
 			}
 			else
@@ -264,15 +261,20 @@ internal class Bouton : Control, ILisse
 				}
 				if (!enfonce)
 				{
-					using Pen pen5 = new Pen(Color.FromArgb((int)(26f + 34f * hv), 255, 255, 255), 1f);
-					g.DrawLine(pen5, num, 1.5f, base.Width - num - Zx.P(2), 1.5f);
+					GraphicsState gs2 = g.Save();
+					g.SetClip(path, CombineMode.Intersect);
+					using (LinearGradientBrush brush5 = new LinearGradientBrush(new RectangleF(0f, 0f, base.Width, (float)base.Height * 0.5f + 1f), Color.FromArgb((int)(14f + 18f * hv), 255, 255, 255), Color.FromArgb(0, 255, 255, 255), 90f))
+					{
+						g.FillRectangle(brush5, 0f, 0f, base.Width, (float)base.Height * 0.5f);
+					}
+					g.Restore(gs2);
 				}
 				c = (Danger ? Color.FromArgb(245, 128, 118) : Mel(C.Texte, Color.White, hv));
 			}
 		}
 		if (Focused && ShowFocusCues && base.Enabled)
 		{
-			using GraphicsPath path3 = RondF(new RectangleF(Zx.P(2.5f), Zx.P(2.5f), (float)base.Width - Zx.P(6f), (float)base.Height - Zx.P(6f)), Math.Max(2, num - 2));
+			using GraphicsPath path3 = RondF(new RectangleF(Zx.P(2.5f), Zx.P(2.5f), (float)base.Width - 1f - Zx.P(5f), (float)base.Height - 1f - Zx.P(5f)), Math.Max(2, num - Zx.P(2)));
 			using Pen pen6 = new Pen(Color.FromArgb(220, 175, 190, 255), 1.6f);
 			g.DrawPath(pen6, path3);
 		}

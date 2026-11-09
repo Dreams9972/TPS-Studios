@@ -190,6 +190,12 @@ internal static class Programme
 			}
 			a.RemoveRange(num, 2);
 		}
+		num = a.IndexOf("/page");
+		if (num >= 0 && num + 1 < a.Count)
+		{
+			Fenetre.PageInit = a[num + 1];
+			a.RemoveRange(num, 2);
+		}
 		num = a.IndexOf("/plein");
 		if (num >= 0)
 		{

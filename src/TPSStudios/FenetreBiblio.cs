@@ -219,6 +219,23 @@ internal partial class Fenetre
 			{
 				num -= SystemInformation.VerticalScrollBarWidth;
 			}
+			int lf = bFlecheMods.LargeurFleche;
+			int w = lf;
+			bFlecheMods.Libelle = ((ongletB == 0) ? "Les Mods" : "");
+			if (ongletB == 0)
+			{
+				int wt = Lang.MeasureText("Les Mods", FlecheBord.PoliceLibelle).Width + Zx.P(12);
+				int place = num - lf - Zx.P(6) - (rPageD.Right + Zx.P(12));
+				if (rPageD.Width > 0 && place >= wt)
+				{
+					w = lf + wt;
+				}
+			}
+			if (bFlecheMods.Width != w)
+			{
+				bFlecheMods.Width = w;
+				bFlecheMods.Invalidate();
+			}
 			int x = ((ongletB == 0) ? (num - bFlecheMods.Width - Zx.P(6)) : Zx.P(14));
 			bFlecheMods.Location = new Point(x, Math.Max(Zx.P(132), (pBiblio.ClientSize.Height - bFlecheMods.Height) / 2));
 			bFlecheMods.BringToFront();
@@ -638,8 +655,8 @@ internal partial class Fenetre
 			using Pen pen = new Pen(C.Ligne);
 			g.DrawPath(pen, graphicsPath);
 		}
-		Lang.DrawText(g, "Mes mods", fModNom, new Point(num + Zx.P(22), num2 + Zx.P(20)), C.Texte, TextFormatFlags.NoPadding);
-		int num5 = num + Zx.P(22) + Lang.MeasureText("Mes mods", fModNom).Width + Zx.P(10);
+		Lang.DrawText(g, "Mes Cartes", fModNom, new Point(num + Zx.P(22), num2 + Zx.P(20)), C.Texte, TextFormatFlags.NoPadding);
+		int num5 = num + Zx.P(22) + Lang.MeasureText("Mes Cartes", fModNom).Width + Zx.P(10);
 		Lang.DrawText(g, installes.Count + ((installes.Count > 1) ? " installés" : " installé"), fModInfo, new Point(num5, num2 + Zx.P(23)), C.Gris, TextFormatFlags.NoPadding);
 		int num6 = num2 + Zx.P(66);
 		using (Pen pen2 = new Pen(C.Ligne))

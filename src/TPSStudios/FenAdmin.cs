@@ -1361,6 +1361,43 @@ internal class FenAdmin : Form, IPage
 			tPrereq.Text = Str(cur, "prerequis");
 			sgRuban.Index = Math.Max(0, Array.IndexOf(Projet.RubansId, Str(cur, "ruban")));
 			tVideo.Text = (videosEnAttente.ContainsKey(Str(cur, "id")) ? videosEnAttente[Str(cur, "id")] : Str(cur, "video"));
+			if (tEditeur.Text.Length == 0)
+			{
+				tEditeur.Text = "TPS Groupe";
+			}
+			if (tVideo.Text.Length == 0)
+			{
+				Dictionary<string, object> page0 = cur;
+				string yt = YouTube.TrailerPour(new Projet
+				{
+					Nom = Str(cur, "nom")
+				}, null, delegate
+				{
+					try
+					{
+						BeginInvoke((MethodInvoker)delegate
+						{
+							if (!base.IsDisposed && cur == page0 && tVideo.Text.Length == 0)
+							{
+								bool c0 = charge;
+								charge = true;
+								tVideo.Text = YouTube.TrailerPour(new Projet
+								{
+									Nom = Str(page0, "nom")
+								}, null, null) ?? "";
+								charge = c0;
+							}
+						});
+					}
+					catch
+					{
+					}
+				});
+				if (yt != null)
+				{
+					tVideo.Text = yt;
+				}
+			}
 			tLiens.Text = Str(cur, "liens").Replace("\r\n", "\n").Replace("\n", "\r\n");
 			tAncien.Text = (Projet.ParsePrix(Str(cur, "ancien_prix"), out var d2) ? d2.ToString("0.00", CultureInfo.GetCultureInfo("fr-FR")) : "");
 			tLies.Text = Str(cur, "lies");
@@ -2329,8 +2366,17 @@ internal class FenAdmin : Form, IPage
 		pageReglages.Bascule("boutique", "Boutique visible", "Affiche la tuile « Boutique » sur l'accueil de tous les joueurs.", "", "0", defaut: true);
 		pageReglages.Section("VIP");
 		pageReglages.Texte("vip_lien", "Lien d'achat du VIP à 5 € (https://… : PayPal, Ko-fi, Stripe…)", "https://", 300);
-		pageReglages.Action("Créer 5 codes VIP", C.Or, out var lc).Click += delegate
+		Champ tNbVip = pageReglages.Texte(null, "Nombre de codes VIP à créer (1 à 500)", "5", 3);
+		tNbVip.Text = "5";
+		pageReglages.Action("Créer les codes VIP", C.Or, out var lc).Click += delegate
 		{
+			int nbVip;
+			if (!int.TryParse(tNbVip.Text.Trim(), out nbVip) || nbVip < 1 || nbVip > 500)
+			{
+				lc.ForeColor = C.Rouge;
+				lc.Text = "Indiquez un nombre de codes entre 1 et 500.";
+				return;
+			}
 			if (!Social.Actif || !Social.CleAdminPresente)
 			{
 				lc.ForeColor = C.Rouge;
@@ -2339,14 +2385,14 @@ internal class FenAdmin : Form, IPage
 			else
 			{
 				lc.ForeColor = C.Gris;
-				lc.Text = "Création des codes…";
+				lc.Text = "Création de " + nbVip + " codes VIP…";
 				Thread thread2 = new Thread((ThreadStart)delegate
 				{
 					string err = null;
 					List<string> codes = null;
 					try
 					{
-						codes = Social.CodesVip(5, "lanceur", out err);
+						codes = Social.CodesVip(nbVip, "lanceur", out err);
 					}
 					catch (Exception ex2)
 					{
@@ -2372,8 +2418,19 @@ internal class FenAdmin : Form, IPage
 								{
 								}
 								lc.ForeColor = C.Vert;
-								lc.Text = "✔  5 codes copiés dans le presse-papiers.";
-								MessageBox.Show(this, "Codes VIP à usage unique :\n\n" + text2 + "\n\nIls sont copiés dans le presse-papiers.", "Codes VIP");
+								lc.Text = "✔  " + codes.Count + ((codes.Count > 1) ? " codes copiés" : " code copié") + " dans le presse-papiers.";
+								string fichierVip = null;
+								try
+								{
+									fichierVip = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory), "Codes VIP " + DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss") + ".txt");
+									File.WriteAllText(fichierVip, text2 + "\r\n");
+								}
+								catch
+								{
+									fichierVip = null;
+								}
+								string apercuVip = ((codes.Count <= 20) ? text2 : (string.Join("\r\n", codes.GetRange(0, 20).ToArray()) + "\r\n… et " + (codes.Count - 20) + " autres"));
+								MessageBox.Show(this, "Codes VIP à usage unique :\n\n" + apercuVip + "\n\nIls sont copiés dans le presse-papiers" + ((fichierVip != null) ? (" et enregistrés sur le Bureau :\n" + Path.GetFileName(fichierVip)) : ".") + "\n\nIls ne seront plus affichés : gardez-les précieusement.", "Codes VIP");
 							}
 						});
 					}

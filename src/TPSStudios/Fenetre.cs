@@ -214,6 +214,55 @@ internal partial class Fenetre : Form
 
 	public static int Rouvrir = -1;
 
+	/// <summary>Page à retrouver après un redémarrage du lanceur (« vue|jeu|mod|onglet »).</summary>
+	public static string PageInit;
+
+	private string EtatPage()
+	{
+		return vue.ToString() + "|" + (jeuId ?? "") + "|" + ((sel != null) ? sel.Id : "") + "|" + ongletB;
+	}
+
+	/// <summary>Remet la page enregistrée par EtatPage (vrai si une page a été rouverte).</summary>
+	private bool RetrouverPage(string etat)
+	{
+		try
+		{
+			string[] a = etat.Split('|');
+			if (a.Length < 4 || !Enum.TryParse<Vue>(a[0], out var v))
+			{
+				return false;
+			}
+			if (a[1].Length > 0)
+			{
+				jeuId = a[1];
+			}
+			int.TryParse(a[3], out var o);
+			ongletB = ((o == 1) ? 1 : 0);
+			if (v == Vue.Projet)
+			{
+				Projet p = ((cat != null) ? cat.Projets.Find((Projet x) => x.Id == a[2]) : null);
+				if (p == null)
+				{
+					v = Vue.Biblio;
+				}
+				else
+				{
+					Choisir(p);
+				}
+			}
+			if (v != Vue.Accueil)
+			{
+				ShowVue(v);
+			}
+			return true;
+		}
+		catch (Exception e)
+		{
+			Journal.Une("page-init", e);
+			return false;
+		}
+	}
+
 	public static bool PleinAuDemarrage;
 
 	public static Fenetre Principale;
@@ -589,7 +638,7 @@ internal partial class Fenetre : Form
 
 	private List<KeyValuePair<Rectangle, Annonce>> rAnnonces = new List<KeyValuePair<Rectangle, Annonce>>();
 
-	private static readonly string[] NouveautesLanceur = new string[4] { "Transitions sans clignotement", "Réglages et Boutique en plein écran", "J'aime sur les commentaires", "Textes revus et traduits dans toutes les langues" };
+	private static readonly string[] NouveautesLanceur = new string[4] { "Pause sur les bandes-annonces", "Boutons plus soignés", "Retour sur la même page après un changement de langue", "« Les Mods » et « Mes Cartes » dans la bibliothèque" };
 
 	private static readonly Font fAnT2 = new Font("Segoe UI Semibold", Zx.P(11f));
 
@@ -9399,7 +9448,12 @@ internal partial class Fenetre : Form
 				{
 					premiereCharge = false;
 					string text = Config.Lire("page_demarrage");
-					if (text == "biblio")
+					string pageInit = PageInit;
+					PageInit = null;
+					if (pageInit != null && RetrouverPage(pageInit))
+					{
+					}
+					else if (text == "biblio")
 					{
 						ShowVue(Vue.Biblio);
 					}
@@ -10669,7 +10723,7 @@ internal partial class Fenetre : Form
 		}
 		if (flag5)
 		{
-			RedemarrerSur(Application.ExecutablePath, " /rouvrir " + num + (plein ? " /plein" : ""));
+			RedemarrerSur(Application.ExecutablePath, " /rouvrir " + num + " /page \"" + EtatPage() + "\"" + (plein ? " /plein" : ""));
 			return;
 		}
 		if (pleinEcran != plein)

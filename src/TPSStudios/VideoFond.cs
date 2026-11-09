@@ -42,6 +42,12 @@ internal class VideoFond : Panel
 
 	private readonly Bouton bSon;
 
+	/// <summary>Bouton lecture / pause, à gauche du bouton son.</summary>
+	private readonly Bouton bPause;
+
+	/// <summary>Mise en pause demandée par le joueur (gardée tant que la vidéo ne change pas).</summary>
+	private bool enPause;
+
 	/// <summary>Vrai quand la page qui contient la vidéo est à l'écran.</summary>
 	public Func<bool> Actif;
 
@@ -104,6 +110,19 @@ internal class VideoFond : Panel
 		};
 		base.Controls.Add(bSon);
 		bSon.BringToFront();
+		bPause = new Bouton("\ue769");
+		bPause.Plein = false;
+		bPause.Font = new Font("Segoe MDL2 Assets", Zx.P(12f));
+		bPause.Size = new Size(Zx.P(42), Zx.P(42));
+		bPause.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+		bPause.Click += delegate
+		{
+			enPause = !enPause;
+			MajPause();
+			Tic();
+		};
+		base.Controls.Add(bPause);
+		bPause.BringToFront();
 		minuteur = new Timer();
 		minuteur.Interval = 400;
 		minuteur.Tick += delegate
@@ -150,6 +169,16 @@ internal class VideoFond : Panel
 		{
 			bSon.Location = new Point(base.Width - bSon.Width - Zx.P(14), base.Height - bSon.Height - Zx.P(14));
 		}
+		if (bPause != null && bSon != null)
+		{
+			bPause.Location = new Point(bSon.Left - bPause.Width - Zx.P(8), bSon.Top);
+		}
+	}
+
+	private void MajPause()
+	{
+		bPause.Text = (enPause ? "\ue768" : "\ue769");
+		bPause.Invalidate();
 	}
 
 	/// <summary>Change de vidéo (adresse vide ou non lisible : rien n'est affiché).</summary>
@@ -165,6 +194,8 @@ internal class VideoFond : Panel
 			return;
 		}
 		url = u;
+		enPause = false;
+		MajPause();
 		pret = false;
 		joue = false;
 		abandon = false;
@@ -236,6 +267,7 @@ internal class VideoFond : Panel
 		web = lecteurWeb;
 		base.Controls.Add(web);
 		bSon.BringToFront();
+		bPause.BringToFront();
 	}
 
 	[System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
@@ -301,7 +333,7 @@ internal class VideoFond : Panel
 		{
 			return;
 		}
-		bool flag = base.Visible && base.Parent != null && base.Parent.Visible && (Actif == null || Actif());
+		bool flag = !enPause && base.Visible && base.Parent != null && base.Parent.Visible && (Actif == null || Actif());
 		if (modeWeb)
 		{
 			if (web != null)

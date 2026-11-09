@@ -61,20 +61,20 @@ internal partial class Fenetre
 	private List<string[]> PhotosDuJeu()
 	{
 		List<string[]> list = new List<string[]>();
-		FicheSteam ficheSteam = FicheJeu();
-		if (ficheSteam != null)
+		string[] array = ValJeu(jeuId, "galerie").Replace("\r", "").Split('\n');
+		foreach (string text in array)
 		{
-			list.AddRange(ficheSteam.Captures);
+			if (Uri.TryCreate(text.Trim(), UriKind.Absolute, out var result) && (result.Scheme == Uri.UriSchemeHttps || result.Scheme == Uri.UriSchemeHttp) && list.Count < 12)
+			{
+				list.Add(new string[2] { result.AbsoluteUri, result.AbsoluteUri });
+			}
 		}
 		if (list.Count == 0)
 		{
-			string[] array = ValJeu(jeuId, "galerie").Replace("\r", "").Split('\n');
-			foreach (string text in array)
+			FicheSteam ficheSteam = FicheJeu();
+			if (ficheSteam != null)
 			{
-				if (Uri.TryCreate(text.Trim(), UriKind.Absolute, out var result) && (result.Scheme == Uri.UriSchemeHttps || result.Scheme == Uri.UriSchemeHttp) && list.Count < 12)
-				{
-					list.Add(new string[2] { result.AbsoluteUri, result.AbsoluteUri });
-				}
+				list.AddRange(ficheSteam.Captures);
 			}
 		}
 		return list;
@@ -258,7 +258,7 @@ internal partial class Fenetre
 	private string DescriptionJeu(FicheSteam fiche)
 	{
 		string text = ValJeu(jeuId, "description");
-		if (fiche != null && fiche.Description.Length > 0)
+		if (text.Length == 0 && fiche != null && fiche.Description.Length > 0)
 		{
 			text = fiche.Description;
 		}
@@ -272,12 +272,22 @@ internal partial class Fenetre
 	private List<string[]> InfosJeu(FicheSteam fiche)
 	{
 		List<string[]> list = new List<string[]>();
+		string ed = ValJeu(jeuId, "editeur");
+		string so = ValJeu(jeuId, "sortie");
+		string ge = ValJeu(jeuId, "genres");
 		if (fiche != null)
 		{
-			Ajout(list, "Développeur", fiche.Developpeurs);
-			Ajout(list, "Éditeur", fiche.Editeurs);
-			Ajout(list, "Date de sortie", fiche.Sortie);
-			Ajout(list, "Genres", fiche.Genres);
+			if (ed.Length > 0)
+			{
+				Ajout(list, "Éditeur", ed);
+			}
+			else
+			{
+				Ajout(list, "Développeur", fiche.Developpeurs);
+				Ajout(list, "Éditeur", fiche.Editeurs);
+			}
+			Ajout(list, "Date de sortie", (so.Length > 0) ? so : fiche.Sortie);
+			Ajout(list, "Genres", (ge.Length > 0) ? ge : fiche.Genres);
 			Ajout(list, "Fonctionnalités", fiche.Fonctionnalites);
 			Ajout(list, "Langues", fiche.Langues);
 			List<string> list2 = new List<string>();
@@ -290,9 +300,9 @@ internal partial class Fenetre
 		}
 		else
 		{
-			Ajout(list, "Éditeur", ValJeu(jeuId, "editeur"));
-			Ajout(list, "Date de sortie", ValJeu(jeuId, "sortie"));
-			Ajout(list, "Genres", ValJeu(jeuId, "genres"));
+			Ajout(list, "Éditeur", ed);
+			Ajout(list, "Date de sortie", so);
+			Ajout(list, "Genres", ge);
 		}
 		return list;
 	}
