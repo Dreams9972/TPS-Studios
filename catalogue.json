@@ -1,8 +1,8 @@
 {
   "lanceur": {
-    "version": "2.8.1",
-    "url": "https://raw.githubusercontent.com/Dreams9972/TPS-Studios/main/lanceur/v2.8.1/TPS.Studios.exe",
-    "sha256": "8d1211285f41714dcca7c3f5a6eecd10507fd800fb69f194802c3c58fcd068f2"
+    "version": "2.9.0",
+    "url": "https://raw.githubusercontent.com/Dreams9972/TPS-Studios/main/lanceur/v2.9.0/TPS.Studios.exe",
+    "sha256": "3933415ebcb0e11c09043ae1590f7baefc236be3d1e0731fe9dc27d2c16ddc03"
   },
   "projets": [
     {
@@ -36,7 +36,7 @@
       "fichier_version": "Paris25_version.txt",
       "liste": "Paris25_fichiers_installes.txt",
       "marque": "maps\\Paris 25",
-      "description": "Paris 25 reproduit la ligne de bus 25, qui relie Vitry-sur-Seine au 13e arrondissement de Paris (5 km, 15 à 20 minutes). L'environnement est celui de 2024/2025 ; certains endroits ont pu être interprétés autrement.\n\nDeux périodes Chrono :\n•  « RATP », jusqu'au 31 juillet 2026 (HOF « Paris 25 Old »).\n•  « IDFM », à partir du 1er août 2026 (HOF « Paris 25 »).\n\nAvant de jouer : copiez l'HOF qui convient dans le dossier de votre bus (Addons\\Paris 25\\Hofs : Krueger++pc, Rollband Agora pour le Renault Agora RATP, Global pour les autres bus). Le « 4GB Patch » est vivement conseillé.\n\nCarte réalisée par annamathys (Kalinkowski), avec Nicolas, ibk.cis5, Péri, Fabian, VeesGuy, Sobol, TPS Studios et Jihem. Les objets du dossier Sceneryobjects\\Paris_25\\batiment ne doivent pas être réutilisés ; la carte peut être modifiée mais pas repartagée.",
+      "description": "Paris 25 reproduit la ligne de bus 25, qui relie Vitry-sur-Seine au 13e arrondissement de Paris (5 km, 15 à 20 minutes). L'environnement est celui de 2024/2025 ; certains endroits ont pu être interprétés autrement.\n\nDeux périodes Chrono :\n•  « RATP », jusqu'au 31 juillet 2026 (HOF « Paris 25 Old »).\n•  « IDFM », à partir du 1er août 2026 (HOF « Paris 25 »).\n\nAvant de jouer : copiez l'HOF qui convient dans le dossier de votre bus (Addons\\Paris 25\\Hofs : Krueger++pc, Rollband Agora pour le Renault Agora RATP, Global pour les autres bus). Le « 4GB Patch » est vivement conseillé.\n\nCarte réalisée par annamathys (Kalinkowski), avec Nicolas, ibk.cis5, Péri, Fabian, VeesGuy, Sobol, TPS Groupe et Jihem. Les objets du dossier Sceneryobjects\\Paris_25\\batiment ne doivent pas être réutilisés ; la carte peut être modifiée mais pas repartagée.",
       "carte": "maps/Paris 25/global.cfg",
       "meteo": "",
       "bus_defaut": "Vehicles/MAN_NL_NG/MAN_EN92_main.bus",
@@ -50,7 +50,7 @@
       "sha256": "ffa4d4e05351b3786c948002295566808283b994cd86caa1b83edf2dba4f9d4c",
       "taille": 865328991,
       "image": "https://raw.githubusercontent.com/Dreams9972/TPS-Studios/main/images/paris25.jpg",
-      "notes": "Première version de Paris 25 dans le lanceur TPS Studios (archive officielle 1.0 d'annamathys).",
+      "notes": "Première version de Paris 25 dans le lanceur TPS Groupe (archive officielle 1.0 d'annamathys).",
       "categorie": "cartes",
       "a_la_une": true,
       "ordre": 1
@@ -78,8 +78,8 @@
       "bus_defaut": "",
       "hof_defaut": "",
       "consigne": "Choisissez votre bus et la ligne, puis lancez.",
-      "description": "Lignes de la Region:\n1802 Belmont Gare RER <-> Belmont Gare RER\n1822 Mairie de Saint-François <-> Belmont Gare RER\n1803 Saint-François Gare RER <-> C.C Cap Nord\n1804 Saint-François Gare RER <-> La Source\n1820 Saint-François Gare RER <-> Belmont Gare RER\n\nCarte réalisée par TPS Studios.",
-      "editeur": "TPS Studios",
+      "description": "Lignes de la Region:\n1802 Belmont Gare RER <-> Belmont Gare RER\n1822 Mairie de Saint-François <-> Belmont Gare RER\n1803 Saint-François Gare RER <-> C.C Cap Nord\n1804 Saint-François Gare RER <-> La Source\n1820 Saint-François Gare RER <-> Belmont Gare RER\n\nCarte réalisée par TPS Groupe.",
+      "editeur": "TPS Groupe",
       "version": "V2.1",
       "date": "08/11/2026 12:21",
       "md5": "f949fe1f289d80abf63b34b74b4642c8",
@@ -131,8 +131,8 @@
       "bus_defaut": "",
       "hof_defaut": "",
       "consigne": "Choisissez votre bus et la ligne, puis lancez.",
-      "description": "Lignes de Paris:\n23 Gare de Lyon <-> Gare de l'Est\n34 Gare de Lyon <-> Chatelet\n36 Republique <-> Nation\n41 Opera <-> Chatelet\n50 Gare de Lyon <-> Porte de la Muette\n65 Chatelet <-> Gare de l'Est/Bastille\n78 Bastille <-> Porte de la Muette\n79 Clemenceau <-> Nation\n81 Etoile <-> Denfert-Rochereau\n90 Gare de Lyon <-> Charles de Gaulle Etoile\n149 Etoile <-> Bercy\n\nCarte réalisée par TPS Studios.",
-      "editeur": "TPS Studios",
+      "description": "Lignes de Paris:\n23 Gare de Lyon <-> Gare de l'Est\n34 Gare de Lyon <-> Chatelet\n36 Republique <-> Nation\n41 Opera <-> Chatelet\n50 Gare de Lyon <-> Porte de la Muette\n65 Chatelet <-> Gare de l'Est/Bastille\n78 Bastille <-> Porte de la Muette\n79 Clemenceau <-> Nation\n81 Etoile <-> Denfert-Rochereau\n90 Gare de Lyon <-> Charles de Gaulle Etoile\n149 Etoile <-> Bercy\n\nCarte réalisée par TPS Groupe.",
+      "editeur": "TPS Groupe",
       "version": "V1.1",
       "date": "08/11/2026 12:22",
       "md5": "6d379ddf0a2e58a62e695e537ab37639",
@@ -220,8 +220,8 @@
       "bus_defaut": "",
       "hof_defaut": "",
       "consigne": "Choisissez votre bus et la ligne, puis lancez.",
-      "description": "Périgueux – Map Française pour OMSI 2\n\nPérigueux est une carte française réaliste pour OMSI 2, recréant fidèlement l’ambiance urbaine et périurbaine de la ville de Périgueux (Dordogne) et de sa communauté d’agglomération.\nDéveloppée avec soin par l’équipe Add-On Périgueux, la map propose un environnement immersif, inspiré des véritables lignes et infrastructures de transport de la région.\n\n\nCaractéristiques principales\n\nReproduction fidèle de secteurs réels de Périgueux et de ses environs.\n\nLignes de bus jouables inspirées du réseau urbain local.\n\nHoraires dynamiques et trafic réaliste.\n\nObjets, bâtiments et arrêts personnalisés, créés spécialement pour la map.\n\nAmbiance typiquement française, avec signalisation, mobilier urbain et architecture locale.\n\nOptimisation soignée pour garantir une bonne fluidité sur la majorité des configurations.\n\n\nInformations techniques\n\nVersion actuelle : 1.00\n\nDéveloppeurs : Peri & Peristuff\n\nSite officiel : https://add-on-perigueux.fr/\n\nCarte réalisée par Add-On Périgueux · TPS Studios.",
-      "editeur": "Add-On Périgueux · TPS Studios",
+      "description": "Périgueux – Map Française pour OMSI 2\n\nPérigueux est une carte française réaliste pour OMSI 2, recréant fidèlement l’ambiance urbaine et périurbaine de la ville de Périgueux (Dordogne) et de sa communauté d’agglomération.\nDéveloppée avec soin par l’équipe Add-On Périgueux, la map propose un environnement immersif, inspiré des véritables lignes et infrastructures de transport de la région.\n\n\nCaractéristiques principales\n\nReproduction fidèle de secteurs réels de Périgueux et de ses environs.\n\nLignes de bus jouables inspirées du réseau urbain local.\n\nHoraires dynamiques et trafic réaliste.\n\nObjets, bâtiments et arrêts personnalisés, créés spécialement pour la map.\n\nAmbiance typiquement française, avec signalisation, mobilier urbain et architecture locale.\n\nOptimisation soignée pour garantir une bonne fluidité sur la majorité des configurations.\n\n\nInformations techniques\n\nVersion actuelle : 1.00\n\nDéveloppeurs : Peri & Peristuff\n\nSite officiel : https://add-on-perigueux.fr/\n\nCarte réalisée par Add-On Périgueux · TPS Groupe.",
+      "editeur": "Add-On Périgueux · TPS Groupe",
       "version": "V1.0",
       "date": "08/11/2026 12:25",
       "md5": "115747f82b2081caf8f458eb5e121a14",
