@@ -4819,7 +4819,15 @@ internal partial class Fenetre : Form
 	private void PeintBiblio(Graphics g, int dy)
 	{
 		FondPeint(g, pBiblio);
-		EnTete(g, "Bibliothèque", NomJeu(jeuId) + "  ·  " + ((ongletB == 0) ? "ma bibliothèque" : ((categorie.Length == 0) ? "tous les mods" : Categories.Nom(categorie))), dy, 56);
+		if (ongletB == 1)
+		{
+			Size size0 = Lang.MeasureText("Mods", fTitre);
+			Lang.DrawText(g, "Mods", fTitre, new Point((pBiblio.ClientSize.Width - size0.Width) / 2, Zx.P(30) + dy), C.Texte, TextFormatFlags.NoPadding);
+		}
+		else
+		{
+			EnTete(g, "Bibliothèque", NomJeu(jeuId) + "  ·  ma bibliothèque", dy, 56);
+		}
 		if (ongletB == 0)
 		{
 			PeindrePageJeu(g, dy);

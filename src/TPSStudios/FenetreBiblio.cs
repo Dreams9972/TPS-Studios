@@ -283,6 +283,8 @@ internal partial class Fenetre
 			return;
 		}
 		bool page = ongletB == 0;
+		bChangerJeu.Visible = page;
+		bAccueilB.Visible = page;
 		bFlecheMods.Droite = page;
 		bFlecheMods.Invalidate();
 		bulle.SetToolTip(bFlecheMods, page ? "Tous les mods du jeu" : "Retour à la bibliothèque");
