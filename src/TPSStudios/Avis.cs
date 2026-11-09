@@ -14,6 +14,7 @@ internal class Avis : Control
 	public Avis()
 	{
 		SetStyle(ControlStyles.UserPaint | ControlStyles.ResizeRedraw | ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer, value: true);
+		SetStyle(ControlStyles.StandardDoubleClick, value: false);
 		base.Visible = false;
 		base.Height = Zx.P(46);
 	}

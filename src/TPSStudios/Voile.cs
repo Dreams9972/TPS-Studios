@@ -11,6 +11,7 @@ internal class Voile : Control
 	public Voile()
 	{
 		SetStyle(ControlStyles.UserPaint | ControlStyles.Opaque | ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer, value: true);
+		SetStyle(ControlStyles.StandardDoubleClick, value: false);
 	}
 
 	protected override void OnPaintBackground(PaintEventArgs e)

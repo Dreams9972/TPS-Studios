@@ -719,7 +719,7 @@ internal partial class Fenetre : Form
 
 	private List<KeyValuePair<Rectangle, Annonce>> rAnnonces = new List<KeyValuePair<Rectangle, Annonce>>();
 
-	private static readonly string[] NouveautesLanceur = new string[4] { "Amis : vrais pseudos, niveaux et bannières", "Cartes d'amis avec détails au survol", "Recherche de joueurs par pseudo ou code ami", "Fenêtre Amis en pleine largeur" };
+	private static readonly string[] NouveautesLanceur = new string[3] { "Amis : pseudos avec [ ] et tags d'équipe corrigés", "Recherche de joueurs plus souple", "Boutons plus réactifs (clics rapides pris en compte)" };
 
 	private static readonly Font fAnT2 = new Font("Segoe UI Semibold", Zx.P(11f));
 

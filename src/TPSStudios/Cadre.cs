@@ -11,6 +11,7 @@ internal class Cadre : Panel
 	public Cadre()
 	{
 		SetStyle(ControlStyles.UserPaint | ControlStyles.ResizeRedraw | ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer, value: true);
+		SetStyle(ControlStyles.StandardDoubleClick, value: false);
 		BackColor = C.Carte;
 	}
 

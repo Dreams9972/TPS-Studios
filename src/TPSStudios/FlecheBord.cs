@@ -23,6 +23,7 @@ internal class FlecheBord : Control
 	public FlecheBord()
 	{
 		SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer | ControlStyles.SupportsTransparentBackColor | ControlStyles.ResizeRedraw, value: true);
+		SetStyle(ControlStyles.StandardDoubleClick, value: false);
 		BackColor = Color.Transparent;
 		Cursor = Cursors.Hand;
 	}

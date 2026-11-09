@@ -74,6 +74,7 @@ internal class SelecteurCouleur : Control
 	public SelecteurCouleur()
 	{
 		SetStyle(ControlStyles.UserPaint | ControlStyles.ResizeRedraw | ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer, value: true);
+		SetStyle(ControlStyles.StandardDoubleClick, value: false);
 		Hex = new Champ(multi: false, Zx.P(34));
 		Hex.Width = Zx.P(116);
 		Hex.MaxLength = 7;

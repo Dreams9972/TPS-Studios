@@ -11,6 +11,7 @@ internal class PanelFond : Panel
 	public PanelFond()
 	{
 		SetStyle(ControlStyles.UserPaint | ControlStyles.ResizeRedraw | ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer, value: true);
+		SetStyle(ControlStyles.StandardDoubleClick, value: false);
 	}
 
 	protected override void OnPaintBackground(PaintEventArgs e)

@@ -44,6 +44,7 @@ internal class Curseur : Control
 		Cursor = Cursors.Hand;
 		base.TabStop = true;
 		SetStyle(ControlStyles.UserPaint | ControlStyles.ResizeRedraw | ControlStyles.Selectable | ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer, value: true);
+		SetStyle(ControlStyles.StandardDoubleClick, value: false);
 	}
 
 	private void Pos(int x)

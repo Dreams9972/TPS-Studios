@@ -78,6 +78,7 @@ internal class Option : Control, ILisse
 		Cursor = Cursors.Hand;
 		base.TabStop = true;
 		SetStyle(ControlStyles.UserPaint | ControlStyles.ResizeRedraw | ControlStyles.Selectable | ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer, value: true);
+		SetStyle(ControlStyles.StandardDoubleClick, value: false);
 	}
 
 	protected override void OnMouseEnter(EventArgs e)

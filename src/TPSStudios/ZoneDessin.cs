@@ -11,6 +11,7 @@ internal class ZoneDessin : Control
 	public ZoneDessin()
 	{
 		SetStyle(ControlStyles.UserPaint | ControlStyles.ResizeRedraw | ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer, value: true);
+		SetStyle(ControlStyles.StandardDoubleClick, value: false);
 	}
 
 	protected override void OnPaint(PaintEventArgs e)

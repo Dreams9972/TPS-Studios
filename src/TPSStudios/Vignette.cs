@@ -29,6 +29,7 @@ internal class Vignette : Control
 		Cursor = Cursors.Hand;
 		BackColor = C.Carte;
 		SetStyle(ControlStyles.UserPaint | ControlStyles.ResizeRedraw | ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer, value: true);
+		SetStyle(ControlStyles.StandardDoubleClick, value: false);
 	}
 
 	protected override void OnMouseEnter(EventArgs e)

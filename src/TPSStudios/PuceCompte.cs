@@ -16,6 +16,7 @@ internal class PuceCompte : Control
 	public PuceCompte()
 	{
 		SetStyle(ControlStyles.UserPaint | ControlStyles.ResizeRedraw | ControlStyles.SupportsTransparentBackColor | ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer, value: true);
+		SetStyle(ControlStyles.StandardDoubleClick, value: false);
 		Cursor = Cursors.Hand;
 		BackColor = Color.Transparent;
 	}

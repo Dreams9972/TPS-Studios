@@ -18,6 +18,7 @@ internal class PaletteCouleurs : Control
 		base.Size = new Size(Zx.P(8) * Zx.P(40), Zx.P(38));
 		Cursor = Cursors.Hand;
 		SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer, value: true);
+		SetStyle(ControlStyles.StandardDoubleClick, value: false);
 	}
 
 	protected override void OnPaint(PaintEventArgs e)
