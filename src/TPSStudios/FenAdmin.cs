@@ -121,6 +121,8 @@ internal class FenAdmin : Form, IPage
 
 	private Bouton bSauver;
 
+	private Bouton bPaquet;
+
 	private Cadre cdIdentite;
 
 	private Cadre cdClass;
@@ -341,6 +343,17 @@ internal class FenAdmin : Form, IPage
 		};
 		pied.Controls.Add(bouton3);
 		bouton3.Visible = false;
+		bPaquet = new Bouton("Publier le paquet…");
+		bPaquet.Plein = false;
+		bPaquet.Size = new Size(Zx.P(180), Zx.P(40));
+		bPaquet.Location = new Point(bouton.Left - Zx.P(10) - Zx.P(180), Zx.P(15));
+		bPaquet.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+		bPaquet.Enabled = false;
+		bPaquet.Click += delegate
+		{
+			PublierPaquet();
+		};
+		pied.Controls.Add(bPaquet);
 		ongletsAdm = new Segments();
 		ongletsAdm.Items = OngletsNoms;
 		ongletsAdm.Etire = true;
@@ -1277,6 +1290,7 @@ internal class FenAdmin : Form, IPage
 		cur = ((i >= 0 && i < visibles.Count) ? visibles[i] : null);
 		edition.Visible = cur != null;
 		bSauver.Enabled = cur != null;
+		bPaquet.Enabled = cur != null;
 		if (cur != null)
 		{
 			long.TryParse(Str(cur, "taille"), out var result);
@@ -2634,6 +2648,35 @@ internal class FenAdmin : Form, IPage
 			}
 		}
 		return null;
+	}
+
+	private void PublierPaquet()
+	{
+		if (cur == null)
+		{
+			return;
+		}
+		if (nouvelles.Contains(cur))
+		{
+			MessageBox.Show(this, "Publiez d'abord cette nouvelle page (« Enregistrer et publier »), puis envoyez son paquet.", Text, MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
+			return;
+		}
+		if (modifiees.Count + supprimees.Count > 0)
+		{
+			MessageBox.Show(this, "Des modifications ne sont pas encore publiées : cliquez d'abord sur « Enregistrer et publier ».", Text, MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
+			return;
+		}
+		string id = Str(cur, "id");
+		using (FenPaquet fenPaquet = new FenPaquet(id, Str(cur, "nom"), Str(cur, "version"), Str(cur, "notes")))
+		{
+			if (fenPaquet.ShowDialog(this) != DialogResult.OK)
+			{
+				return;
+			}
+		}
+		lEtat.ForeColor = C.Vert;
+		lEtat.Text = "✔  Paquet publié sur GitHub";
+		Charger();
 	}
 
 	private void Publier()

@@ -75,7 +75,7 @@ internal static class GitHub
 		ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls13;
 		HttpWebRequest httpWebRequest = (HttpWebRequest)WebRequest.Create(url);
 		httpWebRequest.Method = methode;
-		httpWebRequest.UserAgent = "TPS-Studios-Lanceur/2.7.9";
+		httpWebRequest.UserAgent = "TPS-Studios-Lanceur/" + Config.VERSION;
 		httpWebRequest.Accept = "application/vnd.github+json";
 		httpWebRequest.Timeout = 25000;
 		httpWebRequest.ReadWriteTimeout = 60000;
@@ -292,7 +292,7 @@ internal static class GitHub
 		string stringToEscape = id + "-" + DateTime.UtcNow.ToString("yyyyMMddHHmmss") + ".mp4";
 		HttpWebRequest httpWebRequest = (HttpWebRequest)WebRequest.Create(text2 + "?name=" + Uri.EscapeDataString(stringToEscape));
 		httpWebRequest.Method = "POST";
-		httpWebRequest.UserAgent = "TPS-Studios-Lanceur/2.7.9";
+		httpWebRequest.UserAgent = "TPS-Studios-Lanceur/" + Config.VERSION;
 		httpWebRequest.Accept = "application/vnd.github+json";
 		httpWebRequest.Headers["Authorization"] = "Bearer " + text;
 		httpWebRequest.Headers["X-GitHub-Api-Version"] = "2022-11-28";
@@ -370,5 +370,120 @@ internal static class GitHub
 		}
 		Ecrire(text2, File.ReadAllBytes(fichier), "Image de la page " + id, sha);
 		return "https://raw.githubusercontent.com/Dreams9972/TPS-Studios/main/" + text2 + "?v=" + DateTime.UtcNow.Ticks;
+	}
+
+	// ---------- Paquets de mods (GitHub Releases) ----------
+
+	/// <summary>Release portant ce tag, ou null si elle n'existe pas.</summary>
+	public static Dictionary<string, object> ReleaseParTag(string tag)
+	{
+		try
+		{
+			return JS().Deserialize<Dictionary<string, object>>(Appel("GET", Api + "/repos/Dreams9972/TPS-Studios/releases/tags/" + Uri.EscapeDataString(tag), null, Jeton()));
+		}
+		catch (Exception ex)
+		{
+			if (ex.Message.IndexOf("404") >= 0)
+			{
+				return null;
+			}
+			throw;
+		}
+	}
+
+	public static Dictionary<string, object> CreerRelease(string tag, string nom, string corps)
+	{
+		Dictionary<string, object> d = new Dictionary<string, object>();
+		d["tag_name"] = tag;
+		d["target_commitish"] = "main";
+		d["name"] = nom;
+		d["body"] = corps;
+		d["make_latest"] = "false";
+		return JS().Deserialize<Dictionary<string, object>>(Appel("POST", Api + "/repos/Dreams9972/TPS-Studios/releases", JS().Serialize(d), Jeton()));
+	}
+
+	/// <summary>Supprime de la release les fichiers portant ce nom (reprise après un envoi interrompu).</summary>
+	public static void SupprimerAssetNomme(Dictionary<string, object> release, string nom)
+	{
+		Dictionary<string, object> frais = JS().Deserialize<Dictionary<string, object>>(Appel("GET", Api + "/repos/Dreams9972/TPS-Studios/releases/" + release["id"], null, Jeton()));
+		if (!(frais.TryGetValue("assets", out var value) && value is System.Collections.ArrayList))
+		{
+			return;
+		}
+		foreach (object item in (System.Collections.ArrayList)value)
+		{
+			if (item is Dictionary<string, object> a && string.Equals(a["name"] as string, nom, StringComparison.OrdinalIgnoreCase))
+			{
+				Appel("DELETE", Api + "/repos/Dreams9972/TPS-Studios/releases/assets/" + a["id"], null, Jeton());
+			}
+		}
+	}
+
+	/// <summary>Envoie un fichier dans une release et vérifie qu'il est bien arrivé entier. Renvoie son adresse de téléchargement.</summary>
+	public static string EnvoyerAsset(Dictionary<string, object> release, string fichier, string nom, string sha256, Action<long, long> progres, Func<bool> annule)
+	{
+		string text = Jeton();
+		string url = release["upload_url"] as string;
+		int i = url.IndexOf('{');
+		if (i > 0)
+		{
+			url = url.Substring(0, i);
+		}
+		long total = new FileInfo(fichier).Length;
+		HttpWebRequest req = (HttpWebRequest)WebRequest.Create(url + "?name=" + Uri.EscapeDataString(nom));
+		req.Method = "POST";
+		req.UserAgent = "TPS-Studios-Lanceur/" + Config.VERSION;
+		req.Accept = "application/vnd.github+json";
+		req.Headers["Authorization"] = "Bearer " + text;
+		req.Headers["X-GitHub-Api-Version"] = "2022-11-28";
+		req.ContentType = "application/zip";
+		req.AllowWriteStreamBuffering = false;
+		req.SendChunked = false;
+		req.Timeout = 120000;
+		req.ReadWriteTimeout = 900000;
+		req.ContentLength = total;
+		using (FileStream fs = File.OpenRead(fichier))
+		{
+			using Stream st = req.GetRequestStream();
+			byte[] buf = new byte[1048576];
+			long envoye = 0L;
+			int n;
+			while ((n = fs.Read(buf, 0, buf.Length)) > 0)
+			{
+				if (annule != null && annule())
+				{
+					req.Abort();
+					throw new OperationCanceledException();
+				}
+				st.Write(buf, 0, n);
+				envoye += n;
+				progres?.Invoke(envoye, total);
+			}
+		}
+		string input;
+		try
+		{
+			using HttpWebResponse resp = (HttpWebResponse)req.GetResponse();
+			using StreamReader sr = new StreamReader(resp.GetResponseStream(), Encoding.UTF8);
+			input = sr.ReadToEnd();
+		}
+		catch (WebException ex)
+		{
+			HttpWebResponse r2 = ex.Response as HttpWebResponse;
+			throw new Exception("envoi de " + nom + " refusé" + ((r2 != null) ? (" (GitHub a répondu " + (int)r2.StatusCode + ")") : (" : " + ex.Message)));
+		}
+		Dictionary<string, object> asset = JS().Deserialize<Dictionary<string, object>>(input);
+		long taille;
+		long.TryParse(Convert.ToString(asset.ContainsKey("size") ? asset["size"] : null), out taille);
+		if (taille != total)
+		{
+			throw new Exception(nom + " est arrivé incomplet sur GitHub (" + taille + " octets sur " + total + ")");
+		}
+		string digest = asset.ContainsKey("digest") ? (asset["digest"] as string) : null;
+		if (!string.IsNullOrEmpty(digest) && !string.Equals(digest, "sha256:" + sha256, StringComparison.OrdinalIgnoreCase))
+		{
+			throw new Exception(nom + " est arrivé abîmé sur GitHub (empreinte différente)");
+		}
+		return asset["browser_download_url"] as string;
 	}
 }

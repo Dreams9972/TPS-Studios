@@ -15,7 +15,7 @@ internal static class Web
 	{
 		ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls13;
 		WebClient webClient = new WebClientDelai();
-		webClient.Headers[HttpRequestHeader.UserAgent] = "TPS-Studios-Lanceur/2.7.9";
+		webClient.Headers[HttpRequestHeader.UserAgent] = "TPS-Studios-Lanceur/" + Config.VERSION;
 		return webClient;
 	}
 

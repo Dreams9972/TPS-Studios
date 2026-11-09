@@ -38,7 +38,7 @@ internal static class Journal
 				}
 				File.Move(text, text + ".old");
 			}
-			File.AppendAllText(text, string.Concat(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), "  v2.7.9  ", contexte, " : ", e, "\r\n\r\n"), Encoding.UTF8);
+			File.AppendAllText(text, string.Concat(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), "  v" + Config.VERSION + "  ", contexte, " : ", e, "\r\n\r\n"), Encoding.UTF8);
 		}
 		catch
 		{

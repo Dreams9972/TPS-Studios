@@ -699,7 +699,7 @@ internal static class Social
 		httpWebRequest.Method = methode;
 		httpWebRequest.Timeout = 9000;
 		httpWebRequest.ReadWriteTimeout = 9000;
-		httpWebRequest.UserAgent = "TPS-Studios-Lanceur/2.7.9";
+		httpWebRequest.UserAgent = "TPS-Studios-Lanceur/" + Config.VERSION;
 		httpWebRequest.ContentType = "application/json";
 		httpWebRequest.Accept = "application/json";
 		if (auth && jeton.Length > 0)

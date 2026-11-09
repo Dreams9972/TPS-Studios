@@ -173,7 +173,7 @@ internal static class Notifs
 			if (notif.Type == "lanceur")
 			{
 				string a = (notif.Cle.StartsWith("lanceur:") ? notif.Cle.Substring(8) : "");
-				flag2 = !Fenetre.PlusRecent(a, "2.7.9");
+				flag2 = !Fenetre.PlusRecent(a, Config.VERSION);
 			}
 			else if (notif.Type == "maj")
 			{

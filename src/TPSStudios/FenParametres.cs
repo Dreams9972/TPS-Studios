@@ -240,7 +240,7 @@ internal class FenParametres : Form, IPage
 			base.DialogResult = DialogResult.OK;
 		};
 		cadre2.Controls.Add(bouton);
-		Etiquette(cadre2, (versionDispo != null) ? ("Nouvelle version du lanceur : v" + versionDispo + "   (installée : v2.7.9)") : "Lanceur v2.7.9  ·  à jour", Zx.P(312), Zx.P(55)).ForeColor = ((versionDispo != null) ? C.Bleu : C.Gris);
+		Etiquette(cadre2, (versionDispo != null) ? ("Nouvelle version du lanceur : v" + versionDispo + "   (installée : v" + Config.VERSION + ")") : ("Lanceur v" + Config.VERSION + "  ·  à jour"), Zx.P(312), Zx.P(55)).ForeColor = ((versionDispo != null) ? C.Bleu : C.Gris);
 		cMajL = Opt(cadre2, 1, "Mettre à jour le lanceur automatiquement", "Installe les nouvelles versions au démarrage. Désactivé : une alerte vous prévient.", Config.Oui("maj_lanceur", defaut: true), Zx.P(40) + Zx.P(62) - Zx.P(4));
 		cMajP = Opt(cadre2, 2, "Mettre à jour mes projets installés automatiquement", "Au démarrage, un projet à la fois, jamais jeu ouvert.", Config.Oui("maj_auto_projets", defaut: false), Zx.P(40) + Zx.P(62) - Zx.P(4));
 		Cadre c = Section("Démarrage et jeu", Zx.P(40) + 3 * Zx.P(62) + Zx.P(6));
@@ -404,7 +404,7 @@ internal class FenParametres : Form, IPage
 		base.Controls.Add(panel);
 		Label value5 = new Label
 		{
-			Text = "TPS Studios Lanceur v2.7.9",
+			Text = "TPS Studios Lanceur v" + Config.VERSION,
 			Font = new Font("Segoe UI", Zx.P(9f)),
 			ForeColor = C.Gris,
 			BackColor = C.Cote,

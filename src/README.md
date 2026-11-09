@@ -24,3 +24,19 @@ L'exécutable sort dans `src/bin/Release/net48/TPS.Studios.exe`.
 - `TPSStudios/Omsi.cs` : détection d'OMSI 2 / openOMSI, installation, désactivation, désinstallation.
 - `TPSStudios/Catalogue.cs`, `Projet.cs` : lecture de `catalogue.json`.
 - `TPSStudios/Config.cs` : réglages et dossiers (`%LocalAppData%\TPS Studios`).
+
+## Publier le paquet d'un mod (mode administrateur, v2.8.0)
+
+Dans le mode administrateur, sélectionnez une page puis **Publier le paquet…** :
+
+1. Choisissez le dossier du mod. Soit il contient `jeu\` (et éventuellement `plugins\`, `fonts\`),
+   soit c'est directement le contenu à copier dans le dossier d'OMSI 2 (`maps\`, `Vehicles\`…).
+2. Indiquez la nouvelle version et les notes de version.
+3. Le lanceur découpe le mod en zips d'environ 250 Mo, envoie chaque partie dans une release
+   GitHub (`<id>-<version>`), vérifie sa taille et son empreinte, puis **l'efface du PC** :
+   il n'y a jamais plus d'une partie sur le disque.
+4. À la fin, le catalogue est mis à jour (version, date, empreintes, tailles) :
+   les joueurs voient « METTRE À JOUR ».
+
+En cas de coupure, relancez avec le même numéro de version : la release est réutilisée.
+Le code est dans `TPSStudios/FenPaquet.cs`, `TPSStudios/Paquet.cs` et `TPSStudios/GitHub.cs`.

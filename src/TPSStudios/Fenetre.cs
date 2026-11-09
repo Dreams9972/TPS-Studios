@@ -993,7 +993,7 @@ internal class Fenetre : Form
 		lBas.ForeColor = C.Gris;
 		lBas.Font = new Font("Segoe UI", Zx.P(8.5f));
 		lBas.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-		lBas.Text = "Lanceur v2.7.9";
+		lBas.Text = "Lanceur v" + Config.VERSION;
 		cote.Controls.Add(lBas);
 		cote.Resize += delegate
 		{
@@ -2905,7 +2905,7 @@ internal class Fenetre : Form
 		}
 		string text = Omsi.DetecteOmsi();
 		string[] array = ((text != null) ? Omsi.Installee(sel, text) : null);
-		string text2 = "Lanceur v2.7.9  ·  mod " + ((array != null) ? ("installé " + ((array[0].Trim().Length > 0) ? array[0].Trim() : "?") + (Omsi.Desactive(sel, text) ? " (désactivé)" : "")) : "non installé") + "  ·  catalogue " + ((sel.Version.Length > 0) ? sel.Version : "?") + "  ·  " + Environment.OSVersion.VersionString + "  ·  OMSI 2 " + ((text != null) ? "trouvé" : "introuvable");
+		string text2 = "Lanceur v" + Config.VERSION + "  ·  mod " + ((array != null) ? ("installé " + ((array[0].Trim().Length > 0) ? array[0].Trim() : "?") + (Omsi.Desactive(sel, text) ? " (désactivé)" : "")) : "non installé") + "  ·  catalogue " + ((sel.Version.Length > 0) ? sel.Version : "?") + "  ·  " + Environment.OSVersion.VersionString + "  ·  OMSI 2 " + ((text != null) ? "trouvé" : "introuvable");
 		using FenSupport f = new FenSupport(sel, text2);
 		f.Afficher(this);
 	}
@@ -4757,7 +4757,7 @@ internal class Fenetre : Form
 		{
 			fond.Peindre(g, p.ClientRectangle);
 		}
-		Lang.DrawText(g, "Lanceur v2.7.9", fVersion, new Rectangle(p.ClientSize.Width - Zx.P(240), p.ClientSize.Height - Zx.P(30), Zx.P(220), Zx.P(20)), Color.FromArgb(150, 160, 178), TextFormatFlags.Right | TextFormatFlags.NoPadding);
+		Lang.DrawText(g, "Lanceur v" + Config.VERSION, fVersion, new Rectangle(p.ClientSize.Width - Zx.P(240), p.ClientSize.Height - Zx.P(30), Zx.P(220), Zx.P(20)), Color.FromArgb(150, 160, 178), TextFormatFlags.Right | TextFormatFlags.NoPadding);
 	}
 
 	private void EnTete(Graphics g, string titre, string sous, int dy, int dx = 0)
@@ -6656,7 +6656,7 @@ internal class Fenetre : Form
 				int width = pAccueil.ClientSize.Width;
 				int height = pAccueil.ClientSize.Height;
 				noel.PeindreFond(g, width, height);
-				Lang.DrawText(g, "Lanceur v2.7.9", fVersion, new Rectangle(width - Zx.P(240), height - Zx.P(30), Zx.P(220), Zx.P(20)), Color.FromArgb(90, 100, 130), TextFormatFlags.Right | TextFormatFlags.NoPadding);
+				Lang.DrawText(g, "Lanceur v" + Config.VERSION, fVersion, new Rectangle(width - Zx.P(240), height - Zx.P(30), Zx.P(220), Zx.P(20)), Color.FromArgb(90, 100, 130), TextFormatFlags.Right | TextFormatFlags.NoPadding);
 			});
 		}
 		T("calottes", delegate
@@ -7180,11 +7180,11 @@ internal class Fenetre : Form
 				}
 			}
 		}
-		if (cat != null && cat.LanceurUrl != null && PlusRecent(cat.LanceurVersion, "2.7.9"))
+		if (cat != null && cat.LanceurUrl != null && PlusRecent(cat.LanceurVersion, Config.VERSION))
 		{
 			list.Add(An("Lanceur v" + cat.LanceurVersion + " disponible", "Il s'installe au prochain démarrage.", "\ue895", C.Bleu, null));
 		}
-		list.Add(An("Nouveau dans le lanceur v2.7.9", string.Join("  ·  ", NouveautesLanceur), "\ue7c1", C.Jade, null));
+		list.Add(An("Nouveau dans le lanceur v" + Config.VERSION, string.Join("  ·  ", NouveautesLanceur), "\ue7c1", C.Jade, null));
 		if (cat != null)
 		{
 			List<Projet> list2 = new List<Projet>(cat.Projets);
@@ -9142,7 +9142,7 @@ internal class Fenetre : Form
 				MajVip();
 				try
 				{
-					Notifs.Verifier(cat, Omsi.DetecteOmsi(), (cat.LanceurUrl != null && PlusRecent(cat.LanceurVersion, "2.7.9")) ? cat.LanceurVersion : null);
+					Notifs.Verifier(cat, Omsi.DetecteOmsi(), (cat.LanceurUrl != null && PlusRecent(cat.LanceurVersion, Config.VERSION)) ? cat.LanceurVersion : null);
 				}
 				catch
 				{
@@ -9180,10 +9180,10 @@ internal class Fenetre : Form
 					lAlerte.Text = "Hors ligne : impossible de joindre le catalogue TPS Studios (" + err + ").";
 					lAlerte.Visible = true;
 				}
-				bool flag = VerifierLanceur(manuel || (Opt("version_min").Length > 0 && PlusRecent(Opt("version_min"), "2.7.9") && !ModeCapture));
+				bool flag = VerifierLanceur(manuel || (Opt("version_min").Length > 0 && PlusRecent(Opt("version_min"), Config.VERSION) && !ModeCapture));
 				if (manuel && !flag)
 				{
-					Toast((err != null) ? "Impossible de joindre le serveur de mises à jour." : "Le lanceur est à jour (v2.7.9).", (err != null) ? C.Rouge : C.Vert, 5000);
+					Toast((err != null) ? "Impossible de joindre le serveur de mises à jour." : "Le lanceur est à jour (v" + Config.VERSION + ").", (err != null) ? C.Rouge : C.Vert, 5000);
 				}
 				if (ActionAuto != null)
 				{
@@ -10322,7 +10322,7 @@ internal class Fenetre : Form
 
 	private bool VerifierLanceur(bool manuel)
 	{
-		if (cat == null || cat.LanceurUrl == null || !PlusRecent(cat.LanceurVersion, "2.7.9"))
+		if (cat == null || cat.LanceurUrl == null || !PlusRecent(cat.LanceurVersion, Config.VERSION))
 		{
 			return false;
 		}
@@ -10409,7 +10409,7 @@ internal class Fenetre : Form
 		bool pleinEcran = plein;
 		bool flag5 = false;
 		int num = 0;
-		string versionDispo = ((cat != null && cat.LanceurUrl != null && PlusRecent(cat.LanceurVersion, "2.7.9")) ? cat.LanceurVersion : null);
+		string versionDispo = ((cat != null && cat.LanceurUrl != null && PlusRecent(cat.LanceurVersion, Config.VERSION)) ? cat.LanceurVersion : null);
 		using (FenParametres fenParametres = new FenParametres(plein, versionDispo, AppDiscordFournie()))
 		{
 			if (fenParametres.Afficher(this) == DialogResult.OK)
@@ -10649,7 +10649,7 @@ internal class Fenetre : Form
 						projet.Id = "paris25";
 						projet.Version = "";
 					}
-					form = new FenSupport(projet, "Lanceur v2.7.9  ·  test");
+					form = new FenSupport(projet, "Lanceur v" + Config.VERSION + "  ·  test");
 					break;
 				}
 				case "ami_profil":
