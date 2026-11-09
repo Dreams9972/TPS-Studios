@@ -589,7 +589,7 @@ internal partial class Fenetre : Form
 
 	private List<KeyValuePair<Rectangle, Annonce>> rAnnonces = new List<KeyValuePair<Rectangle, Annonce>>();
 
-	private static readonly string[] NouveautesLanceur = new string[4] { "Nouvelle bibliothèque : page du jeu et « Mes mods »", "Activer ou désactiver un mod en un clic", "Jouer directement sur une carte", "Onglet Mods avec tri (nom, récents, populaires)" };
+	private static readonly string[] NouveautesLanceur = new string[4] { "Bande-annonce et photos sur les pages des jeux et des mods", "« À propos » façon Steam", "Flèche pour glisser vers tous les mods", "Nouvelles transitions et profil plein écran" };
 
 	private static readonly Font fAnT2 = new Font("Segoe UI Semibold", Zx.P(11f));
 
@@ -11043,6 +11043,13 @@ internal partial class Fenetre : Form
 		}
 		case "biblio":
 			ShowVue(Vue.Biblio);
+			break;
+		case "profil":
+			BeginInvoke((MethodInvoker)delegate
+			{
+				int.TryParse(arg ?? "0", out var result);
+				Profil(nouveau: false, result);
+			});
 			break;
 		}
 		System.Windows.Forms.Timer timer = new System.Windows.Forms.Timer();
