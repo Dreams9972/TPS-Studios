@@ -10377,12 +10377,18 @@ internal partial class Fenetre : Form
 		{
 			return false;
 		}
-		if (!manuel && !Config.Oui("maj_lanceur", defaut: true))
+		if (!manuel && !Config.Oui("maj_lanceur", defaut: false))
 		{
-			lAlerte.Text = "Le lanceur v" + cat.LanceurVersion + " est disponible. Cliquez sur « Rechercher les mises à jour » pour l'installer.";
-			lAlerte.ForeColor = C.Bleu;
-			lAlerte.Visible = true;
-			Toast("Lanceur v" + cat.LanceurVersion + " disponible : Réglages › Rechercher les mises à jour.", C.Bleu, 7000);
+			bool flag0 = !majLanceurDispo;
+			majLanceurDispo = true;
+			if (vue == Vue.Accueil)
+			{
+				DisposerAccueil();
+			}
+			if (flag0)
+			{
+				Toast("Lanceur v" + cat.LanceurVersion + " disponible : cliquez sur « Mettre à jour » sur l'accueil.", C.Bleu, 7000);
+			}
 			return false;
 		}
 		lAlerte.Text = "Mise à jour du lanceur vers la v" + cat.LanceurVersion + "…";

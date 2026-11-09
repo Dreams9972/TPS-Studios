@@ -7,13 +7,11 @@ using System.Windows.Forms;
 namespace TPSStudios;
 
 /// <summary>
-/// Accueil : bandeau « Mise à jour disponible » (lanceur et/ou mods installés), bien visible
-/// au-dessus des tuiles. Un clic lance la mise à jour (ou ouvre la liste s'il y en a plusieurs).
+/// Accueil : bandeau « Nouvelle version du lanceur disponible », bien visible au-dessus des
+/// tuiles. Un clic télécharge et installe la nouvelle version (le lanceur redémarre).
 /// </summary>
 internal partial class Fenetre
 {
-	private List<Projet> majsAccueil = new List<Projet>();
-
 	private bool majLanceurDispo;
 
 	private Rectangle rMajA;
@@ -26,60 +24,17 @@ internal partial class Fenetre
 
 	private static readonly Font fMajG = new Font("Segoe MDL2 Assets", Zx.P(14f));
 
-	/// <summary>Cherche les mises à jour (lanceur et mods installés) : à la construction de l'accueil, pas à chaque peinture.</summary>
+	/// <summary>Une nouvelle version du lanceur est-elle annoncée dans le catalogue ?</summary>
 	private void CalculerMajAccueil()
 	{
-		List<Projet> list = new List<Projet>();
-		string omsi = Omsi.DetecteOmsi();
-		if (cat != null && omsi != null)
-		{
-			foreach (Projet projet in cat.Projets)
-			{
-				try
-				{
-					LibelleEtat(projet, omsi, out var _, out var code);
-					if (code == 2)
-					{
-						list.Add(projet);
-					}
-				}
-				catch
-				{
-				}
-			}
-		}
-		majsAccueil = list;
 		majLanceurDispo = cat != null && cat.LanceurUrl != null && PlusRecent(cat.LanceurVersion, Config.VERSION);
 	}
 
-	private bool MajAAfficher
-	{
-		get
-		{
-			if (majsAccueil.Count <= 0)
-			{
-				return majLanceurDispo;
-			}
-			return true;
-		}
-	}
+	private bool MajAAfficher => majLanceurDispo;
 
 	private string TexteMaj()
 	{
-		int count = majsAccueil.Count;
-		if (majLanceurDispo && count > 0)
-		{
-			return "Mises à jour disponibles : lanceur v" + cat.LanceurVersion + " et " + count + " mod" + ((count > 1) ? "s" : "");
-		}
-		if (majLanceurDispo)
-		{
-			return "Nouvelle version du lanceur disponible : v" + cat.LanceurVersion;
-		}
-		if (count == 1)
-		{
-			return "Mise à jour disponible : " + majsAccueil[0].Nom + "  ·  " + majsAccueil[0].Version;
-		}
-		return count + " mises à jour de mods disponibles";
+		return "Nouvelle version du lanceur disponible : v" + cat.LanceurVersion;
 	}
 
 	private void PeindreMaj(Graphics g)
@@ -106,7 +61,7 @@ internal partial class Fenetre
 			g.FillEllipse(brush2, rect);
 		}
 		Lang.DrawText(g, "", fMajG, rect, Color.White, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
-		string text = ((majsAccueil.Count > 1 && !majLanceurDispo) ? "Voir  ›" : "Mettre à jour  ›");
+		string text = "Mettre à jour  ›";
 		int num = Lang.MeasureText(text, fMajB).Width + Zx.P(30);
 		Rectangle rectangle = new Rectangle(r.Right - Zx.P(7) - num, r.Y + Zx.P(7), num, r.Height - Zx.P(14));
 		using (GraphicsPath path2 = Bouton.Rond(rectangle, rectangle.Height / 2))
@@ -124,21 +79,6 @@ internal partial class Fenetre
 		if (majLanceurDispo)
 		{
 			VerifierLanceur(manuel: true);
-		}
-		else if (majsAccueil.Count == 1)
-		{
-			Projet projet = majsAccueil[0];
-			Choisir(projet);
-			ShowVue(Vue.Projet);
-			Installer(projet);
-		}
-		else if (majsAccueil.Count > 1)
-		{
-			Projet projet2 = majsAccueil[0];
-			jeuId = JeuDe(projet2);
-			filtre = 2;
-			ongletB = 1;
-			ShowVue(Vue.Biblio);
 		}
 	}
 }
