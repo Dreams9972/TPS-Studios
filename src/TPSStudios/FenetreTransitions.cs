@@ -90,17 +90,17 @@ internal partial class Fenetre
 		{
 			g.DrawImageUnscaled(avant, 0, 0);
 			Assombrir(g, new Rectangle(0, 0, width, height), 0.6 * vp);
-			double num6 = 0.55 + 0.45 * vp;
+			double num6 = 0.6 + 0.4 * vp;
 			int num7 = (int)((double)width * num6);
 			int num8 = (int)((double)height * num6);
-			Rectangle rectangle = new Rectangle((width - num7) / 2, (height - num8) / 2, num7, num8);
+			Rectangle rectangle = new Rectangle((width - num7) / 2, (height - num8) / 2 + (int)((double)Zx.P(24) * (1.0 - vp)), num7, num8);
 			int num9 = Math.Max(1, (int)((double)Zx.P(28) * (1.0 - vp)));
 			using (GraphicsPath path2 = Bouton.Rond(rectangle, num9))
 			{
 				GraphicsState gstate2 = g.Save();
 				g.SetClip(path2);
-				g.DrawImage(apres, rectangle);
-				Assombrir(g, rectangle, 0.5 * (1.0 - vp));
+				g.DrawImageUnscaled(apres, 0, (int)((double)Zx.P(24) * (1.0 - vp)));
+				Assombrir(g, rectangle, 0.45 * (1.0 - vp));
 				g.Restore(gstate2);
 			}
 			break;
@@ -202,5 +202,12 @@ internal partial class Fenetre
 			using LinearGradientBrush brush = new LinearGradientBrush(new Rectangle(x - num, 0, num + 1, h), Color.FromArgb(0, 0, 0, 0), Color.FromArgb(140, 0, 0, 0), 0f);
 			g.FillRectangle(brush, x - num, 0, num, h);
 		}
+	}
+
+	/// <summary>Masque les bandes-annonces pendant les captures et l'animation d'une transition.</summary>
+	private void SuspendreVideos(bool s)
+	{
+		videoB?.Suspendre(s);
+		videoP?.Suspendre(s);
 	}
 }

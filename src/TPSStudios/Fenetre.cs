@@ -3842,7 +3842,7 @@ internal partial class Fenetre : Form
 		vo.Update();
 		long derT = 0L;
 		Stopwatch swN = Stopwatch.StartNew();
-		Jouer((neigeTrans > 0) ? 520 : ((style == StyleTrans.Diagonale) ? 320 : 380), delegate(double p)
+		Jouer((neigeTrans > 0) ? 520 : ((style == StyleTrans.Diagonale) ? 320 : 360), delegate(double p)
 		{
 			if (neigeTrans > 0)
 			{
@@ -3854,7 +3854,7 @@ internal partial class Fenetre : Form
 			vp = p;
 			vo.Invalidate();
 			vo.Update();
-		}, entreeSortie: true);
+		}, style == StyleTrans.Diagonale || neigeTrans > 0);
 		ThemeNoel.AlphaBlocs = 1f;
 		if (IntroDossier != null)
 		{
@@ -4364,6 +4364,7 @@ internal partial class Fenetre : Form
 		{
 			try
 			{
+				SuspendreVideos(s: true);
 				bitmap = Snap(zone);
 			}
 			catch
@@ -4410,6 +4411,7 @@ internal partial class Fenetre : Form
 		{
 			Transition(bitmap, ChoisirStyle(ancienne, v));
 		}
+		SuspendreVideos(s: false);
 		if (noel != null)
 		{
 			noel.Fige = false;

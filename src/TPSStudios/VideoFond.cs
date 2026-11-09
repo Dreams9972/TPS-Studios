@@ -167,11 +167,20 @@ internal class VideoFond : Panel
 		base.Visible = montre && url.Length > 0 && wmp != null;
 	}
 
+	private bool suspendue;
+
+	/// <summary>Cache la vidéo le temps d'une transition (l'image peinte dessous la remplace).</summary>
+	public void Suspendre(bool s)
+	{
+		suspendue = s;
+		Afficher(montre);
+	}
+
 	/// <summary>Montre ou cache la vidéo sans l'oublier (onglet changé, page masquée…).</summary>
 	public void Afficher(bool m)
 	{
 		montre = m;
-		bool flag = m && url.Length > 0 && wmp != null && !abandon;
+		bool flag = m && !suspendue && url.Length > 0 && wmp != null && !abandon;
 		if (base.Visible != flag)
 		{
 			base.Visible = flag;

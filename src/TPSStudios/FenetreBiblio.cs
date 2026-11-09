@@ -114,10 +114,18 @@ internal partial class Fenetre
 				ZoneB zoneB = ZoneSous(e.Location);
 				if (zoneB != survolB)
 				{
+					Rectangle rectangle = ZoneARepeindre(survolB);
 					survolB = zoneB;
 					pBiblio.Cursor = ((zoneB != null) ? Cursors.Hand : Cursors.Default);
 					bulle.SetToolTip(pBiblio, (zoneB != null && zoneB.Bulle != null) ? zoneB.Bulle : null);
-					pBiblio.Invalidate();
+					if (!rectangle.IsEmpty)
+					{
+						pBiblio.Invalidate(rectangle);
+					}
+					if (zoneB != null)
+					{
+						pBiblio.Invalidate(ZoneARepeindre(zoneB));
+					}
 				}
 			};
 			pBiblio.Scroll += delegate
@@ -184,6 +192,7 @@ internal partial class Fenetre
 		{
 			try
 			{
+				SuspendreVideos(s: true);
 				bitmap = Snap(zone);
 			}
 			catch
@@ -197,6 +206,7 @@ internal partial class Fenetre
 		{
 			Transition(bitmap, versMods ? StyleTrans.Pousse : StyleTrans.Retour);
 		}
+		SuspendreVideos(s: false);
 	}
 
 	private void PlacerFleche()
@@ -333,14 +343,18 @@ internal partial class Fenetre
 				num6 -= Zx.P(54);
 			}
 		}
+		CalculerEtats();
 		PlacerVideoJeu(page: true);
 		PlacerFleche();
 		pBiblio.Invalidate();
 	}
 
+	/// <summary>La bannière prend la place qui reste pour que toute la page tienne dans la fenêtre.</summary>
 	private int HauteurHero()
 	{
-		return Math.Max(Zx.P(220), Math.Min(Zx.P(400), (int)((double)rPageG.Width * 0.36)));
+		int num = Math.Min(Zx.P(400), (int)((double)rPageG.Width * 0.36));
+		int num2 = pBiblio.ClientSize.Height - rPageG.Y - Zx.P(24) - Zx.P(18) - Zx.P(78) - HauteurPhotos() - HauteurAPropos();
+		return Math.Max(Zx.P(140), Math.Min(num, num2));
 	}
 
 	/// <summary>Bannière du jeu : library_hero de Steam si présente, sinon la couverture habituelle.</summary>
@@ -433,30 +447,24 @@ internal partial class Fenetre
 		zonesB.Clear();
 		g.SmoothingMode = SmoothingMode.AntiAlias;
 		g.InterpolationMode = InterpolationMode.HighQualityBilinear;
-		string omsi = Omsi.DetecteOmsi();
 		List<Projet> list = new List<Projet>();
 		List<Projet> list2 = new List<Projet>();
-		int num = 0;
 		if (cat != null)
 		{
 			foreach (Projet projet in cat.Projets)
 			{
-				if (JeuDe(projet) != jeuId)
+				if (JeuDe(projet) == jeuId)
 				{
-					continue;
-				}
-				list.Add(projet);
-				LibelleEtat(projet, omsi, out var _, out var code);
-				if (code >= 1)
-				{
-					list2.Add(projet);
-					if (code == 2)
-					{
-						num++;
-					}
+					list.Add(projet);
 				}
 			}
 		}
+		foreach (EtatMod item in etatsB)
+		{
+			list2.Add(item.P);
+		}
+		int num = nbMajJeu;
+		string omsi = omsiB;
 		int bas = PeindreColonneJeu(g, dy, list, list2, num);
 		int val = PeindreMesMods(g, dy, list2, omsi);
 		int height = Math.Max(bas, val) + Zx.P(50);
@@ -473,14 +481,11 @@ internal partial class Fenetre
 		using (GraphicsPath graphicsPath = Bouton.Rond(rectangle, Zx.P(14)))
 		{
 			GraphicsState gstate = g.Save();
-			g.SetClip(graphicsPath);
-			Image image = ImageHero();
+			g.SetClip(graphicsPath, CombineMode.Intersect);
+			Bitmap image = Couvrir(ImageHero(), rectangle.Width, rectangle.Height);
 			if (image != null)
 			{
-				double num = Math.Max((double)rectangle.Width / (double)image.Width, (double)rectangle.Height / (double)image.Height);
-				int num2 = (int)((double)image.Width * num);
-				int num3 = (int)((double)image.Height * num);
-				g.DrawImage(image, rectangle.X + (rectangle.Width - num2) / 2, rectangle.Y + (rectangle.Height - num3) / 2, num2, num3);
+				g.DrawImageUnscaled(image, rectangle.X, rectangle.Y);
 			}
 			else
 			{
@@ -587,22 +592,8 @@ internal partial class Fenetre
 
 	private void Vignette(Graphics g, Projet p, Rectangle r)
 	{
-		using GraphicsPath graphicsPath = Bouton.Rond(r, Zx.P(8));
-		GraphicsState gstate = g.Save();
-		g.SetClip(graphicsPath);
-		if (images.TryGetValue(p.Id, out var value) && value != null)
-		{
-			double num = Math.Max((double)r.Width / (double)value.Width, (double)r.Height / (double)value.Height);
-			int num2 = (int)((double)value.Width * num);
-			int num3 = (int)((double)value.Height * num);
-			g.DrawImage(value, r.X + (r.Width - num2) / 2, r.Y + (r.Height - num3) / 2, num2, num3);
-		}
-		else
-		{
-			using LinearGradientBrush brush = new LinearGradientBrush(r, C.Ligne, C.Carte, 45f);
-			g.FillRectangle(brush, r);
-		}
-		g.Restore(gstate);
+		images.TryGetValue(p.Id, out var value);
+		DessinerArrondi(g, value, r, Zx.P(8));
 	}
 
 	private Rectangle Pilule(Graphics g, string t, int droite, int y, Color c, bool plein)
@@ -663,14 +654,13 @@ internal partial class Fenetre
 			});
 			return rectangle.Bottom - dy;
 		}
-		foreach (Projet item in installes)
+		foreach (EtatMod etat in etatsB)
 		{
-			Projet p = item;
+			Projet p = etat.P;
 			Rectangle rectangle4 = new Rectangle(num + Zx.P(10), num6, width - Zx.P(20), num3 - Zx.P(6));
-			bool flag2 = Omsi.Desactive(p, omsi);
-			LibelleEtat(p, omsi, out var _, out var code);
-			string[] array = Omsi.Installee(p, omsi);
-			string text = ((array != null && array[0].Trim().Length > 0) ? array[0].Trim() : p.Version);
+			bool flag2 = etat.Off;
+			int code = etat.Code;
+			string text = etat.VInst;
 			Zone(rectangle4, delegate
 			{
 				Choisir(p);
@@ -782,6 +772,7 @@ internal partial class Fenetre
 		{
 			base.UseWaitCursor = false;
 		}
+		CalculerEtats();
 		pBiblio.Invalidate();
 	}
 
