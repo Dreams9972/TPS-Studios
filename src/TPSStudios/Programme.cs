@@ -123,7 +123,7 @@ internal static class Programme
 			Type type = obj.GetType();
 			type.InvokeMember("TargetPath", BindingFlags.SetProperty, null, obj, new object[1] { cible });
 			type.InvokeMember("WorkingDirectory", BindingFlags.SetProperty, null, obj, new object[1] { Path.GetDirectoryName(cible) });
-			type.InvokeMember("Description", BindingFlags.SetProperty, null, obj, new object[1] { "TPS Groupe : projets, mises à jour et lancement" });
+			type.InvokeMember("Description", BindingFlags.SetProperty, null, obj, new object[1] { "TPS Groupe : mods, mises à jour et lancement" });
 			type.InvokeMember("IconLocation", BindingFlags.SetProperty, null, obj, new object[1] { cible + ",0" });
 			type.InvokeMember("Save", BindingFlags.InvokeMethod, null, obj, null);
 		}

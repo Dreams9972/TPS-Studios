@@ -44,7 +44,7 @@ internal class FenMusique : Form
 		base.Controls.Add(value);
 		Label value2 = new Label
 		{
-			Text = "Pilote Spotify ou Apple Music sans quitter le lanceur (ou le jeu).",
+			Text = "Pilotez Spotify ou Apple Music sans quitter le lanceur (ou le jeu).",
 			Font = new Font("Segoe UI", Zx.P(9.5f)),
 			ForeColor = C.Gris,
 			BackColor = C.Fond,
@@ -188,7 +188,7 @@ internal class FenMusique : Form
 		if (text.Length == 0)
 		{
 			t = ((lecteur.Length > 0) ? (lecteur + " est ouvert") : "Aucune musique en cours");
-			text2 = ((lecteur.Length > 0) ? "En pause, ou lance un titre" : "Ouvre Spotify ou Apple Music ci-dessous");
+			text2 = ((lecteur.Length > 0) ? "En pause, ou lancez un titre" : "Ouvrez Spotify ou Apple Music ci-dessous");
 		}
 		else
 		{

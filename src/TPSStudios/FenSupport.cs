@@ -42,7 +42,7 @@ internal class FenSupport : Form
 		base.Controls.Add(value);
 		Label value2 = new Label
 		{
-			Text = "Décris ton souci : l'équipe TPS Groupe reçoit un ticket sur son Discord et te répond au plus vite.",
+			Text = "Décrivez votre problème : l'équipe TPS Groupe reçoit un ticket sur son Discord et vous répond au plus vite.",
 			Font = new Font("Segoe UI", Zx.P(9.5f)),
 			ForeColor = C.Gris,
 			BackColor = C.Fond,
@@ -52,7 +52,7 @@ internal class FenSupport : Form
 		base.Controls.Add(value2);
 		Label value3 = new Label
 		{
-			Text = "Quel est le souci ?",
+			Text = "Quel est le problème ?",
 			Font = new Font("Segoe UI Semibold", Zx.P(9.5f)),
 			ForeColor = C.Gris,
 			BackColor = C.Fond,
@@ -69,7 +69,7 @@ internal class FenSupport : Form
 		base.Controls.Add(sg);
 		Label value4 = new Label
 		{
-			Text = "Explique ce qui se passe (quand, quel message, ce que tu as déjà essayé)",
+			Text = "Expliquez ce qui se passe (quand, quel message, ce que vous avez déjà essayé)",
 			Font = new Font("Segoe UI Semibold", Zx.P(9.5f)),
 			ForeColor = C.Gris,
 			BackColor = C.Fond,
@@ -84,7 +84,7 @@ internal class FenSupport : Form
 		base.Controls.Add(tMsg);
 		Label value5 = new Label
 		{
-			Text = "Ton pseudo Discord (facultatif, pour te répondre)",
+			Text = "Votre pseudo Discord (facultatif, pour vous répondre)",
 			Font = new Font("Segoe UI Semibold", Zx.P(9.5f)),
 			ForeColor = C.Gris,
 			BackColor = C.Fond,
@@ -146,7 +146,7 @@ internal class FenSupport : Form
 			if (text.Length < 10)
 			{
 				fenSupport.lErr.ForeColor = C.Rouge;
-				fenSupport.lErr.Text = "Décris le souci en quelques mots (10 caractères au moins).";
+				fenSupport.lErr.Text = "Décrivez le problème en quelques mots (10 caractères au moins).";
 			}
 			else
 			{

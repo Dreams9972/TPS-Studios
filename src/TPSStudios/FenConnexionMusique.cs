@@ -212,13 +212,13 @@ internal class FenConnexionMusique : Form
 		}
 		Lang.DrawText(g, "\uec4f", new Font("Segoe MDL2 Assets", Zx.P(22f)), rectangle, Color.White, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
 		Lang.DrawText(g, "Connecter " + Nom, fT, new Point(Zx.P(100), Zx.P(28)), C.Texte);
-		Lang.DrawText(g, "Connexion sécurisée sur la page officielle de " + Nom + " : le lanceur ne voit jamais ton mot de passe.", fS, new Rectangle(Zx.P(100), Zx.P(64), w - Zx.P(128), Zx.P(36)), C.Gris, TextFormatFlags.WordBreak | TextFormatFlags.NoPadding);
+		Lang.DrawText(g, "Connexion sécurisée sur la page officielle de " + Nom + " : le lanceur ne voit jamais votre mot de passe.", fS, new Rectangle(Zx.P(100), Zx.P(64), w - Zx.P(128), Zx.P(36)), C.Gris, TextFormatFlags.WordBreak | TextFormatFlags.NoPadding);
 		bool inst = Musique.Installe(quoi);
-		Etape(g, 1, Zx.P(130), w, "Connecte-toi à ton compte", "La page de connexion officielle s'ouvre dans ton navigateur.", "Ouvrir la page de connexion", delegate
+		Etape(g, 1, Zx.P(130), w, "Connectez-vous à votre compte", "La page de connexion officielle s'ouvre dans votre navigateur.", "Ouvrir la page de connexion", delegate
 		{
 			Ouvrir((quoi == "apple") ? "https://music.apple.com/login" : "https://accounts.spotify.com/login");
 		});
-		Etape(g, 2, Zx.P(210), w, "Écoute avec l'application ou sur le site", "Rien à installer : le lecteur web marche aussi (navigateur). Le lanceur pilote l'un ou l'autre.", inst ? "Application" : "Installer", delegate
+		Etape(g, 2, Zx.P(210), w, "Écoutez avec l'application ou sur le site", "Rien à installer : le lecteur web fonctionne aussi (navigateur). Le lanceur pilote l'un ou l'autre.", inst ? "Application" : "Installer", delegate
 		{
 			if (inst)
 			{
@@ -232,11 +232,11 @@ internal class FenConnexionMusique : Form
 		{
 			Ouvrir(Musique.LienWeb(quoi));
 		});
-		Etape(g, 3, Zx.P(290), w, "Lance un titre", "Il s'affiche dans la pilule de l'accueil et dans le mini-lecteur de Windows (icône TPS Groupe près de l'horloge).", null, null);
+		Etape(g, 3, Zx.P(290), w, "Lancez un titre", "Il s'affiche dans la pilule de l'accueil et dans le mini-lecteur de Windows (icône TPS Groupe près de l'horloge).", null, null);
 		string text = Musique.EnCours();
 		string lecteur = Musique.Lecteur;
 		bool flag = lecteur == "Lecteur web" || (quoi == "apple" && lecteur.Length > 0 && lecteur != "Spotify") || (quoi == "spotify" && lecteur == "Spotify");
-		string t = ((!flag) ? (Nom + " n'est pas ouvert (application ou site)") : ((lecteur == "Lecteur web" && text.Length > 0) ? ("✔  Lecteur web  ·  en cours : " + text) : ((text.Length > 0) ? ("✔  Connecté  ·  en cours : " + text) : ("✔  " + Nom + " est ouvert  ·  lance un titre"))));
+		string t = ((!flag) ? (Nom + " n'est pas ouvert (application ou site)") : ((lecteur == "Lecteur web" && text.Length > 0) ? ("✔  Lecteur web  ·  en cours : " + text) : ((text.Length > 0) ? ("✔  Connecté  ·  en cours : " + text) : ("✔  " + Nom + " est ouvert  ·  lancez un titre"))));
 		Rectangle r = new Rectangle(Zx.P(28), Zx.P(356), w - Zx.P(56), Zx.P(34));
 		using (GraphicsPath path = Bouton.Rond(r, Zx.P(17)))
 		{

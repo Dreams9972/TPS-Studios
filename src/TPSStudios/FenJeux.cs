@@ -161,7 +161,7 @@ internal class FenJeux : Form
 			ImporterImage();
 		};
 		base.Controls.Add(bouton3);
-		Lb("Photos : une adresse d'image par ligne (10 au plus), ou ajoute des fichiers depuis ton PC", num, Zx.P(440), num2, Zx.P(20), new Font("Segoe UI", Zx.P(9f)), C.Gris);
+		Lb("Photos : une adresse d'image par ligne (10 au maximum), ou ajoutez des fichiers depuis votre PC", num, Zx.P(440), num2, Zx.P(20), new Font("Segoe UI", Zx.P(9f)), C.Gris);
 		tPhotos = new Champ(multi: true, Zx.P(96));
 		tPhotos.Location = new Point(num, Zx.P(462));
 		tPhotos.Width = num2;
@@ -207,7 +207,7 @@ internal class FenJeux : Form
 		base.Controls.Add(cPlein);
 		boutonsMedias = new Bouton[3] { bouton3, bouton4, bouton5 };
 		Lb("Catégories de tri des mods", Zx.P(870), Zx.P(90), Zx.P(300), Zx.P(20), new Font("Segoe UI Semibold", Zx.P(9.5f)), C.Texte);
-		Lb("Une catégorie par ligne (12 au plus). Elles servent de filtres dans « Mods » et de choix dans les pages de ce jeu.", Zx.P(870), Zx.P(112), Zx.P(300), Zx.P(54), new Font("Segoe UI", Zx.P(9f)), C.Gris);
+		Lb("Une catégorie par ligne (12 au maximum). Elles servent de filtres dans « Mods » et de choix dans les pages de ce jeu.", Zx.P(870), Zx.P(112), Zx.P(300), Zx.P(54), new Font("Segoe UI", Zx.P(9f)), C.Gris);
 		tCats = new Champ(multi: true, Zx.P(250));
 		tCats.Location = new Point(Zx.P(870), Zx.P(170));
 		tCats.Width = Zx.P(300);
@@ -216,7 +216,7 @@ internal class FenJeux : Form
 		int xd = Zx.P(870);
 		int wd = Zx.P(300);
 		Lb("Fiche « À propos » du jeu", xd, Zx.P(432), wd, Zx.P(22), new Font("Segoe UI Semibold", Zx.P(9.5f)), C.Texte);
-		tSteam = ChampL("N° Steam (remplit tout seul la fiche)", xd, Zx.P(456), wd, 12);
+		tSteam = ChampL("AppID Steam (remplit automatiquement la fiche)", xd, Zx.P(456), wd, 12);
 		tSteam.Indice = "ex. 252530";
 		tEditeur = ChampL("Éditeur / développeur", xd, Zx.P(518), wd, 120);
 		int wm = (wd - Zx.P(10)) / 2;
@@ -514,7 +514,7 @@ internal class FenJeux : Form
 		using OpenFileDialog openFileDialog = new OpenFileDialog();
 		openFileDialog.Filter = "Images (*.jpg;*.jpeg;*.png)|*.jpg;*.jpeg;*.png";
 		openFileDialog.Multiselect = true;
-		openFileDialog.Title = "Photos du jeu (10 au plus)";
+		openFileDialog.Title = "Photos du jeu (10 au maximum)";
 		if (openFileDialog.ShowDialog(this) != DialogResult.OK)
 		{
 			return;
@@ -525,7 +525,7 @@ internal class FenJeux : Form
 		if (num + fs.Length > 10)
 		{
 			lErr.ForeColor = C.Rouge;
-			lErr.Text = "10 photos au plus (il y en a déjà " + num + ").";
+			lErr.Text = "10 photos au maximum (il y en a déjà " + num + ").";
 			return;
 		}
 		Envoyer("des photos", delegate(Action<string> e)
@@ -558,7 +558,7 @@ internal class FenJeux : Form
 		if (new FileInfo(f).Length > 1992294400)
 		{
 			lErr.ForeColor = C.Rouge;
-			lErr.Text = "Vidéo trop lourde (1,9 Go au plus).";
+			lErr.Text = "Vidéo trop lourde (1,9 Go maximum).";
 			return;
 		}
 		Envoyer("de la vidéo", (Action<string> e) => GitHub.EnvoyerVideo(f, id, e), delegate(string u)

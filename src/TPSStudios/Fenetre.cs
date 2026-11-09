@@ -967,7 +967,7 @@ internal partial class Fenetre : Form
 			}
 			Lang.DrawText(graphics, "TPS Groupe", F.Logo, new Point(Zx.P(84), Zx.P(22)), C.Texte);
 			Lang.DrawText(graphics, "Lanceur", F.SousLogo, new Point(Zx.P(86), Zx.P(50)), C.Gris);
-			Lang.DrawText(graphics, "MES PROJETS", F.Rubrique, new Point(Zx.P(20), Zx.P(250)), C.Gris);
+			Lang.DrawText(graphics, "MES MODS", F.Rubrique, new Point(Zx.P(20), Zx.P(250)), C.Gris);
 			using Pen pen = new Pen(C.Ligne);
 			graphics.DrawLine(pen, Zx.P(20), Zx.P(84), cote.Width - Zx.P(20), Zx.P(84));
 			graphics.DrawLine(pen, Zx.P(20), Zx.P(236), cote.Width - Zx.P(20), Zx.P(236));
@@ -980,7 +980,7 @@ internal partial class Fenetre : Form
 		liste.AutoScroll = true;
 		liste.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
 		cote.Controls.Add(liste);
-		bParam = new Bouton("⚙  Paramètres");
+		bParam = new Bouton("⚙  Réglages");
 		bParam.Plein = false;
 		bParam.Size = new Size(Zx.P(220), Zx.P(36));
 		bParam.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
@@ -2121,7 +2121,7 @@ internal partial class Fenetre : Form
 					{
 						cpt.Stats[key] = 1;
 						Progression.Compter(cpt, "votes", 1);
-						Progression.Gagner(cpt, 20, "vote pour un mod");
+						Progression.Gagner(cpt, 20, "J'aime sur un mod");
 					}
 				});
 			}
@@ -2386,7 +2386,7 @@ internal partial class Fenetre : Form
 		{
 			DateTime? datePublic = p.DatePublic;
 			bouton = ((p.Vip == "test") ? "RÉSERVÉ AUX TESTEURS VIP" : "ACCÈS ANTICIPÉ VIP");
-			message = ((p.Vip == "test") ? "Version de test réservée aux testeurs VIP (Profil › VIP)." : ("Accès anticipé réservé aux VIP" + (datePublic.HasValue ? ("\nDisponible pour tous le " + datePublic.Value.ToString("dd/MM/yyyy à HH:mm")) : "") + "."));
+			message = ((p.Vip == "test") ? "Version de test réservée aux testeurs VIP (Mon profil › VIP)." : ("Accès anticipé réservé aux VIP" + (datePublic.HasValue ? ("\nDisponible pour tous le " + datePublic.Value.ToString("dd/MM/yyyy à HH:mm")) : "") + "."));
 		}
 		else if (text == "programme" && dateSortie.HasValue)
 		{
@@ -2402,7 +2402,7 @@ internal partial class Fenetre : Form
 		else
 		{
 			bouton = "INDISPONIBLE";
-			message = "Le paquet de ce contenu n'est pas encore publié.";
+			message = "Le paquet de ce mod n'est pas encore publié.";
 		}
 	}
 
@@ -4950,7 +4950,7 @@ internal partial class Fenetre : Form
 		{
 			themeJeux.PeindreFond(g, width, height);
 		}
-		EnTete(g, "Choisir un jeu", "Sélectionnez un jeu pour ouvrir sa bibliothèque de cartes.", dy);
+		EnTete(g, "Choisir un jeu", "Sélectionnez un jeu pour ouvrir sa bibliothèque de mods.", dy);
 		if (themeJeux != null)
 		{
 			themeJeux.PeindreDevant(g, width, height);
@@ -5363,7 +5363,7 @@ internal partial class Fenetre : Form
 						amisCharges = true;
 						if (cad.Count > 0)
 						{
-							Toast("\ud83c\udf81  " + string.Join(", ", cad.ToArray()) + " t'a offert le VIP TPS Groupe !  Profite de tes avantages.", C.Or, 10000);
+							Toast("\ud83c\udf81  " + string.Join(", ", cad.ToArray()) + " vous a offert le VIP TPS Groupe !  Profitez de vos avantages.", C.Or, 10000);
 							if (cacheProfil != null)
 							{
 								cacheProfil.Dispose();
@@ -5372,7 +5372,7 @@ internal partial class Fenetre : Form
 						}
 						if (nv.Count > 0)
 						{
-							Toast("Demande d'ami de " + string.Join(", ", nv.ToArray()) + "  ·  clique sur + dans « Amis en ligne »", C.Jade, 7000);
+							Toast("Demande d'ami de " + string.Join(", ", nv.ToArray()) + "  ·  cliquez sur + dans « Amis en ligne »", C.Jade, 7000);
 						}
 						if (pAccueil != null)
 						{
@@ -5468,8 +5468,8 @@ internal partial class Fenetre : Form
 		int num4 = (r.Bottom - 8 - num3) / 46;
 		if (list.Count == 0)
 		{
-			string t = ((!Social.Connecte) ? "Ajoute tes amis TPS Groupe" : ((Social.Amis.Count == 0) ? "Pas encore d'amis" : "Aucun ami en ligne"));
-			string t2 = ((!Social.Connecte || Social.Amis.Count == 0) ? "Clique sur + pour en ajouter" : (Social.Amis.Count + ((Social.Amis.Count > 1) ? " amis hors ligne" : " ami hors ligne")));
+			string t = ((!Social.Connecte) ? "Ajoutez vos amis TPS Groupe" : ((Social.Amis.Count == 0) ? "Pas encore d'amis" : "Aucun ami en ligne"));
+			string t2 = ((!Social.Connecte || Social.Amis.Count == 0) ? "Cliquez sur + pour en ajouter" : (Social.Amis.Count + ((Social.Amis.Count > 1) ? " amis hors ligne" : " ami hors ligne")));
 			Lang.DrawText(g, t, fAmN, new Rectangle(r.X + Zx.P(10), num3 + Zx.P(14), r.Width - Zx.P(20), Zx.P(20)), Color.FromArgb(200, 208, 228), TextFormatFlags.HorizontalCenter | TextFormatFlags.NoPadding);
 			Lang.DrawText(g, t2, fAmS, new Rectangle(r.X + Zx.P(10), num3 + Zx.P(36), r.Width - Zx.P(20), Zx.P(18)), C.Gris, TextFormatFlags.HorizontalCenter | TextFormatFlags.NoPadding);
 		}
@@ -6737,7 +6737,7 @@ internal partial class Fenetre : Form
 					}
 				}
 				string jid = item4;
-				list.Add(NouvelleDiapo("Jeu", Color.FromArgb(40, 150, 210), NomJeu(item4), SousJeu(item4), num3 + ((num3 > 1) ? " cartes disponibles" : " carte disponible") + "  ·  " + num4 + ((num4 > 1) ? " installées" : " installée"), CouvertureJeu(item4), "Ouvrir la bibliothèque", delegate
+				list.Add(NouvelleDiapo("Jeu", Color.FromArgb(40, 150, 210), NomJeu(item4), SousJeu(item4), num3 + ((num3 > 1) ? " mods disponibles" : " mod disponible") + "  ·  " + num4 + ((num4 > 1) ? " installés" : " installé"), CouvertureJeu(item4), "Ouvrir la bibliothèque", delegate
 				{
 					jeuId = jid;
 					Config.Ecrire("jeu", jid);
@@ -6773,7 +6773,7 @@ internal partial class Fenetre : Form
 		}
 		if (list.Count == 0)
 		{
-			list.Add(NouvelleDiapo("Bienvenue", C.Jade, "Bienvenue sur TPS Groupe", "Tous nos projets, mods et jeux réunis dans un seul lanceur.", "", null, "Jouer", delegate
+			list.Add(NouvelleDiapo("Bienvenue", C.Jade, "Bienvenue sur TPS Groupe", "Tous nos mods et jeux réunis dans un seul lanceur.", "", null, "Jouer", delegate
 			{
 				ShowVue(Vue.Jeux);
 			}));
@@ -7152,7 +7152,7 @@ internal partial class Fenetre : Form
 		}
 		else if (!flag)
 		{
-			text2 = ((lecteur.Length > 0) ? (lecteur + "  ·  en pause") : ("Musique  ·  ouvrir " + ((mode == "apple") ? "Apple Music" : ((mode == "spotify") ? "Spotify" : "ton lecteur"))));
+			text2 = ((lecteur.Length > 0) ? (lecteur + "  ·  en pause") : ("Musique  ·  ouvrir " + ((mode == "apple") ? "Apple Music" : ((mode == "spotify") ? "Spotify" : "votre lecteur"))));
 		}
 		if (lecteur == "Lecteur web")
 		{
@@ -7335,7 +7335,7 @@ internal partial class Fenetre : Form
 			bSuivre.Plein = flag;
 			bSuivre.Couleur = C.Jade;
 			bSuivre.Invalidate();
-			bulle.SetToolTip(bSuivre, flag ? "Suivi : vous serez prévenu (mises à jour, sortie). Cliquer pour ne plus suivre." : "Être prévenu des mises à jour et de la sortie de ce contenu");
+			bulle.SetToolTip(bSuivre, flag ? "Suivi : vous serez prévenu (mises à jour, sortie). Cliquez pour ne plus suivre." : "Être prévenu des mises à jour et de la sortie de ce mod");
 		}
 	}
 
@@ -8000,7 +8000,7 @@ internal partial class Fenetre : Form
 
 	private void Quitter()
 	{
-		if (!occupe || MessageBox.Show(this, "Une installation est en cours : la fermer maintenant l'interrompt.\n\nQuitter quand même ?", Text, MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation) == DialogResult.Yes)
+		if (!occupe || MessageBox.Show(this, "Une installation est en cours : fermer le lanceur maintenant l'interrompra.\n\nQuitter quand même ?", Text, MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation) == DialogResult.Yes)
 		{
 			quitterVraiment = true;
 			Close();
@@ -8032,7 +8032,7 @@ internal partial class Fenetre : Form
 			Config.Ecrire("zone_info_vue", "1");
 			try
 			{
-				icone.ShowBalloonTip(6000, Lang.T("TPS Groupe reste ouvert"), Lang.T("Il continue dans la zone de notification, près de l'horloge : clique sur l'icône pour la musique et « Ouvrir le lanceur », ou « Quitter » pour le fermer."), ToolTipIcon.Info);
+				icone.ShowBalloonTip(6000, Lang.T("TPS Groupe reste ouvert"), Lang.T("Il continue dans la zone de notification, près de l'horloge : cliquez sur l'icône pour la musique et « Ouvrir le lanceur », ou « Quitter » pour le fermer."), ToolTipIcon.Info);
 			}
 			catch
 			{
@@ -8269,7 +8269,7 @@ internal partial class Fenetre : Form
 			tuile.Sous = SousJeu(item2);
 			tuile.Img = ((item2 == "omsi2" && cat != null && cat.JeuOmsi != null && ValJeu("omsi2", "image").Length > 0) ? (CouvertureWeb(cat.JeuOmsi) ?? CouvertureJeu(item2)) : CouvertureJeu(item2));
 			tuile.Glyphe = "\ue7fc";
-			tuile.Badge = num + ((num > 1) ? " cartes" : " carte") + "  ·  " + num2 + ((num2 > 1) ? " installées" : " installée");
+			tuile.Badge = num + ((num > 1) ? " mods" : " mod") + "  ·  " + num2 + ((num2 > 1) ? " installés" : " installé");
 			tuile.BadgeCouleur = ((num2 > 0) ? C.Vert : C.Gris);
 			tuile.Choisie = item2 == jeuId;
 			string jid2 = item2;
@@ -8282,7 +8282,7 @@ internal partial class Fenetre : Form
 			};
 			if (item2 == "omsi2")
 			{
-				tuile.Coin = "Paramètres";
+				tuile.Coin = "Réglages";
 				tuile.ClicCoin += delegate
 				{
 					ChoisirDossiers();
@@ -8311,14 +8311,14 @@ internal partial class Fenetre : Form
 				tuile2.Img = CouvertureWeb(i);
 				if (text == "bientot")
 				{
-					tuile2.Badge = (estAdmin ? "Prochainement  ·  aperçu admin" : "Prochainement");
+					tuile2.Badge = (estAdmin ? "Prochainement  ·  aperçu administrateur" : "Prochainement");
 					tuile2.BadgeCouleur = C.Orange;
 					tuile2.Prix = "BIENTÔT";
 					tuile2.PrixCouleur = C.Orange;
 				}
 				else if (text == "masque")
 				{
-					tuile2.Badge = "Masqué  ·  visible par les admins";
+					tuile2.Badge = "Masqué  ·  visible par les administrateurs";
 					tuile2.BadgeCouleur = C.Gris;
 				}
 				else
@@ -8629,7 +8629,7 @@ internal partial class Fenetre : Form
 		bChangerJeu.Font = Integre.fNav;
 		bChangerJeu.Size = new Size(Zx.P(48), Zx.P(48));
 		bulle.SetToolTip(bChangerJeu, "Choix du jeu (Échap)");
-		bChemins = Petit("⚙  Chemins du jeu", delegate
+		bChemins = Petit("⚙  Dossiers du jeu", delegate
 		{
 			Dictionary<string, string> dictionary = JeuWebCourant();
 			if (dictionary != null)
@@ -8657,7 +8657,7 @@ internal partial class Fenetre : Form
 			RemplirBiblio();
 		};
 		fTous = Filtre("Toutes", 0);
-		fInst = Filtre("Installées", 1);
+		fInst = Filtre("Installés", 1);
 		fMaj = Filtre("Mises à jour", 2);
 		bPhotosJeu = Petit("▣  Photos", delegate
 		{
@@ -8926,11 +8926,11 @@ internal partial class Fenetre : Form
 		}
 		else
 		{
-			bChemins.Text = "⚙  Chemins du jeu";
+			bChemins.Text = "⚙  Dossiers du jeu";
 			bChemins.Plein = false;
 			bChemins.Couleur = C.Orange;
 			bChemins.Size = new Size(Zx.P(170), Zx.P(34));
-			txtVide = ((tuilesB.Count > 0) ? "" : ((num == 0) ? "Aucune carte pour ce jeu (catalogue introuvable ou vide)." : "Aucune carte ne correspond à ces critères."));
+			txtVide = ((tuilesB.Count > 0) ? "" : ((num == 0) ? "Aucun mod pour ce jeu (catalogue introuvable ou vide)." : "Aucun mod ne correspond à ces critères."));
 		}
 		DisposerBiblio();
 	}
@@ -9547,7 +9547,7 @@ internal partial class Fenetre : Form
 		{
 			Label label = L(new Font("Segoe UI", Zx.P(9.5f)), C.Gris, auto: false);
 			label.BackColor = C.Cote;
-			label.Text = "Aucun projet (catalogue introuvable).";
+			label.Text = "Aucun mod (catalogue introuvable).";
 			label.Location = new Point(Zx.P(20), Zx.P(4));
 			label.Size = new Size(Zx.P(220), Zx.P(60));
 			liste.Controls.Add(label);
@@ -9662,7 +9662,7 @@ internal partial class Fenetre : Form
 			bAction.Couleur = C.Orange;
 			bAction.Enabled = !occupe && LienOk(sel.LienAchat);
 			bAction.Invalidate();
-			lEtat.Text = (LienOk(sel.LienAchat) ? "Contenu payant. Achetez-le, puis entrez votre code d'accès pour l'installer." : "Contenu payant : la page d'achat n'est pas encore disponible.");
+			lEtat.Text = (LienOk(sel.LienAchat) ? "Mod payant. Achetez-le, puis saisissez votre code d'accès pour l'installer." : "Mod payant : la page d'achat n'est pas encore disponible.");
 		}
 		bCode.Visible = modeAchat;
 		if (modeAchat != flag2)
@@ -9891,7 +9891,7 @@ internal partial class Fenetre : Form
 		string omsi = Omsi.DetecteOmsi();
 		if (p.Payant && !p.Debloque && Omsi.Installee(p, omsi) == null)
 		{
-			MessageBox.Show(this, "Ce contenu est payant : achetez-le, puis entrez votre code d'accès.", Text);
+			MessageBox.Show(this, "Ce mod est payant : achetez-le, puis saisissez votre code d'accès.", Text);
 			return;
 		}
 		if (omsi == null)
@@ -9962,7 +9962,7 @@ internal partial class Fenetre : Form
 				long availableFreeSpace2 = new DriveInfo(Path.GetPathRoot(omsi)).AvailableFreeSpace;
 				if (availableFreeSpace < p.Taille + 209715200 || availableFreeSpace2 < p.Taille * 2)
 				{
-					lAlerte.Text = "Pas assez de place disque pour " + p.Nom + " : il faut environ " + (p.Taille * 2 / 1073741824 + 1) + " Go libres sur le disque d'OMSI 2.";
+					lAlerte.Text = "Pas assez d'espace disque pour " + p.Nom + " : il faut environ " + (p.Taille * 2 / 1073741824 + 1) + " Go libres sur le disque d'OMSI 2.";
 					lAlerte.ForeColor = C.Rouge;
 					lAlerte.Visible = true;
 					return;
@@ -10820,7 +10820,7 @@ internal partial class Fenetre : Form
 					form = new FenDossiers("Exemple de message");
 					break;
 				case "message":
-					form = new FenMessage("Supprimer le profil « Evens » ?\n\nSon historique de jeu, sa photo et sa bannière sont perdus. Vos projets installés ne sont pas touchés.", "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+					form = new FenMessage("Supprimer le profil « Evens » ?\n\nSon historique de jeu, sa photo et sa bannière sont perdus. Vos mods installés ne sont pas touchés.", "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 					break;
 				case "communaute":
 					form = new FenCommunaute(new Dictionary<string, string>());
@@ -10831,7 +10831,7 @@ internal partial class Fenetre : Form
 					Dictionary<string, string> dictionary = new Dictionary<string, string>();
 					dictionary["id"] = "masterplan";
 					dictionary["nom"] = "MasterPlan";
-					dictionary["sous_titre"] = "City Transport Master · bâtis ton empire du transport";
+					dictionary["sous_titre"] = "City Transport Master · bâtissez votre empire du transport";
 					dictionary["url"] = "http://citytransportmaster.fr/";
 					dictionary["image"] = "http://citytransportmaster.fr/logo.png";
 					dictionary["statut"] = "bientot";

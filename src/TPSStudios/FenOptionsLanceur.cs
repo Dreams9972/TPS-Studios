@@ -150,7 +150,7 @@ internal class FenOptionsLanceur : Form
 					fenOptionsLanceur.BeginInvoke((MethodInvoker)delegate
 					{
 						lWh.ForeColor = ((b == true) ? C.Vert : C.Gris);
-						lWh.Text = ((b == true) ? "✔  Tickets actifs : ils arrivent dans ton salon Discord." : ((b == false) ? "Aucun salon réglé : le bouton Support affiche « pas encore configuré »." : "État inconnu (serveur ou clé administrateur absents)."));
+						lWh.Text = ((b == true) ? "✔  Tickets actifs : ils arrivent dans votre salon Discord." : ((b == false) ? "Aucun salon réglé : le bouton Support affiche « pas encore configuré »." : "État inconnu (serveur ou clé administrateur absents)."));
 					});
 				}
 				catch

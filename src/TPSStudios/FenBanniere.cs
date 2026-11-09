@@ -415,7 +415,7 @@ internal class FenBanniere : Form
 		};
 		Label value3 = new Label
 		{
-			Text = "Format conseillé : image large (par exemple 1600×400). Elle est recadrée au format de la bannière ; zoom et position servent à choisir la partie visible. L'image reste sur ce PC.",
+			Text = "Format conseillé : image large (ex. 1600×400). Elle est recadrée au format de la bannière ; zoom et position servent à choisir la partie visible. L'image reste sur ce PC.",
 			Font = new Font("Segoe UI", Zx.P(9.5f)),
 			ForeColor = C.Gris,
 			BackColor = C.Carte,

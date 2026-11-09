@@ -28,7 +28,7 @@ internal class FenChoixOmsi : Form
 		base.Controls.Add(value);
 		Label value2 = new Label
 		{
-			Text = "Comment veux-tu lancer le jeu ?",
+			Text = "Comment voulez-vous lancer le jeu ?",
 			Font = new Font("Segoe UI", Zx.P(9.5f)),
 			ForeColor = C.Gris,
 			BackColor = C.Fond,
@@ -51,7 +51,7 @@ internal class FenChoixOmsi : Form
 		base.Controls.Add(bouton);
 		Label value4 = new Label
 		{
-			Text = (openPresent ? "Plugins de cabine (écran, prise de service) et réglages du lanceur." : "openOMSI n'est pas installé ou introuvable."),
+			Text = (openPresent ? "Plugins de cabine (écran, prise de service) et réglages du lanceur." : "openOMSI n'est pas installé ou est introuvable."),
 			Font = new Font("Segoe UI", Zx.P(9f)),
 			ForeColor = C.Gris,
 			BackColor = C.Fond,

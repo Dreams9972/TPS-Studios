@@ -405,8 +405,8 @@ internal class FenCompte : Form, IPage
 		pages[0].Controls.Add(cadre);
 		int num6 = (num5 - 48 - 16) / 2;
 		tPseudo = ChampBloc(cadre, "Pseudo", Zx.P(24), Zx.P(44), num6, Zx.P(36), multi: false, 20, a.Pseudo);
-		tStatut = ChampBloc(cadre, "Statut (60 caractères max)", Zx.P(24) + num6 + Zx.P(16), Zx.P(44), num6, Zx.P(36), multi: false, 60, a.Statut);
-		tBio = ChampBloc(cadre, "Bio (240 caractères max)", Zx.P(24), Zx.P(112), num5 - Zx.P(48), Zx.P(90), multi: true, 240, a.Bio);
+		tStatut = ChampBloc(cadre, "Statut (60 caractères maximum)", Zx.P(24) + num6 + Zx.P(16), Zx.P(44), num6, Zx.P(36), multi: false, 60, a.Statut);
+		tBio = ChampBloc(cadre, "Bio (240 caractères maximum)", Zx.P(24), Zx.P(112), num5 - Zx.P(48), Zx.P(90), multi: true, 240, a.Bio);
 		tJeu = ChampBloc(cadre, "Carte ou jeu favori", Zx.P(24), Zx.P(238), num6, Zx.P(36), multi: false, 40, a.JeuFavori);
 		tLieu = ChampBloc(cadre, "Lieu (facultatif)", Zx.P(24) + num6 + Zx.P(16), Zx.P(238), num6, Zx.P(36), multi: false, 40, a.Lieu);
 		Etiq(cadre, "Photo de profil", Zx.P(24), Zx.P(306));
@@ -589,7 +589,7 @@ internal class FenCompte : Form, IPage
 				lErr.Text = "Importez d'abord une photo de profil : ses couleurs seront appliquées automatiquement.";
 			}
 		};
-		Etiq(cadre3, "Couleurs de votre photo (cliquer pour choisir)", Zx.P(24), Zx.P(112));
+		Etiq(cadre3, "Couleurs de votre photo (cliquez pour choisir)", Zx.P(24), Zx.P(112));
 		rcPhoto = new RangeeCouleurs();
 		rcPhoto.Location = new Point(Zx.P(24), Zx.P(134));
 		rcPhoto.Size = new Size(width, Zx.P(40));
@@ -711,7 +711,7 @@ internal class FenCompte : Form, IPage
 			if (lb.SelectedIndex >= 0)
 			{
 				Compte compte = Comptes.Tous[lb.SelectedIndex];
-				if (MessageBox.Show(this, "Supprimer le profil « " + compte.Pseudo + " » ?\n\nSon historique de jeu, sa photo et sa bannière sont perdus. Vos projets installés ne sont pas touchés.", Text, MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+				if (MessageBox.Show(this, "Supprimer le profil « " + compte.Pseudo + " » ?\n\nSon historique de jeu, sa photo et sa bannière sont perdus. Vos mods installés ne sont pas touchés.", Text, MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
 				{
 					Comptes.RetirerAvatar(compte);
 					Comptes.RetirerBanniereImage(compte);
@@ -1078,7 +1078,7 @@ internal class FenCompte : Form, IPage
 			}
 			Deco.Forcer(g, new Rectangle(Zx.P(34), Zx.P(40), Zx.P(60), Zx.P(60)), "couronne", temps);
 			Lang.DrawText(g, Social.Vip ? "Membre VIP  ✔" : "TPS VIP  ·  5 € à vie", new Font("Segoe UI Semibold", Zx.P(16f)), new Point(Zx.P(118), Zx.P(26)), Color.FromArgb(255, 232, 170));
-			string t = ((!Social.Actif) ? "Le serveur TPS n'est pas encore configuré." : (Social.Vip ? (Social.Points.ToString("N0", CultureInfo.GetCultureInfo("fr-FR")) + " points VIP  ·  " + (Social.BonusPris ? "bonus du jour récupéré ✔" : "bonus du jour au prochain démarrage")) : "Soutiens TPS Groupe et profite d'avantages exclusifs, sur tous les profils de ce PC."));
+			string t = ((!Social.Actif) ? "Le serveur TPS n'est pas encore configuré." : (Social.Vip ? (Social.Points.ToString("N0", CultureInfo.GetCultureInfo("fr-FR")) + " points VIP  ·  " + (Social.BonusPris ? "bonus du jour récupéré ✔" : "bonus du jour au prochain démarrage")) : "Soutenez TPS Groupe et profitez d'avantages exclusifs, sur tous les profils de ce PC."));
 			Lang.DrawText(g, t, new Font("Segoe UI", Zx.P(10f)), new Rectangle(Zx.P(118), Zx.P(66), w - Zx.P(140), Zx.P(44)), Color.FromArgb(240, 230, 210), TextFormatFlags.WordBreak | TextFormatFlags.NoPadding);
 		};
 		int y = Zx.P(156);
@@ -1088,7 +1088,7 @@ internal class FenCompte : Form, IPage
 		}
 		if (!Social.Vip)
 		{
-			string[] array = new string[7] { "Badge VIP doré sur ton profil et à côté de tes commentaires", "2 bannières animées exclusives : « Or VIP » et « Prestige TPS »", "Accès anticipé aux nouveaux mods et versions de test réservées aux testeurs VIP", "Points VIP : +50 par jour, +10 par mod aimé, +5 par commentaire (3 par jour)", "Boutique : dépense tes points en cosmétiques (couronne, flammes, bannières) et en DLC", "Rôle VIP sur le Discord TPS Groupe", "+200 points de bienvenue" };
+			string[] array = new string[7] { "Badge VIP doré sur votre profil et à côté de vos commentaires", "2 bannières animées exclusives : « Or VIP » et « Prestige TPS »", "Accès anticipé aux nouveaux mods et versions de test réservées aux testeurs VIP", "Points VIP : +50 par jour, +10 par mod aimé, +5 par commentaire (3 par jour)", "Boutique : dépensez vos points en cosmétiques (couronne, flammes, bannières) et en DLC", "Rôle VIP sur le Discord TPS Groupe", "+200 points de bienvenue" };
 			Cadre cadre = new Cadre();
 			cadre.Titre = "Avantages VIP";
 			cadre.Location = new Point(0, y);
@@ -1134,7 +1134,7 @@ internal class FenCompte : Form, IPage
 				lErr.Text = "Le lien d'achat VIP n'est pas encore configuré par TPS Groupe.";
 			};
 			Label label2 = new Label();
-			label2.Text = "Après le paiement, TPS Groupe t'envoie un code VIP personnel, utilisable une seule fois.";
+			label2.Text = "Après le paiement, TPS Groupe vous envoie un code VIP personnel, utilisable une seule fois.";
 			label2.Font = new Font("Segoe UI", Zx.P(9f));
 			label2.ForeColor = C.Gris;
 			label2.BackColor = C.Carte;
@@ -1241,7 +1241,7 @@ internal class FenCompte : Form, IPage
 		label4.Location = new Point(Zx.P(26), Zx.P(90));
 		label4.AutoSize = true;
 		cadre3.Controls.Add(label4);
-		Bouton bouton2 = new Bouton("Ouvrir la boutique");
+		Bouton bouton2 = new Bouton("Ouvrir la Boutique");
 		bouton2.Couleur = C.Or;
 		bouton2.Size = new Size(Zx.P(200), Zx.P(40));
 		bouton2.Location = new Point(num - Zx.P(24) - Zx.P(200), Zx.P(46));
@@ -1270,7 +1270,7 @@ internal class FenCompte : Form, IPage
 		cadre4.Size = new Size(num, Zx.P(150));
 		pg.Controls.Add(cadre4);
 		Label label5 = new Label();
-		label5.Text = "Rejoins le Discord TPS Groupe et envoie ton identifiant VIP dans le salon #vip : l'équipe le vérifie et te donne le rôle VIP.";
+		label5.Text = "Rejoignez le Discord TPS Groupe et envoyez votre identifiant VIP dans le salon #vip : l'équipe le vérifie et vous donne le rôle VIP.";
 		label5.Font = new Font("Segoe UI", Zx.P(9.5f));
 		label5.ForeColor = Color.FromArgb(242, 228, 196);
 		label5.BackColor = C.Carte;
@@ -1296,7 +1296,7 @@ internal class FenCompte : Form, IPage
 			{
 				Clipboard.SetText(Social.MonId);
 				lErr.ForeColor = C.Vert;
-				lErr.Text = "✔  Identifiant VIP copié : colle-le dans le salon #vip du Discord.";
+				lErr.Text = "✔  Identifiant VIP copié : collez-le dans le salon #vip du Discord.";
 			}
 			catch
 			{

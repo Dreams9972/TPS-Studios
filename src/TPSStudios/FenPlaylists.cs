@@ -46,7 +46,7 @@ internal class FenPlaylists : Form
 		base.Controls.Add(value);
 		Label value2 = new Label
 		{
-			Text = "Ajoute une fois tes playlists Spotify ou Apple Music : tu les lances ensuite d'un clic depuis la pilule de l'accueil.\nLien : Spotify › clic droit sur la playlist › Partager › Copier le lien  ·  Apple Music › ··· › Partager › Copier le lien.",
+			Text = "Ajoutez une fois vos playlists Spotify ou Apple Music : vous les lancez ensuite d'un clic depuis la pilule de l'accueil.\nLien : Spotify › clic droit sur la playlist › Partager › Copier le lien  ·  Apple Music › ··· › Partager › Copier le lien.",
 			Font = new Font("Segoe UI", Zx.P(9f)),
 			ForeColor = C.Gris,
 			BackColor = C.Fond,
@@ -90,7 +90,7 @@ internal class FenPlaylists : Form
 			if (!Musique.LienValide(text2))
 			{
 				lErr.ForeColor = C.Rouge;
-				lErr.Text = "Lien invalide : colle un lien de partage Spotify (open.spotify.com) ou Apple Music (music.apple.com).";
+				lErr.Text = "Lien invalide : collez un lien de partage Spotify (open.spotify.com) ou Apple Music (music.apple.com).";
 			}
 			else
 			{

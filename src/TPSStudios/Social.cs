@@ -467,13 +467,13 @@ internal static class Social
 		}
 		if (!CleAdminPresente)
 		{
-			return "clé administrateur absente sur ce PC : clique sur « Importer la clé »";
+			return "clé administrateur absente sur ce PC : cliquez sur « Importer la clé »";
 		}
 		int statut;
 		Dictionary<string, object> r = Appel("PUT", "/v1/admin/reglages", new Dictionary<string, object> { { "webhook_support", url } }, auth: false, out statut);
 		return statut switch
 		{
-			403 => "clé administrateur refusée : clique sur « Importer la clé » et choisis le fichier cle-admin.txt du serveur", 
+			403 => "clé administrateur refusée : cliquez sur « Importer la clé » et choisissez le fichier cle-admin.txt du serveur", 
 			200 => null, 
 			_ => Msg(r, "refusé par le serveur (" + statut + ")"), 
 		};

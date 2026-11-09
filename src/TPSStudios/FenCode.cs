@@ -41,7 +41,7 @@ internal class FenCode : Form
 		base.Controls.Add(value2);
 		Label value3 = new Label
 		{
-			Text = "Entrez le code reçu après l'achat de « " + p.Nom + " » pour débloquer son installation. Il vous a été remis avec votre achat.",
+			Text = "Saisissez le code reçu après l'achat de « " + p.Nom + " » pour débloquer son installation. Il vous a été remis avec votre achat.",
 			Font = Font,
 			ForeColor = Color.FromArgb(205, 214, 228),
 			BackColor = C.Fond,
@@ -94,7 +94,7 @@ internal class FenCode : Form
 	{
 		if (!p.CodeValide(tCode.Text))
 		{
-			lErr.Text = ((p.AccesSha.Length == 0) ? "Aucun code n'est défini pour ce contenu : contactez TPS Groupe." : "Code incorrect.");
+			lErr.Text = ((p.AccesSha.Length == 0) ? "Aucun code n'est défini pour ce mod : contactez TPS Groupe." : "Code incorrect.");
 			return;
 		}
 		Config.Ecrire("acces_" + p.Id, "1");
