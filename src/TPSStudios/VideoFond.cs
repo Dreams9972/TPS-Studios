@@ -184,6 +184,14 @@ internal class VideoFond : Panel
 		if (bPause != null && bSon != null)
 		{
 			bPause.Location = new Point(bSon.Left - bPause.Width - Zx.P(8), bSon.Top);
+			foreach (Bouton b in new Bouton[2] { bSon, bPause })
+			{
+				if (b.Region == null)
+				{
+					using System.Drawing.Drawing2D.GraphicsPath gp = Bouton.Rond(new Rectangle(0, 0, b.Width, b.Height), Math.Max(Zx.P(4), Math.Min(Zx.P(10), b.Height / 3)) + 1);
+					b.Region = new Region(gp);
+				}
+			}
 		}
 	}
 
@@ -223,7 +231,10 @@ internal class VideoFond : Panel
 		{
 		}
 		string text = YouTube.Id(url);
-		modeWeb = text != null;
+		bool mp4Web = text == null && url.Length > 0 && WebView2Embarque.Possible && !url.ToLowerInvariant().Split('?')[0].EndsWith(".wmv");
+		modeWeb = text != null || mp4Web;
+		bSon.Visible = !modeWeb;
+		bPause.Visible = !modeWeb;
 		if (modeWeb)
 		{
 			try
@@ -234,7 +245,14 @@ internal class VideoFond : Panel
 				}
 				web.Visible = true;
 				WebMuet(muet);
-				WebCharger(text);
+				if (mp4Web)
+				{
+					WebChargerMp4(url);
+				}
+				else
+				{
+					WebCharger(text);
+				}
 			}
 			catch (Exception e)
 			{
@@ -276,6 +294,16 @@ internal class VideoFond : Panel
 		{
 			Abandonner();
 		};
+		lecteurWeb.PauseDemandee += delegate(bool p)
+		{
+			enPause = p;
+			MajPause();
+		};
+		lecteurWeb.MuetDemande += delegate(bool m)
+		{
+			muet = m;
+			bSon.Text = (muet ? "\ue74f" : "\ue767");
+		};
 		web = lecteurWeb;
 		base.Controls.Add(web);
 		bSon.BringToFront();
@@ -286,6 +314,12 @@ internal class VideoFond : Panel
 	private void WebCharger(string id)
 	{
 		((LecteurWeb)web).Charger(id);
+	}
+
+	[System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+	private void WebChargerMp4(string u)
+	{
+		((LecteurWeb)web).ChargerMp4(u);
 	}
 
 	[System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]

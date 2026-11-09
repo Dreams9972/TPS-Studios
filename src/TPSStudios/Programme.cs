@@ -136,6 +136,7 @@ internal static class Programme
 	private static int Main(string[] args)
 	{
 		WebView2Embarque.Init();
+		Theme.ModeSombre();
 		Application.EnableVisualStyles();
 		Application.SetCompatibleTextRenderingDefault(defaultValue: false);
 		Zx.Init();
