@@ -112,7 +112,7 @@ internal partial class Fenetre
 			return;
 		}
 		videoB.Charger(VideoDuJeu());
-		videoB.Bounds = new Rectangle(rPageG.X + 1, rPageG.Y + 1, rPageG.Width - 2, HauteurHero() - 2);
+		videoB.Bounds = new Rectangle(rPageG.X, rPageG.Y, rPageG.Width, HauteurHero());
 		videoB.Afficher(m: true);
 		videoB.BringToFront();
 	}

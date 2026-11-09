@@ -2414,8 +2414,12 @@ internal class FenAdmin : Form, IPage
 		pageReglages.Section("Bandeau d'alerte");
 		pageReglages.Texte("alerte", "Message en haut de l'accueil (vide = aucun bandeau)", "ex. Maintenance du serveur ce soir de 22 h à 23 h", 140);
 		pageReglages.Choix("alerte_type", "Couleur du bandeau", new string[3] { "Information", "Avertissement", "Important" }, new string[3] { "information", "avertissement", "important" });
+		pageReglages.Section("Site web");
+		pageReglages.Note("La grande case « Actualités » de l'accueil affiche les articles du site ; un clic ouvre le site.");
+		pageReglages.Texte("site", "Adresse du site TPS Groupe", "https://…", 300);
+		pageReglages.Texte("site_flux", "Flux des actualités du site (RSS, Atom ou JSON)", "ex. https://…/feed.xml ou https://…/actualites.json", 300);
 		pageReglages.Section("Annonces de l'équipe");
-		pageReglages.Note("Une annonce par ligne : « Titre | texte ». Elles s'affichent en premier dans « Informations ».");
+		pageReglages.Note("Une annonce par ligne : « Titre | texte ». Elles s'affichent dans la case « Actualités », après les articles du site.");
 		pageReglages.Texte("annonces", "Annonces", "Tournoi ParisView samedi | Rendez-vous sur le Discord à 20 h", 1500, multi: true, 160);
 		pageReglages.Section("Thèmes des fêtes");
 		pageReglages.Choix("themes", "Décors de l'accueil (Noël, Halloween, Carnaval…)", new string[2] { "Selon le calendrier", "Désactivés pour tous" }, new string[2] { "", "off" });
