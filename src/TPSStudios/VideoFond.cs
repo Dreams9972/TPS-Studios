@@ -29,7 +29,10 @@ internal class VideoFond : Panel
 
 	private bool joue;
 
-	private bool muet = true;
+	/// <summary>Volume des bandes-annonces : 5 %, son activé au départ (bouton pour couper).</summary>
+	public const int Volume = 5;
+
+	private bool muet;
 
 	private bool abandon;
 
@@ -75,7 +78,7 @@ internal class VideoFond : Panel
 			Journal.Une("video-fond", e);
 			wmp = null;
 		}
-		bSon = new Bouton("");
+		bSon = new Bouton("");
 		bSon.Plein = false;
 		bSon.Font = new Font("Segoe MDL2 Assets", Zx.P(12f));
 		bSon.Size = new Size(Zx.P(42), Zx.P(42));
@@ -353,7 +356,7 @@ internal class VideoFond : Panel
 				object obj2 = LecteurWmp.Lire(obj, "settings");
 				LecteurWmp.Fixer(obj2, "autoStart", true);
 				LecteurWmp.Fixer(obj2, "mute", muet);
-				LecteurWmp.Fixer(obj2, "volume", 70);
+				LecteurWmp.Fixer(obj2, "volume", Volume);
 				try
 				{
 					obj2.GetType().InvokeMember("setMode", System.Reflection.BindingFlags.InvokeMethod, null, obj2, new object[2] { "loop", true });

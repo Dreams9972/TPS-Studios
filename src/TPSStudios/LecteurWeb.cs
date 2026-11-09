@@ -24,7 +24,7 @@ internal class LecteurWeb : Panel
 
 	private string id;
 
-	private bool muet = true;
+	private bool muet;
 
 	private bool joue = true;
 
@@ -153,7 +153,7 @@ internal class LecteurWeb : Panel
 
 	private static string Page()
 	{
-		return "<!doctype html><html><head><meta charset=\"utf-8\"><meta name=\"referrer\" content=\"strict-origin-when-cross-origin\">" + "<style>html,body{margin:0;height:100%;background:#000;overflow:hidden}iframe{position:absolute;border:0;pointer-events:none}</style></head>" + "<body><iframe id=\"v\" allow=\"autoplay; encrypted-media; picture-in-picture\" referrerpolicy=\"strict-origin-when-cross-origin\"></iframe><script>" + "var id=new URLSearchParams(location.search).get('v')||'';var f=document.getElementById('v');" + "f.src='https://www.youtube-nocookie.com/embed/'+encodeURIComponent(id)+'?autoplay=1&mute=0&controls=0&loop=1&playlist='+encodeURIComponent(id)+'&modestbranding=1&rel=0&playsinline=1&iv_load_policy=3&disablekb=1&fs=0&enablejsapi=1&origin='+encodeURIComponent(location.origin);" + "function taille(){var w=innerWidth,h=innerHeight,W=Math.max(w,h*16/9),H=W*9/16;f.style.width=W+'px';f.style.height=H+'px';f.style.left=((w-W)/2)+'px';f.style.top=((h-H)/2)+'px';}" + "addEventListener('resize',taille);taille();" + "function cmd(c){try{f.contentWindow.postMessage(JSON.stringify({event:'command',func:c,args:''}),'*');}catch(e){}}" + "</script></body></html>";
+		return "<!doctype html><html><head><meta charset=\"utf-8\"><meta name=\"referrer\" content=\"strict-origin-when-cross-origin\">" + "<style>html,body{margin:0;height:100%;background:#000;overflow:hidden}iframe{position:absolute;border:0;pointer-events:none}</style></head>" + "<body><iframe id=\"v\" allow=\"autoplay; encrypted-media; picture-in-picture\" referrerpolicy=\"strict-origin-when-cross-origin\"></iframe><script>" + "var id=new URLSearchParams(location.search).get('v')||'';var f=document.getElementById('v');" + "f.src='https://www.youtube-nocookie.com/embed/'+encodeURIComponent(id)+'?autoplay=1&mute=0&controls=0&loop=1&playlist='+encodeURIComponent(id)+'&modestbranding=1&rel=0&playsinline=1&iv_load_policy=3&disablekb=1&fs=0&enablejsapi=1&origin='+encodeURIComponent(location.origin);" + "function taille(){var w=innerWidth,h=innerHeight,W=Math.max(w,h*16/9),H=W*9/16;f.style.width=W+'px';f.style.height=H+'px';f.style.left=((w-W)/2)+'px';f.style.top=((h-H)/2)+'px';}" + "addEventListener('resize',taille);taille();" + "function cmd(c,a){try{f.contentWindow.postMessage(JSON.stringify({event:'command',func:c,args:(a===undefined?'':a)}),'*');}catch(e){}}" + "f.addEventListener('load',function(){try{f.contentWindow.postMessage(JSON.stringify({event:'listening',id:1}),'*');}catch(e){}});" + "setInterval(function(){cmd('setVolume',[" + VideoFond.Volume + "]);},700);" + "</script></body></html>";
 	}
 
 	protected override void Dispose(bool disposing)
