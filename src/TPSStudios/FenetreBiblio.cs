@@ -31,7 +31,7 @@ internal partial class Fenetre
 
 	private int triB;
 
-	private Bouton bFlecheMods;
+	private FlecheBord bFlecheMods;
 
 	private Segments sgTri;
 
@@ -77,9 +77,7 @@ internal partial class Fenetre
 
 	private void ConstruireOngletsBiblio()
 	{
-		bFlecheMods = new Bouton("›");
-		bFlecheMods.Plein = false;
-		bFlecheMods.Font = new Font("Segoe UI Semibold", Zx.P(20f));
+		bFlecheMods = new FlecheBord();
 		bFlecheMods.Size = new Size(Zx.P(30), Zx.P(110));
 		bFlecheMods.Click += delegate
 		{
@@ -205,7 +203,12 @@ internal partial class Fenetre
 	{
 		if (bFlecheMods != null)
 		{
-			int x = ((ongletB == 0) ? (pBiblio.ClientSize.Width - bFlecheMods.Width - Zx.P(6)) : Zx.P(5));
+			int num = pBiblio.ClientSize.Width;
+			if (pBiblio.AutoScrollMinSize.Height > pBiblio.ClientSize.Height)
+			{
+				num -= SystemInformation.VerticalScrollBarWidth;
+			}
+			int x = ((ongletB == 0) ? (num - bFlecheMods.Width - Zx.P(6)) : Zx.P(5));
 			bFlecheMods.Location = new Point(x, Math.Max(Zx.P(132), (pBiblio.ClientSize.Height - bFlecheMods.Height) / 2));
 			bFlecheMods.BringToFront();
 		}
@@ -270,7 +273,8 @@ internal partial class Fenetre
 			return;
 		}
 		bool page = ongletB == 0;
-		bFlecheMods.Text = (page ? "›" : "‹");
+		bFlecheMods.Droite = page;
+		bFlecheMods.Invalidate();
 		bulle.SetToolTip(bFlecheMods, page ? "Tous les mods du jeu" : "Retour à la bibliothèque");
 		PlacerFleche();
 		Control[] array = new Control[5] { tRecherche, fTous, fInst, fMaj, sgTri };
@@ -312,7 +316,7 @@ internal partial class Fenetre
 		int num2 = Zx.P(28);
 		int num3 = Math.Max(Zx.P(560), (int)((double)(width - 2 * num - num2) * 0.58));
 		rPageG = new Rectangle(num, y, num3, 0);
-		rPageD = new Rectangle(num + num3 + num2, y, Math.Max(Zx.P(360), width - 2 * num - num3 - num2), 0);
+		rPageD = new Rectangle(num + num3 + num2, y, Math.Max(Zx.P(360), (int)((double)(width - 2 * num - num3 - num2) * 0.82)), 0);
 		int num4 = HauteurHero();
 		int num5 = y + num4 + Zx.P(18);
 		bJouerJeu.Text = (web ? "▶  JOUER" : "▶  JOUER");
@@ -459,6 +463,7 @@ internal partial class Fenetre
 		if (pBiblio.AutoScrollMinSize.Height != height)
 		{
 			pBiblio.AutoScrollMinSize = new Size(0, height);
+			PlacerFleche();
 		}
 	}
 
@@ -629,7 +634,7 @@ internal partial class Fenetre
 		bool flag = JeuWebCourant() != null;
 		int num3 = Zx.P(96);
 		int num4 = Math.Max(1, installes.Count);
-		Rectangle rectangle = new Rectangle(num, num2, width, Zx.P(70) + num4 * num3 + Zx.P(14) + ((installes.Count == 0) ? Zx.P(60) : 0));
+		Rectangle rectangle = new Rectangle(num, num2, width, Math.Max(Zx.P(70) + num4 * num3 + Zx.P(14) + ((installes.Count == 0) ? Zx.P(60) : 0), pBiblio.ClientSize.Height - rPageD.Y - Zx.P(40)));
 		using (GraphicsPath graphicsPath = Bouton.Rond(rectangle, Zx.P(14)))
 		{
 			using (SolidBrush brush = new SolidBrush(Color.FromArgb(200, C.Carte)))
@@ -642,11 +647,6 @@ internal partial class Fenetre
 		Lang.DrawText(g, "Mes mods", fModNom, new Point(num + Zx.P(22), num2 + Zx.P(20)), C.Texte, TextFormatFlags.NoPadding);
 		int num5 = num + Zx.P(22) + Lang.MeasureText("Mes mods", fModNom).Width + Zx.P(10);
 		Lang.DrawText(g, installes.Count + ((installes.Count > 1) ? " installés" : " installé"), fModInfo, new Point(num5, num2 + Zx.P(23)), C.Gris, TextFormatFlags.NoPadding);
-		Rectangle rectangle2 = Pilule(g, "Tous les mods  →", rectangle.Right - Zx.P(18), num2 + Zx.P(14), C.Jade, plein: false);
-		Zone(rectangle2, delegate
-		{
-			BasculerMods(versMods: true);
-		}, "Ouvrir l'onglet Mods");
 		int num6 = num2 + Zx.P(66);
 		using (Pen pen2 = new Pen(C.Ligne))
 		{
