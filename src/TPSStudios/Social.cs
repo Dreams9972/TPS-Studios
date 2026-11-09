@@ -838,6 +838,8 @@ internal static class Social
 		comSocial.Vip = d.ContainsKey("vip") && Convert.ToBoolean(d["vip"]);
 		comSocial.Statut = (d.ContainsKey("statut") ? Convert.ToString(d["statut"]) : "");
 		comSocial.Cree = (d.ContainsKey("cree") ? Convert.ToInt64(d["cree"]) : 0);
+		comSocial.Likes = ((d.ContainsKey("likes") && d["likes"] != null) ? Convert.ToInt32(d["likes"]) : 0);
+		comSocial.Aime = d.ContainsKey("aime") && d["aime"] != null && Convert.ToBoolean(d["aime"]);
 		comSocial.Moi = (d.ContainsKey("moi") && Convert.ToBoolean(d["moi"])) || (Pseudo.Length > 0 && comSocial.Auteur == Pseudo);
 		return comSocial;
 	}
@@ -893,6 +895,23 @@ internal static class Social
 			comSocial.Moi = true;
 		}
 		return comSocial;
+	}
+
+	/// <summary>Aimer / ne plus aimer un commentaire (renvoie le nouveau nombre de J'aime).</summary>
+	public static int AimerCom(int id, out bool aime)
+	{
+		int st;
+		Dictionary<string, object> dictionary = AppelAuth("POST", "/v1/commentaires/" + id + "/aimer", new Dictionary<string, object>(), out st);
+		if (st == 404 && (dictionary == null || !dictionary.ContainsKey("erreur") || Convert.ToString(dictionary["erreur"]).IndexOf("commentaire") < 0))
+		{
+			throw new Exception("les J'aime sur les commentaires ne sont pas encore activés sur le serveur");
+		}
+		if (st != 200 || dictionary == null)
+		{
+			throw new Exception(Msg(dictionary, "échec"));
+		}
+		aime = Convert.ToBoolean(dictionary["aime"]);
+		return Convert.ToInt32(dictionary["likes"]);
 	}
 
 	public static void Supprimer(int id)

@@ -109,6 +109,12 @@ internal class FenAdmin : Form, IPage
 
 	private Segments sgCat;
 
+	private Segments sgJeuPage;
+
+	private string[] idsJeux = new string[1] { "omsi2" };
+
+	private string[] nomsJeux = new string[1] { "OMSI 2" };
+
 	private Segments sgStatut;
 
 	private Segments sgVip;
@@ -429,12 +435,27 @@ internal class FenAdmin : Form, IPage
 		tId = ChampDans(cdIdentite, "Identifiant (adresse interne, modifiable seulement à la création)", 0, Zx.P(300), multi: false, Zx.P(36));
 		tNom = ChampDans(cdIdentite, "Nom affiché", 1, num - Zx.P(40), multi: false, Zx.P(36));
 		tSous = ChampDans(cdIdentite, "Sous-titre (une ligne)", 2, num - Zx.P(40), multi: false, Zx.P(36));
-		cdClass = Bloc("Classement", ref num2, num, Zx.P(44) + Zx.P(66) + Zx.P(70) + Zx.P(6));
-		Etiq(cdClass, "Catégorie", Zx.P(24), Zx.P(44));
+		cdClass = Bloc("Classement", ref num2, num, Zx.P(44) + Zx.P(70) + Zx.P(66) + Zx.P(70) + Zx.P(6));
+		Etiq(cdClass, "Jeu", Zx.P(24), Zx.P(44));
+		sgJeuPage = new Segments();
+		sgJeuPage.Items = nomsJeux;
+		sgJeuPage.Etire = true;
+		sgJeuPage.Location = new Point(Zx.P(24), Zx.P(66));
+		sgJeuPage.Width = num - Zx.P(48);
+		sgJeuPage.Changed += delegate
+		{
+			if (!charge && cur != null)
+			{
+				MajCatsJeu(idsJeux[Math.Max(0, Math.Min(idsJeux.Length - 1, sgJeuPage.Index))], "");
+				Appliquer();
+			}
+		};
+		cdClass.Controls.Add(sgJeuPage);
+		Etiq(cdClass, "Catégorie (propre au jeu : se règle dans la fenêtre Jeux)", Zx.P(24), Zx.P(114));
 		sgCat = new Segments();
 		sgCat.Items = Categories.Noms;
 		sgCat.Etire = true;
-		sgCat.Location = new Point(Zx.P(24), Zx.P(66));
+		sgCat.Location = new Point(Zx.P(24), Zx.P(136));
 		sgCat.Width = num - Zx.P(48);
 		sgCat.Changed += delegate
 		{
@@ -442,16 +463,16 @@ internal class FenAdmin : Form, IPage
 		};
 		cdClass.Controls.Add(sgCat);
 		cUne = new Option("À la une", "Affichée en premier dans la bibliothèque.", val: false);
-		cUne.Location = new Point(Zx.P(14), Zx.P(118));
+		cUne.Location = new Point(Zx.P(14), Zx.P(188));
 		cUne.Width = (num - Zx.P(48)) / 2 + 40;
 		cUne.Changed += delegate
 		{
 			Appliquer();
 		};
 		cdClass.Controls.Add(cUne);
-		Etiq(cdClass, "Ordre (0 = automatique)", num - Zx.P(24) - Zx.P(150), Zx.P(124));
+		Etiq(cdClass, "Ordre (0 = automatique)", num - Zx.P(24) - Zx.P(150), Zx.P(194));
 		tOrdre = new Champ(multi: false, Zx.P(36));
-		tOrdre.Location = new Point(num - Zx.P(24) - Zx.P(150), Zx.P(146));
+		tOrdre.Location = new Point(num - Zx.P(24) - Zx.P(150), Zx.P(216));
 		tOrdre.Width = Zx.P(150);
 		tOrdre.TextChanged += delegate
 		{
@@ -1145,7 +1166,7 @@ internal class FenAdmin : Form, IPage
 			graphics.FillEllipse(brush3, r.X + Zx.P(12), r.Y + Zx.P(20), Zx.P(10), Zx.P(10));
 		}
 		Lang.DrawText(graphics, (modifiees.Contains(dictionary) ? "✎ " : "") + Str(dictionary, "nom"), new Font("Segoe UI Semibold", Zx.P(10.5f)), new Rectangle(r.X + Zx.P(32), r.Y + Zx.P(6), r.Width - Zx.P(40), Zx.P(22)), C.Texte, TextFormatFlags.EndEllipsis | TextFormatFlags.NoPadding);
-		Lang.DrawText(graphics, Categories.Nom(Categories.Valide(Str(dictionary, "categorie"))) + "  ·  " + text2, F.Etat, new Rectangle(r.X + Zx.P(32), r.Y + Zx.P(27), r.Width - Zx.P(40), Zx.P(18)), color2, TextFormatFlags.EndEllipsis | TextFormatFlags.NoPadding);
+		Lang.DrawText(graphics, Categories.Nom(Categories.Valide(Str(dictionary, "categorie"), Str(dictionary, "jeu"))) + "  ·  " + text2, F.Etat, new Rectangle(r.X + Zx.P(32), r.Y + Zx.P(27), r.Width - Zx.P(40), Zx.P(18)), color2, TextFormatFlags.EndEllipsis | TextFormatFlags.NoPadding);
 	}
 
 	private void RemplirListe(Dictionary<string, object> garder)
@@ -1188,6 +1209,7 @@ internal class FenAdmin : Form, IPage
 		try
 		{
 			cat = GitHub.LireCatalogue(out sha);
+			LireJeux();
 			pages.Clear();
 			modifiees.Clear();
 			nouvelles.Clear();
@@ -1302,7 +1324,9 @@ internal class FenAdmin : Form, IPage
 			tDesc.Text = Str(cur, "description").Replace("\\n", "\r\n").Replace("\n", "\r\n");
 			tNotes.Text = Str(cur, "notes").Replace("\\n", "\r\n").Replace("\n", "\r\n");
 			tConsigne.Text = Str(cur, "consigne");
-			sgCat.Index = Math.Max(0, Array.IndexOf(Categories.Ids, Categories.Valide(Str(cur, "categorie"))));
+			string text0 = ((Str(cur, "jeu").Length > 0) ? Str(cur, "jeu") : "omsi2");
+			sgJeuPage.Index = Math.Max(0, Array.IndexOf(idsJeux, text0));
+			MajCatsJeu(text0, Str(cur, "categorie"));
 			int num = Array.IndexOf(statutsId, Str(cur, "statut"));
 			sgStatut.Index = ((num >= 0) ? num : 0);
 			DateTime result2;
@@ -1383,6 +1407,58 @@ internal class FenAdmin : Form, IPage
 		}
 	}
 
+	/// <summary>Jeux du catalogue (pour le sélecteur « Jeu ») et leurs catégories.</summary>
+	private void LireJeux()
+	{
+		List<string> list = new List<string> { "omsi2" };
+		List<string> list2 = new List<string> { "OMSI 2" };
+		if (cat != null && (cat.TryGetValue("jeux_liste", out var value) || cat.TryGetValue("jeux", out value)) && value is ArrayList)
+		{
+			foreach (object item in (ArrayList)value)
+			{
+				if (!(item is Dictionary<string, object> dictionary))
+				{
+					continue;
+				}
+				string text = Str(dictionary, "id");
+				if (text.Length != 0)
+				{
+					Categories.Definir(text, Str(dictionary, "categories"));
+					if (text == "omsi2")
+					{
+						list2[0] = ((Str(dictionary, "nom").Length > 0) ? Str(dictionary, "nom") : "OMSI 2");
+					}
+					else if (!list.Contains(text))
+					{
+						list.Add(text);
+						list2.Add((Str(dictionary, "nom").Length > 0) ? Str(dictionary, "nom") : text);
+					}
+				}
+			}
+		}
+		idsJeux = list.ToArray();
+		nomsJeux = list2.ToArray();
+		if (sgJeuPage != null)
+		{
+			bool flag = charge;
+			charge = true;
+			sgJeuPage.Items = nomsJeux;
+			sgJeuPage.Invalidate();
+			charge = flag;
+		}
+	}
+
+	/// <summary>Le sélecteur de catégorie montre les catégories du jeu de la page.</summary>
+	private void MajCatsJeu(string jeu, string categorie)
+	{
+		bool flag = charge;
+		charge = true;
+		sgCat.Items = Categories.NomsDe(jeu);
+		sgCat.Index = Math.Max(0, Array.IndexOf(Categories.IdsDe(jeu), Categories.Valide(categorie, jeu)));
+		sgCat.Invalidate();
+		charge = flag;
+	}
+
 	private void Appliquer()
 	{
 		if (charge || cur == null)
@@ -1394,7 +1470,10 @@ internal class FenAdmin : Form, IPage
 		Poser("description", tDesc.Text.Replace("\r\n", "\n"), garder: false);
 		Poser("notes", tNotes.Text.Replace("\r\n", "\n"), garder: false);
 		Poser("consigne", tConsigne.Text.Trim(), garder: false);
-		cur["categorie"] = Categories.Ids[Math.Max(0, sgCat.Index)];
+		string text0 = idsJeux[Math.Max(0, Math.Min(idsJeux.Length - 1, sgJeuPage.Index))];
+		cur["jeu"] = text0;
+		string[] array0 = Categories.IdsDe(text0);
+		cur["categorie"] = array0[Math.Max(0, Math.Min(array0.Length - 1, sgCat.Index))];
 		string text = statutsId[Math.Max(0, sgStatut.Index)];
 		if (text == "publie")
 		{

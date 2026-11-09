@@ -1,0 +1,19 @@
+# Serveur social TPS Groupe (likes, commentaires, amis, temps réel)
+# Reconstruit depuis le Worker déployé « tps-studios-social » (code source tiré de sa carte des sources).
+# Si tu as déjà ton propre wrangler.toml pour ce Worker, garde le tien et copie seulement src/index.js.
+name = "tps-studios-social"
+main = "src/index.js"
+compatibility_date = "2024-11-01"
+# Garde les variables (CATALOGUE_URL…) déjà réglées dans le tableau de bord Cloudflare.
+keep_vars = true
+
+[[d1_databases]]
+binding = "DB"
+database_name = "tps-studios-social"
+database_id = "048bd4b9-7597-4529-be60-8495dfec9b44"
+
+[[durable_objects.bindings]]
+name = "SALLE"
+class_name = "Salle"
+
+# La classe Salle existe déjà sur le Worker déployé : ne pas ajouter de nouvelle migration.

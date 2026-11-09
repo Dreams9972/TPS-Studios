@@ -343,7 +343,7 @@ internal class Projet
 		}
 		projet.LienAchat = S(d, "lien_achat");
 		projet.AccesSha = S(d, "acces_sha256");
-		projet.Categorie = Categories.Valide(S(d, "categorie"));
+		projet.Categorie = Categories.Valide(S(d, "categorie"), projet.Jeu);
 		projet.Statut = S(d, "statut");
 		projet.Sortie = S(d, "sortie");
 		projet.Vip = S(d, "vip").ToLowerInvariant();

@@ -595,6 +595,8 @@ internal partial class Fenetre : Form
 
 	private static readonly Font fAnG2 = new Font("Segoe MDL2 Assets", Zx.P(15f));
 
+	private static readonly Font fAnG3 = new Font("Segoe MDL2 Assets", Zx.P(24f));
+
 	private static readonly Font fAnT = new Font("Segoe UI Semibold", Zx.P(9.5f));
 
 	private static readonly Font fAnX = new Font("Segoe UI", Zx.P(9f));
@@ -683,7 +685,7 @@ internal partial class Fenetre : Form
 
 	private bool themeNoel => noel != null;
 
-	private int DiscordCoupe => rDiscord.X + 150;
+	private int DiscordCoupe => rDiscord.X + Zx.P(160);
 
 	public void Toast(string t, Color c, int ms)
 	{
@@ -1740,7 +1742,7 @@ internal partial class Fenetre : Form
 
 	private static int HauteurCom(ComSocial c, int w)
 	{
-		return Math.Max(78, 44 + Lang.MeasureText(c.Texte, fComTxt, new Size(Math.Max(Zx.P(100), w - Zx.P(96)), Zx.P(4000)), TextFormatFlags.WordBreak | TextFormatFlags.NoPadding).Height + 16);
+		return Math.Max(Zx.P(84), Zx.P(40) + Lang.MeasureText(c.Texte, fComTxt, new Size(Math.Max(Zx.P(100), w - Zx.P(96) - Zx.P(24)), Zx.P(4000)), TextFormatFlags.WordBreak | TextFormatFlags.NoPadding).Height + Zx.P(44));
 	}
 
 	private void RecalcCom(int largeur)
@@ -1760,6 +1762,8 @@ internal partial class Fenetre : Form
 		g.Clear(C.Fond);
 		rSuppr.Clear();
 		idSuppr.Clear();
+		rLikeCom.Clear();
+		idLikeCom.Clear();
 		if (soc.Coms.Count == 0)
 		{
 			Lang.DrawText(g, Social.Actif ? "Aucun commentaire pour l'instant. Soyez le premier !" : "", fLigne, new Rectangle(0, Zx.P(24), w, Zx.P(30)), C.Gris, TextFormatFlags.HorizontalCenter);
@@ -1788,10 +1792,10 @@ internal partial class Fenetre : Form
 			}
 			Lang.DrawText(g, (comSocial.Auteur.Length > 0) ? comSocial.Auteur.Substring(0, 1).ToUpperInvariant() : "?", new Font("Segoe UI Semibold", Zx.P(15f)), rectangle, Color.White, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
 			Badge.Dessiner(g, new Rectangle(rectangle.Right - Zx.P(24), rectangle.Bottom - Zx.P(22), Zx.P(30), Zx.P(30)), comSocial.Niveau, 0.0);
-			int num4 = 72;
+			int num4 = rectangle.Right + Zx.P(24);
 			Size size = Lang.MeasureText(comSocial.Auteur, fComNom, new Size(Zx.P(400), Zx.P(24)), TextFormatFlags.NoPadding);
 			Lang.DrawText(g, comSocial.Auteur, fComNom, new Point(num4, num + Zx.P(12)), C.Texte);
-			int num5 = num4 + size.Width + 8;
+			int num5 = num4 + size.Width + Zx.P(10);
 			if (comSocial.Admin)
 			{
 				Rectangle r2 = new Rectangle(num5, num + Zx.P(13), Zx.P(52), Zx.P(18));
@@ -1801,12 +1805,12 @@ internal partial class Fenetre : Form
 					g.FillPath(brush3, path2);
 				}
 				Lang.DrawText(g, "ÉQUIPE", fPetit, r2, Color.White, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
-				num5 += 60;
+				num5 += Zx.P(60);
 			}
 			if (comSocial.Vip)
 			{
 				Badge.PilleVip(g, new Rectangle(num5, num + Zx.P(13), Zx.P(38), Zx.P(18)));
-				num5 += 46;
+				num5 += Zx.P(46);
 			}
 			if (comSocial.Statut.Length > 0)
 			{
@@ -1814,7 +1818,7 @@ internal partial class Fenetre : Form
 				string t = "●  " + comSocial.Statut;
 				Size size2 = Lang.MeasureText(t, fPetit);
 				Lang.DrawText(g, t, fPetit, new Point(num5, num + Zx.P(15)), color2);
-				num5 += size2.Width + 10;
+				num5 += size2.Width + Zx.P(10);
 				using (SolidBrush brush4 = new SolidBrush(C.Carte))
 				{
 					g.FillEllipse(brush4, rectangle.Right - Zx.P(14), rectangle.Y - 1, Zx.P(15), Zx.P(15));
@@ -1823,7 +1827,22 @@ internal partial class Fenetre : Form
 				g.FillEllipse(brush5, rectangle.Right - Zx.P(12), rectangle.Y + 1, Zx.P(11), Zx.P(11));
 			}
 			Lang.DrawText(g, Depuis(comSocial.Cree), fPetit, new Point(num5, num + Zx.P(15)), C.Gris);
-			Lang.DrawText(g, comSocial.Texte, fComTxt, new Rectangle(num4, num + Zx.P(38), w - Zx.P(96), num3 - Zx.P(44)), Color.FromArgb(205, 214, 228), TextFormatFlags.WordBreak | TextFormatFlags.NoPadding);
+			Lang.DrawText(g, comSocial.Texte, fComTxt, new Rectangle(num4, num + Zx.P(40), w - num4 - Zx.P(24), num3 - Zx.P(40) - Zx.P(40)), Color.FromArgb(205, 214, 228), TextFormatFlags.WordBreak | TextFormatFlags.NoPadding);
+			string text9 = (comSocial.Aime ? "♥" : "♡") + "  " + comSocial.Likes;
+			Size size9 = Lang.MeasureText(text9, fPetit);
+			Rectangle rectangle9 = new Rectangle(num4 - Zx.P(4), num + num3 - Zx.P(34), size9.Width + Zx.P(22), Zx.P(24));
+			using (GraphicsPath path9 = Bouton.Rond(rectangle9, Zx.P(12)))
+			{
+				using (SolidBrush brush9 = new SolidBrush(comSocial.Aime ? Color.FromArgb(60, C.Orange) : Color.FromArgb(40, 255, 255, 255)))
+				{
+					g.FillPath(brush9, path9);
+				}
+				using Pen pen9 = new Pen(comSocial.Aime ? Color.FromArgb(170, C.Orange) : Color.FromArgb(60, 255, 255, 255));
+				g.DrawPath(pen9, path9);
+			}
+			Lang.DrawText(g, text9, fPetit, rectangle9, comSocial.Aime ? C.Orange : Color.FromArgb(200, 208, 228), TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+			rLikeCom.Add(Rectangle.Inflate(rectangle9, Zx.P(4), Zx.P(4)));
+			idLikeCom.Add(comSocial.Id);
 			if (comSocial.Moi || Social.EstAdmin)
 			{
 				Size size3 = Lang.MeasureText("Supprimer", fPetit);
@@ -1836,8 +1855,57 @@ internal partial class Fenetre : Form
 		}
 	}
 
+	private readonly List<Rectangle> rLikeCom = new List<Rectangle>();
+
+	private readonly List<int> idLikeCom = new List<int>();
+
+	private void AimerCom(int id)
+	{
+		if (!Social.Actif || !Social.Connecte)
+		{
+			Toast("Connectez-vous à la communauté pour aimer un commentaire.", C.Orange, 4000);
+			return;
+		}
+		Thread thread = new Thread((ThreadStart)delegate
+		{
+			try
+			{
+				bool aime;
+				int likes = Social.AimerCom(id, out aime);
+				Sur(delegate
+				{
+					ComSocial comSocial = soc.Coms.Find((ComSocial x) => x.Id == id);
+					if (comSocial != null)
+					{
+						comSocial.Likes = likes;
+						comSocial.Aime = aime;
+					}
+					MajSocialUI();
+				});
+			}
+			catch (Exception ex)
+			{
+				Exception e = ex;
+				Sur(delegate
+				{
+					Toast("J'aime impossible : " + e.Message, C.Rouge, 5000);
+				});
+			}
+		});
+		thread.IsBackground = true;
+		thread.Start();
+	}
+
 	private void ClicComs(object o, MouseEventArgs e)
 	{
+		for (int j = 0; j < rLikeCom.Count; j++)
+		{
+			if (rLikeCom[j].Contains(e.Location))
+			{
+				AimerCom(idLikeCom[j]);
+				return;
+			}
+		}
 		for (int i = 0; i < rSuppr.Count; i++)
 		{
 			if (rSuppr[i].Contains(e.Location))
@@ -1969,6 +2037,16 @@ internal partial class Fenetre : Form
 			if (c != null && soc.Coms.Find((ComSocial x) => x.Id == c.Id) == null)
 			{
 				soc.Coms.Add(c);
+			}
+			break;
+		}
+		case "likecom":
+		{
+			int idc = Convert.ToInt32(d["id"]);
+			ComSocial comSocial = soc.Coms.Find((ComSocial x) => x.Id == idc);
+			if (comSocial != null)
+			{
+				comSocial.Likes = Convert.ToInt32(d["likes"]);
 			}
 			break;
 		}
@@ -3796,7 +3874,7 @@ internal partial class Fenetre : Form
 
 	private void Transition(Bitmap avant)
 	{
-		Transition(avant, StyleTrans.Diagonale);
+		Transition(avant, StyleTrans.Monte);
 	}
 
 	private void Transition(Bitmap avant, StyleTrans style)
@@ -4819,7 +4897,15 @@ internal partial class Fenetre : Form
 	private void PeintBiblio(Graphics g, int dy)
 	{
 		FondPeint(g, pBiblio);
-		EnTete(g, "Bibliothèque", NomJeu(jeuId) + "  ·  " + ((ongletB == 0) ? "ma bibliothèque" : ((categorie.Length == 0) ? "tous les mods" : Categories.Nom(categorie))), dy, 56);
+		if (ongletB == 1)
+		{
+			Size size0 = Lang.MeasureText("Mods", fTitre);
+			Lang.DrawText(g, "Mods", fTitre, new Point((pBiblio.ClientSize.Width - size0.Width) / 2, Zx.P(30) + dy), C.Texte, TextFormatFlags.NoPadding);
+		}
+		else
+		{
+			EnTete(g, "Bibliothèque", NomJeu(jeuId) + "  ·  ma bibliothèque", dy, 56);
+		}
 		if (ongletB == 0)
 		{
 			PeindrePageJeu(g, dy);
@@ -5037,7 +5123,7 @@ internal partial class Fenetre : Form
 			if (c != null)
 			{
 				Comptes.Avatar(graphics, c, rectangle, (float)num * 0.34f);
-				Ombre(graphics, st, fStat, new Rectangle(num2, height - Zx.P(34), width2, Zx.P(20)), cs, TextFormatFlags.Right | TextFormatFlags.NoPadding);
+				Ombre(graphics, st, fStat, new Rectangle(num2, (height < Zx.P(90)) ? Math.Max(Zx.P(42), height - Zx.P(24)) : (height - Zx.P(34)), width2, Zx.P(20)), cs, TextFormatFlags.Right | TextFormatFlags.NoPadding);
 			}
 			else
 			{
@@ -5667,7 +5753,7 @@ internal partial class Fenetre : Form
 				int y = (rectangle.Height - num4) / 2;
 				Badge.Anneau(graphics, new Rectangle(Zx.P(18), y, num4, num4), niv, temps);
 				Deco.Dessiner(graphics, new Rectangle(Zx.P(18), y, num4, num4), actif.Deco, temps);
-				Badge.Dessiner(graphics, new Rectangle(rectangle.Width - Zx.P(12) - Zx.P(34), Zx.P(10), Zx.P(34), Zx.P(34)), niv, temps);
+				Badge.Dessiner(graphics, (rectangle.Height < Zx.P(90)) ? new Rectangle(rectangle.Width - Zx.P(10) - Zx.P(30), Zx.P(7), Zx.P(30), Zx.P(30)) : new Rectangle(rectangle.Width - Zx.P(12) - Zx.P(34), Zx.P(10), Zx.P(34), Zx.P(34)), niv, temps);
 				if (Social.Vip)
 				{
 					Badge.PilleVip(graphics, new Rectangle(rectangle.Width - Zx.P(12) - Zx.P(34) - Zx.P(8) - Zx.P(38), Zx.P(18), Zx.P(38), Zx.P(18)));
@@ -7414,20 +7500,28 @@ internal partial class Fenetre : Form
 					int num11 = j * rectangle2.Width - num10;
 					if (num11 < rectangle2.Width && num11 + rectangle2.Width > 0)
 					{
-						int x = num11 + Zx.P(70);
-						int width = rectangle2.Width - Zx.P(70) - Zx.P(16);
+						bool grande = rectangle2.Height >= Zx.P(200);
+						int x = num11 + (grande ? Zx.P(24) : Zx.P(70));
+						int width = rectangle2.Width - (grande ? Zx.P(48) : (Zx.P(70) + Zx.P(16)));
 						int height = Lang.MeasureText("Ag", fAnT2).Height;
 						int height2 = Lang.MeasureText("Ag", fAnX).Height;
-						int num12 = Math.Max(1, Math.Min(4, (rectangle2.Height - Zx.P(24) - height - Zx.P(6)) / Math.Max(1, height2)));
+						int num12 = Math.Max(1, Math.Min(grande ? 9 : 4, (rectangle2.Height - Zx.P(24) - height - Zx.P(6) - (grande ? Zx.P(80) : 0)) / Math.Max(1, height2)));
 						int num13 = Math.Min(num12 * height2, Lang.MeasureText(annonce.Texte, fAnX, new Size(width, Zx.P(400)), TextFormatFlags.TextBoxControl | TextFormatFlags.WordBreak | TextFormatFlags.NoPadding).Height);
 						int num14 = height + ((annonce.Texte.Length > 0) ? (Zx.P(6) + num13) : 0);
 						int num15 = Math.Max(Zx.P(10), (rectangle2.Height - num14) / 2);
 						Rectangle rectangle3 = new Rectangle(num11 + Zx.P(16), Math.Max(Zx.P(8), (rectangle2.Height - Zx.P(42)) / 2), Zx.P(42), Zx.P(42));
+						if (grande)
+						{
+							int num16 = Zx.P(64) + Zx.P(16) + num14;
+							int num17 = Math.Max(Zx.P(20), (rectangle2.Height - num16) / 2);
+							rectangle3 = new Rectangle(x, num17, Zx.P(64), Zx.P(64));
+							num15 = num17 + Zx.P(64) + Zx.P(16);
+						}
 						using (SolidBrush brush4 = new SolidBrush(Color.FromArgb(55, annonce.Couleur)))
 						{
 							g.FillEllipse(brush4, rectangle3);
 						}
-						Lang.DrawText(g, annonce.Glyphe, fAnG2, rectangle3, annonce.Couleur, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+						Lang.DrawText(g, annonce.Glyphe, grande ? fAnG3 : fAnG2, rectangle3, annonce.Couleur, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
 						Lang.DrawText(g, annonce.Titre, fAnT2, new Rectangle(x, num15, width, height), C.Texte, TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding);
 						if (annonce.Texte.Length > 0)
 						{
@@ -7656,9 +7750,28 @@ internal partial class Fenetre : Form
 		}
 		LogoDiscord(g, new Rectangle(r.X + Zx.P(14), r.Y + (r.Height - Zx.P(18)) / 2, Zx.P(24), Zx.P(18)), Color.White, baseColor);
 		Lang.DrawText(g, "Rejoindre", fDisc1, new Rectangle(r.X + Zx.P(46), r.Y + Zx.P(6), discordCoupe - r.X - Zx.P(50), Zx.P(20)), Color.White, TextFormatFlags.NoPadding);
-		Lang.DrawText(g, "TPS Groupe", fDisc2, new Rectangle(r.X + Zx.P(46), r.Y + Zx.P(26), discordCoupe - r.X - Zx.P(50), Zx.P(16)), Color.FromArgb(222, 226, 255), TextFormatFlags.NoPadding);
+		if (dcMembres >= 0)
+		{
+			DessinerCompte(g, new Rectangle(r.X + Zx.P(46), r.Y + Zx.P(26), discordCoupe - r.X - Zx.P(50), Zx.P(16)), affMembres, " membres", sensMembres, quandMembres, fDisc2, Color.FromArgb(222, 226, 255), centre: false);
+		}
+		else
+		{
+			Lang.DrawText(g, "TPS Groupe", fDisc2, new Rectangle(r.X + Zx.P(46), r.Y + Zx.P(26), discordCoupe - r.X - Zx.P(50), Zx.P(16)), Color.FromArgb(222, 226, 255), TextFormatFlags.NoPadding);
+		}
 		Lang.DrawText(g, "Ouvrir", fDisc1, new Rectangle(discordCoupe + Zx.P(6), r.Y + Zx.P(6), r.Right - discordCoupe - Zx.P(12), Zx.P(20)), Color.White, TextFormatFlags.HorizontalCenter | TextFormatFlags.NoPadding);
-		Lang.DrawText(g, "Discord ↗", fDisc2, new Rectangle(discordCoupe + Zx.P(6), r.Y + Zx.P(26), r.Right - discordCoupe - Zx.P(12), Zx.P(16)), Color.FromArgb(222, 226, 255), TextFormatFlags.HorizontalCenter | TextFormatFlags.NoPadding);
+		if (dcEnLigne >= 0)
+		{
+			Rectangle rectangle0 = new Rectangle(discordCoupe + Zx.P(14), r.Y + Zx.P(26), r.Right - discordCoupe - Zx.P(20), Zx.P(16));
+			using (SolidBrush brush0 = new SolidBrush(Color.FromArgb(87, 242, 135)))
+			{
+				g.FillEllipse(brush0, rectangle0.X - Zx.P(2), rectangle0.Y + Zx.P(5), Zx.P(7), Zx.P(7));
+			}
+			DessinerCompte(g, new Rectangle(rectangle0.X + Zx.P(10), rectangle0.Y, rectangle0.Width - Zx.P(10), rectangle0.Height), affEnLigne, " en ligne", sensEnLigne, quandEnLigne, fDisc2, Color.FromArgb(222, 226, 255), centre: false);
+		}
+		else
+		{
+			Lang.DrawText(g, "Discord ↗", fDisc2, new Rectangle(discordCoupe + Zx.P(6), r.Y + Zx.P(26), r.Right - discordCoupe - Zx.P(12), Zx.P(16)), Color.FromArgb(222, 226, 255), TextFormatFlags.HorizontalCenter | TextFormatFlags.NoPadding);
+		}
 		if (graphicsState != null)
 		{
 			g.Restore(graphicsState);
@@ -7756,6 +7869,7 @@ internal partial class Fenetre : Form
 
 	private void ConstruireAccueil()
 	{
+		DemarrerCompteDiscord();
 		pAccueil.Controls.Clear();
 		tuilesA.Clear();
 		if (cacheProfil != null)
@@ -7933,8 +8047,11 @@ internal partial class Fenetre : Form
 		if (list.Count >= 4 && num6 >= Zx.P(40))
 		{
 			rCarte = new Rectangle(num12, list[0].Y, num11, list[1].Bottom - list[0].Y);
-			rInfos = new Rectangle(num12, list[2].Y, num11, list[2].Height);
-			rPilule = new Rectangle(num12, list[3].Y, num11, Zx.P(44));
+			int num30 = height - Zx.P(14) - Zx.P(98) - Zx.P(32);
+			int num31 = Math.Min(list[3].Y + Zx.P(98), num30) - list[2].Y;
+			rInfos = new Rectangle(num12, list[2].Y, num11, Math.Max(list[2].Height, num31));
+			int num32 = (int)((double)num11 * 0.82);
+			rPilule = new Rectangle(num12 + (num11 - num32) / 2, rInfos.Bottom + Zx.P(32), num32, Zx.P(44));
 		}
 		else
 		{
@@ -7948,7 +8065,7 @@ internal partial class Fenetre : Form
 		rBandeau = new Rectangle(num9, num + Zx.P(202), num7, Zx.P(36));
 		rMajA = (MajAAfficher ? new Rectangle(num9, num + Zx.P(198), num7, Zx.P(48)) : Rectangle.Empty);
 		ThemeBase.Cartes = (rInfos.IsEmpty ? new Rectangle[2] { rProfil, rCarte } : new Rectangle[3] { rProfil, rCarte, rInfos });
-		rDiscord = new Rectangle(Zx.P(24), height - Zx.P(24) - Zx.P(48), Zx.P(250), Zx.P(48));
+		rDiscord = new Rectangle(Zx.P(24), height - Zx.P(24) - Zx.P(48), Zx.P(286), Zx.P(48));
 		int num16 = Math.Max((int)((double)height * 0.37), rProfil.Y + Zx.P(452) + Zx.P(20));
 		if (rDiscord.Y - Zx.P(44) - num16 < Zx.P(220))
 		{
@@ -8509,9 +8626,15 @@ internal partial class Fenetre : Form
 		}
 		chips.Clear();
 		chips.Add(Chip("Tout", ""));
-		for (int j = 0; j < Categories.Ids.Length; j++)
+		string[] idsCat = Categories.IdsDe(jeuId);
+		string[] nomsCat = Categories.NomsDe(jeuId);
+		if (categorie.Length > 0 && Array.IndexOf(idsCat, categorie) < 0)
 		{
-			chips.Add(Chip(Categories.Noms[j], Categories.Ids[j]));
+			categorie = "";
+		}
+		for (int j = 0; j < idsCat.Length; j++)
+		{
+			chips.Add(Chip(nomsCat[j], idsCat[j]));
 		}
 		foreach (Bouton chip in chips)
 		{
@@ -8760,8 +8883,9 @@ internal partial class Fenetre : Form
 		int num = Math.Max(320, Math.Min(440, (int)((double)width * 0.34)));
 		int num2 = Zx.P(132);
 		rJeuB = new Rectangle(Zx.P(40), num2, num, Zx.P(440));
-		int num3 = ((ongletB == 1) ? Zx.P(40) : (rJeuB.Right + Zx.P(28)));
-		int num4 = width - 40;
+		int margeB = ((ongletB == 1) ? Zx.P(60) : 40);
+		int num3 = ((ongletB == 1) ? margeB : (rJeuB.Right + Zx.P(28)));
+		int num4 = width - margeB;
 		bChangerJeu.Location = new Point(Zx.P(40), Zx.P(30));
 		bAccueilB.Location = new Point(Zx.P(96), Zx.P(30));
 		bool flag = JeuWebCourant() != null;
@@ -8837,8 +8961,8 @@ internal partial class Fenetre : Form
 		}
 		int num13 = Zx.P(20);
 		int num14 = Zx.P(280);
-		int num15 = Math.Max(1, (width - 80 + num13) / (num14 + num13));
-		int num16 = Math.Max(Zx.P(200), (width - Zx.P(80) - (num15 - 1) * num13) / num15);
+		int num15 = Math.Max(1, (width - 2 * margeB + num13) / (num14 + num13));
+		int num16 = Math.Max(Zx.P(200), (width - 2 * margeB - (num15 - 1) * num13) / num15);
 		int num17 = (int)((double)num16 * 0.9);
 		int num18 = num11 + Zx.P(52);
 		int num19 = 0;
@@ -8847,7 +8971,7 @@ internal partial class Fenetre : Form
 		while (num19 < tuilesB.Count)
 		{
 			bool flag2 = num18 < rJeuB.Bottom;
-			int num21 = (flag2 ? num3 : 40);
+			int num21 = (flag2 ? num3 : margeB);
 			int num22 = (flag2 ? num20 : num15);
 			int num23 = 0;
 			while (num23 < num22 && num19 < tuilesB.Count)
@@ -11078,9 +11202,29 @@ internal partial class Fenetre : Form
 				Choisir(projet);
 			}
 			ShowVue(Vue.Projet);
+			if (Environment.GetEnvironmentVariable("TPS_DEMO_COMS") == "1")
+			{
+				System.Windows.Forms.Timer timer0 = new System.Windows.Forms.Timer();
+				timer0.Interval = 3000;
+				timer0.Tick += delegate
+				{
+					timer0.Stop();
+					soc.Coms.Clear();
+					soc.Coms.Add(new ComSocial { Id = 1, Auteur = "S2FX_94", Niveau = 7, Texte = "Ajoutez la 132 et le dépôt de Vitry ! Sinon belle map", Cree = DateTimeOffset.UtcNow.ToUnixTimeSeconds() - 86400, Likes = 3 });
+					soc.Coms.Add(new ComSocial { Id = 2, Auteur = "Evens (TPS)", Niveau = 12, Admin = true, Moi = true, Aime = true, Likes = 1, Texte = "Merci ! La 132 arrive dans la prochaine mise à jour, le dépôt de Vitry est en cours de modélisation. Pensez à signaler les bugs ici ou sur le Discord.", Cree = DateTimeOffset.UtcNow.ToUnixTimeSeconds() - 3600 });
+					ChoisirOnglet(2);
+					MajSocialUI();
+					Disposer();
+				};
+				timer0.Start();
+			}
 			break;
 		}
 		case "biblio":
+			if (!string.IsNullOrEmpty(arg))
+			{
+				jeuId = arg;
+			}
 			ShowVue(Vue.Biblio);
 			break;
 		case "profil":
@@ -11090,6 +11234,19 @@ internal partial class Fenetre : Form
 				Profil(nouveau: false, result);
 			});
 			break;
+		}
+		if (Environment.GetEnvironmentVariable("TPS_DEMO_DISCORD") == "1")
+		{
+			MajCompteDiscord(1234, 56);
+			System.Windows.Forms.Timer timerDc = new System.Windows.Forms.Timer();
+			timerDc.Interval = 6000;
+			int etape0 = 0;
+			timerDc.Tick += delegate
+			{
+				etape0++;
+				MajCompteDiscord(1234 + ((etape0 % 2 == 1) ? 12 : 0), 56 - ((etape0 % 2 == 1) ? 9 : 0));
+			};
+			timerDc.Start();
 		}
 		System.Windows.Forms.Timer timer = new System.Windows.Forms.Timer();
 		timer.Interval = 1500;
