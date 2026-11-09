@@ -737,9 +737,13 @@ internal class FenAmis : Form, IPage
 		int wt = r.Right - Zx.P(14) - x;
 		int y = r.Y + Zx.P(90);
 		Lang.DrawText(g, a.Pseudo, fCarteNom, new Rectangle(x, y, wt, Zx.P(26)), C.Texte, TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding);
-		if (a.Vip)
+		int xv = x + Math.Min(wt - Zx.P(40), Lang.MeasureText(a.Pseudo, fCarteNom).Width + Zx.P(8));
+		if (a.Role.Length > 0)
 		{
-			int xv = x + Math.Min(wt - Zx.P(40), Lang.MeasureText(a.Pseudo, fCarteNom).Width + Zx.P(8));
+			xv += Badge.Role(g, a.Role, xv, y + Zx.P(4)) + Zx.P(6);
+		}
+		if (a.Vip && xv + Zx.P(36) < r.Right - Zx.P(10))
+		{
 			Badge.PilleVip(g, new Rectangle(xv, y + Zx.P(4), Zx.P(36), Zx.P(16)));
 		}
 		string etat;

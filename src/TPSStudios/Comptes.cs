@@ -122,6 +122,14 @@ internal static class Comptes
 		{
 			return "Le pseudo doit faire entre 2 et 20 caractères.";
 		}
+		if (!System.Text.RegularExpressions.Regex.IsMatch(pseudo, "[\\p{L}\\p{N}]"))
+		{
+			return "Le pseudo doit contenir au moins une lettre ou un chiffre.";
+		}
+		if (ModerationPseudo.Interdit(pseudo))
+		{
+			return "Ce pseudo n'est pas autorisé : insultes, vulgarités et propos haineux ou violents sont interdits.";
+		}
 		foreach (Compte compte in D.Comptes)
 		{
 			if (compte.Id != sauf && string.Equals(compte.Pseudo, pseudo, StringComparison.OrdinalIgnoreCase))

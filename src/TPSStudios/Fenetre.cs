@@ -2221,7 +2221,7 @@ internal partial class Fenetre : Form
 			Champ champ = comSaisie;
 			bool enabled = (comPub.Enabled = actif);
 			champ.Enabled = enabled;
-			comInfo.Text = ((!actif) ? "Les commentaires seront disponibles dès que le serveur TPS Groupe sera configuré." : (socEnLigne ? "●  En direct : les nouveaux messages apparaissent tout de suite" : "Connexion au serveur…"));
+			comInfo.Text = ((!actif) ? "Les commentaires seront disponibles dès que le serveur TPS Groupe sera configuré." : (socEnLigne ? "" : "Connexion au serveur…"));
 			comInfo.ForeColor = (socEnLigne ? C.Vert : C.Gris);
 			garderScroll = true;
 			Disposer();
@@ -5618,8 +5618,9 @@ internal partial class Fenetre : Form
 		{
 			g.DrawLine(pen4, r.X + Zx.P(12), r.Y + Zx.P(44), r.Right - Zx.P(12), r.Y + Zx.P(44));
 		}
-		int num3 = r.Y + Zx.P(52);
-		int num4 = (r.Bottom - 8 - num3) / 46;
+		int num3 = r.Y + Zx.P(54);
+		int pasAmi = Zx.P(76);
+		int num4 = Math.Max(1, (r.Bottom - Zx.P(8) - num3) / pasAmi);
 		if (list.Count == 0)
 		{
 			string t = ((!Social.Connecte) ? "Ajoutez vos amis TPS Groupe" : ((Social.Amis.Count == 0) ? "Pas encore d'amis" : "Aucun ami en ligne"));
@@ -5635,30 +5636,60 @@ internal partial class Fenetre : Form
 				Lang.DrawText(g, "+ " + (list.Count - i) + " autres en ligne", fAmS, new Rectangle(r.X + Zx.P(14), num3 + Zx.P(12), r.Width - Zx.P(28), Zx.P(18)), C.Gris, TextFormatFlags.NoPadding);
 				break;
 			}
-			Rectangle rectangle = new Rectangle(r.X + Zx.P(14), num3 + Zx.P(4), Zx.P(34), Zx.P(34));
-			int num5 = 0;
-			string id = ami.Id;
-			foreach (char c in id)
+			Rectangle carte = new Rectangle(r.X + Zx.P(10), num3, r.Width - Zx.P(20), Zx.P(68));
+			using (GraphicsPath pc = Bouton.Rond(carte, Zx.P(12)))
 			{
-				num5 = num5 * 31 + c;
+				GraphicsState gsC = g.Save();
+				g.SetClip(pc, CombineMode.Intersect);
+				FenAmis.DessinerBanniere(g, ami, carte);
+				using (LinearGradientBrush voile = new LinearGradientBrush(carte, Color.FromArgb(225, 10, 12, 28), Color.FromArgb(120, 10, 12, 28), LinearGradientMode.Horizontal))
+				{
+					g.FillRectangle(voile, carte);
+				}
+				g.Restore(gsC);
+				using Pen bordC = new Pen(Color.FromArgb(70, 255, 255, 255));
+				g.DrawPath(bordC, pc);
 			}
-			using (SolidBrush brush5 = new SolidBrush(Comptes.Palette[Math.Abs(num5) % Comptes.Palette.Length]))
+			Rectangle rectangle = new Rectangle(carte.X + Zx.P(10), carte.Y + (carte.Height - Zx.P(40)) / 2, Zx.P(40), Zx.P(40));
+			using (SolidBrush brush5 = new SolidBrush(FenAmis.CouleurAvatar(ami)))
 			{
 				g.FillEllipse(brush5, rectangle);
 			}
 			Lang.DrawText(g, (ami.Pseudo.Length > 0) ? ami.Pseudo.Substring(0, 1).ToUpperInvariant() : "?", fAmI, rectangle, Color.White, TextFormatFlags.HorizontalCenter | TextFormatFlags.NoPrefix | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
 			Color color = (ami.Statut.StartsWith("En jeu") ? C.Orange : C.Vert);
-			using (SolidBrush brush6 = new SolidBrush(Color.FromArgb(220, 14, 16, 34)))
+			using (SolidBrush brush6 = new SolidBrush(Color.FromArgb(230, 14, 16, 34)))
 			{
-				g.FillEllipse(brush6, rectangle.Right - Zx.P(12), rectangle.Bottom - Zx.P(12), Zx.P(15), Zx.P(15));
+				g.FillEllipse(brush6, rectangle.Right - Zx.P(13), rectangle.Bottom - Zx.P(13), Zx.P(16), Zx.P(16));
 			}
 			using (SolidBrush brush7 = new SolidBrush(color))
 			{
-				g.FillEllipse(brush7, rectangle.Right - Zx.P(9), rectangle.Bottom - Zx.P(9), Zx.P(9), Zx.P(9));
+				g.FillEllipse(brush7, rectangle.Right - Zx.P(10), rectangle.Bottom - Zx.P(10), Zx.P(10), Zx.P(10));
 			}
-			Lang.DrawText(g, ami.Pseudo, fAmN, new Rectangle(rectangle.Right + Zx.P(10), num3 + Zx.P(4), r.Right - rectangle.Right - Zx.P(22), Zx.P(18)), C.Texte, TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding);
-			Lang.DrawText(g, ami.Statut, fAmS, new Rectangle(rectangle.Right + Zx.P(10), num3 + Zx.P(22), r.Right - rectangle.Right - Zx.P(22), Zx.P(16)), color, TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding);
-			num3 += Zx.P(46);
+			int xt = rectangle.Right + Zx.P(10);
+			int wt = carte.Right - Zx.P(10) - xt;
+			int lp = Math.Min(wt, Lang.MeasureText(ami.Pseudo, fAmN).Width);
+			Lang.DrawText(g, ami.Pseudo, fAmN, new Rectangle(xt, carte.Y + Zx.P(8), lp + Zx.P(2), Zx.P(18)), Color.White, TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding);
+			int xb = xt + lp + Zx.P(6);
+			string roleA = ami.Role ?? "";
+			if (roleA.Length > 0 && xb + Zx.P(50) < carte.Right)
+			{
+				xb += Badge.Role(g, roleA, xb, carte.Y + Zx.P(8)) + Zx.P(4);
+			}
+			else if (ami.Vip && xb + Zx.P(36) < carte.Right)
+			{
+				Badge.PilleVip(g, new Rectangle(xb, carte.Y + Zx.P(9), Zx.P(32), Zx.P(15)));
+			}
+			Lang.DrawText(g, (ami.Statut.Length > 0) ? ami.Statut : "En ligne", fAmS, new Rectangle(xt, carte.Y + Zx.P(27), wt, Zx.P(16)), color, TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding);
+			string perso = ami.Texte("statut");
+			if (perso.Length == 0)
+			{
+				perso = ami.Texte("bio");
+			}
+			if (perso.Length > 0)
+			{
+				Lang.DrawText(g, perso, fAmS, new Rectangle(xt, carte.Y + Zx.P(45), wt, Zx.P(16)), Color.FromArgb(185, 195, 215), TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding);
+			}
+			num3 += pasAmi;
 		}
 		g.SmoothingMode = smoothingMode;
 	}
