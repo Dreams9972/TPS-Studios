@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <!-- Lanceur TPS Studios (WinForms, .NET Framework 4.8). Compile sous Windows : dotnet build -c Release -->
   <PropertyGroup>
-    <AssemblyName>TPS.Studios</AssemblyName>
+    <AssemblyName>TPS Studios</AssemblyName>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net48</TargetFramework>
     <LangVersion>11.0</LangVersion>
