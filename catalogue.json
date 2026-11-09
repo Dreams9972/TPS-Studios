@@ -348,7 +348,10 @@
       "image": "http://citytransportmaster.fr/logo.png",
       "statut": "bientot",
       "galerie": "https://raw.githubusercontent.com/Dreams9972/TPS-Studios/main/images/galerie/jeu-masterplan-8df3dda63ace754-1.jpg",
-      "video": "https://youtu.be/eYUHugWgotg?si=_T4CZ33b1rZMmWdy"
+      "video": "https://youtu.be/eYUHugWgotg?si=_T4CZ33b1rZMmWdy",
+      "editeur": "TPS Groupe",
+      "genres": "Simulation",
+      "categories": "Mods"
     }
   ]
 }
