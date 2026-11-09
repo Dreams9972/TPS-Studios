@@ -16,7 +16,7 @@ internal static class Notifs
 
 	public static readonly string[] TypesNoms = new string[5] { "Mises à jour du lanceur", "Mises à jour de mes mods", "Sorties des mods suivis", "Nouveaux mods TPS Groupe", "Accès anticipé VIP" };
 
-	public static readonly string[] TypesAide = new string[5] { "Une nouvelle version du lanceur est prête.", "Un mod installé a une nouvelle version.", "Un mod suivi devient disponible (et rappel 24 h avant une sortie datée).", "Un nouveau contenu apparaît dans le catalogue.", "Un mod en accès anticipé est disponible pour les VIP." };
+	public static readonly string[] TypesAide = new string[5] { "Une nouvelle version du lanceur est prête.", "Un mod installé a une nouvelle version.", "Un mod suivi devient disponible (et rappel 24 h avant une sortie datée).", "Un nouveau mod apparaît dans le catalogue.", "Un mod en accès anticipé est disponible pour les VIP." };
 
 	private static string Fichier => Path.Combine(Config.Dossier, "notifications.json");
 
@@ -201,7 +201,7 @@ internal static class Notifs
 		}
 		if (lanceurDispo != null && TypeActif("lanceur"))
 		{
-			Ajouter("lanceur:" + lanceurDispo, "lanceur", "Lanceur v" + lanceurDispo + " disponible", "Il s'installe au prochain démarrage (ou Paramètres › Mises à jour).", "");
+			Ajouter("lanceur:" + lanceurDispo, "lanceur", "Lanceur v" + lanceurDispo + " disponible", "Il s'installe au prochain démarrage (ou Réglages › Mises à jour).", "");
 		}
 		string text = Config.Lire("notif_connus") ?? "";
 		bool flag3 = text.Length == 0;
@@ -221,13 +221,13 @@ internal static class Notifs
 			}
 			if (array2 != null && !flag5 && TypeActif("maj") && Omsi.Perimee(projet2, array2))
 			{
-				Ajouter("maj:" + projet2.Id + ":" + projet2.Version, "maj", "Mise à jour : " + projet2.Nom + " " + projet2.Version, "La nouvelle version est prête à installer.", projet2.Id);
+				Ajouter("maj:" + projet2.Id + ":" + projet2.Version, "maj", "Mise à jour : " + projet2.Nom + " " + projet2.Version, "La nouvelle version est prête à être installée.", projet2.Id);
 			}
 			string text2 = Config.Lire("etat_" + projet2.Id) ?? "";
 			string text3 = (projet2.Installable ? "publie" : projet2.StatutEffectif);
 			if (flag4 && TypeActif("sortie") && text2 == "bientot" && text3 == "publie")
 			{
-				Ajouter("sortie:" + projet2.Id + ":" + projet2.Version, "sortie", projet2.Nom + " est disponible !", "Le contenu que vous suivez peut être installé.", projet2.Id);
+				Ajouter("sortie:" + projet2.Id + ":" + projet2.Version, "sortie", projet2.Nom + " est disponible !", "Le mod que vous suivez peut être installé.", projet2.Id);
 			}
 			if (flag4 && TypeActif("sortie") && projet2.StatutEffectif == "bientot")
 			{

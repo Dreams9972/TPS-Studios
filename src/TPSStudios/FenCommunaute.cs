@@ -57,7 +57,7 @@ internal class FenCommunaute : Form
 		tApp = ChampL("Identifiant d'application (discord.com/developers/applications → Application ID)", Zx.P(28), Zx.P(128), Zx.P(564), init.TryGetValue("discord_app", out var value) ? value : "", 22);
 		tInvite = ChampL("Lien d'invitation permanent (https://discord.gg/…), facultatif", Zx.P(28), Zx.P(210), Zx.P(564), init.TryGetValue("discord_invite", out value) ? value : "", 80);
 		tServeur = ChampL("Serveur social : adresse https://… (likes et commentaires en temps réel), facultatif", Zx.P(28), Zx.P(292), Zx.P(564), init.TryGetValue("serveur", out value) ? value : "", 120);
-		tCle = ChampL("Clé administrateur (gardée sur ce PC) — ou importe cle-admin.txt", Zx.P(28), Zx.P(374), Zx.P(400), "", 80);
+		tCle = ChampL("Clé administrateur (gardée sur ce PC) — ou importez cle-admin.txt", Zx.P(28), Zx.P(374), Zx.P(400), "", 80);
 		Bouton bouton = new Bouton("Importer la clé…")
 		{
 			Plein = false,

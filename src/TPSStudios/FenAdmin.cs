@@ -538,7 +538,7 @@ internal class FenAdmin : Form, IPage
 		};
 		cdPub.Controls.Add(sgVip);
 		lPubEtiq = new Label();
-		lPubEtiq.Text = "Ouvert à tous le (les VIP l'ont avant)";
+		lPubEtiq.Text = "Ouvert à tous le (les VIP y ont accès avant)";
 		lPubEtiq.Font = new Font("Segoe UI", Zx.P(9f));
 		lPubEtiq.ForeColor = C.Gris;
 		lPubEtiq.BackColor = C.Carte;
@@ -576,7 +576,7 @@ internal class FenAdmin : Form, IPage
 			Appliquer();
 		};
 		cdOpt.Controls.Add(tEditeur);
-		Etiq(cdOpt, "Prérequis (ex. OMSI 2 + addon Hambourg)", x, Zx.P(44));
+		Etiq(cdOpt, "Prérequis (ex. OMSI 2 + DLC Hambourg)", x, Zx.P(44));
 		tPrereq = new Champ(multi: false, Zx.P(36));
 		tPrereq.Location = new Point(x, Zx.P(66));
 		tPrereq.Width = num3;
@@ -621,7 +621,7 @@ internal class FenAdmin : Form, IPage
 			RetirerVideo();
 		};
 		cdOpt.Controls.Add(bouton6);
-		Etiq(cdOpt, "Liens utiles affichés sur la page : une ligne par lien « Libellé | https://… » (3 au plus)", Zx.P(24), Zx.P(262));
+		Etiq(cdOpt, "Liens utiles affichés sur la page : une ligne par lien « Libellé | https://… » (3 au maximum)", Zx.P(24), Zx.P(262));
 		tLiens = new Champ(multi: true, Zx.P(84));
 		tLiens.Location = new Point(Zx.P(24), Zx.P(284));
 		tLiens.Width = num - Zx.P(48);
@@ -652,7 +652,7 @@ internal class FenAdmin : Form, IPage
 			Appliquer();
 		};
 		cdOpt.Controls.Add(tLies);
-		Etiq(cdOpt, "Tags : mots-clés séparés par des virgules (8 au plus) — affichés sur la page et utilisés par la recherche", Zx.P(24), Zx.P(454));
+		Etiq(cdOpt, "Tags : mots-clés séparés par des virgules (8 au maximum) — affichés sur la page et utilisés par la recherche", Zx.P(24), Zx.P(454));
 		tTags = new Champ(multi: false, Zx.P(36));
 		tTags.Location = new Point(Zx.P(24), Zx.P(476));
 		tTags.Width = num - Zx.P(48);
@@ -849,7 +849,7 @@ internal class FenAdmin : Form, IPage
 			cdTarif.Controls.Add(label);
 			return label;
 		};
-		func("Prix de ce contenu", 24, 44);
+		func("Prix de ce mod", 24, 44);
 		sgPrix = new Segments();
 		sgPrix.Items = new string[2] { "Gratuit", "Payant" };
 		sgPrix.Location = new Point(Zx.P(24), Zx.P(66));
@@ -930,7 +930,7 @@ internal class FenAdmin : Form, IPage
 		cdVisuel.Controls.Add(bouton9);
 		Label value = new Label
 		{
-			Text = "jpg ou png, 5 Mo max  ·  envoyée sur GitHub à l'enregistrement",
+			Text = "jpg ou png, 5 Mo maximum  ·  envoyée sur GitHub à l'enregistrement",
 			Font = new Font("Segoe UI", Zx.P(8.5f)),
 			ForeColor = C.Gris,
 			BackColor = C.Carte,
@@ -1736,7 +1736,7 @@ internal class FenAdmin : Form, IPage
 		int num = dlcEd.Count - count;
 		if (dlcEd.Count > 0)
 		{
-			tPrereq.Text = "OMSI 2 + " + count + " DLC obligatoire" + ((count > 1) ? "s" : "") + ((num > 0) ? (" (" + num + " facultatif" + ((num > 1) ? "s" : "") + ")") : "");
+			tPrereq.Text = "OMSI 2 + " + count + ((count > 1) ? " DLC obligatoires" : " DLC obligatoire") + ((num > 0) ? (" (" + num + ((num > 1) ? " facultatifs" : " facultatif") + ")") : "");
 		}
 		modifiees.Add(cur);
 		liste.Invalidate();
@@ -2092,7 +2092,7 @@ internal class FenAdmin : Form, IPage
 		{
 			return false;
 		}
-		MessageBox.Show(this, "Le jeton GitHub de l'administration n'est plus lisible sur ce PC.\n\nColle-le à nouveau dans la fenêtre suivante (il reste chiffré par Windows).", Text, MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
+		MessageBox.Show(this, "Le jeton GitHub de l'administration n'est plus lisible sur ce PC.\n\nCollez-le à nouveau dans la fenêtre suivante (il reste chiffré par Windows).", Text, MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
 		using FenJeton f = new FenJeton();
 		return f.Afficher(this) == DialogResult.OK;
 	}
@@ -2324,7 +2324,7 @@ internal class FenAdmin : Form, IPage
 
 	private PageReglages PageBoutique(Dictionary<string, string> init)
 	{
-		PageReglages pageReglages = new PageReglages("Boutique · VIP", "La boutique de l'accueil et l'offre VIP.", init);
+		PageReglages pageReglages = new PageReglages("Boutique · VIP", "La Boutique de l'accueil et l'offre VIP.", init);
 		pageReglages.Section("Boutique");
 		pageReglages.Bascule("boutique", "Boutique visible", "Affiche la tuile « Boutique » sur l'accueil de tous les joueurs.", "", "0", defaut: true);
 		pageReglages.Section("VIP");
@@ -2442,7 +2442,7 @@ internal class FenAdmin : Form, IPage
 		pageReglages.Texte("discord_invite", "Lien d'invitation permanent (https://discord.gg/…)", "https://discord.gg/…", 80);
 		pageReglages.Section("Serveur social");
 		pageReglages.Texte("serveur", "Adresse du serveur (likes, commentaires, amis, VIP)", "https://….workers.dev", 120);
-		Champ tc = pageReglages.TexteLibre("Clé administrateur (gardée sur ce PC, jamais publiée)", Social.CleAdminPresente ? "déjà enregistrée sur ce PC" : "colle la clé ou importe cle-admin.txt", 80);
+		Champ tc = pageReglages.TexteLibre("Clé administrateur (gardée sur ce PC, jamais publiée)", Social.CleAdminPresente ? "déjà enregistrée sur ce PC" : "collez la clé ou importez cle-admin.txt", 80);
 		Label lk;
 		Bouton bouton = pageReglages.Action("Enregistrer la clé", C.Jade, out lk);
 		bouton.Click += delegate
@@ -2479,7 +2479,7 @@ internal class FenAdmin : Form, IPage
 					BeginInvoke((MethodInvoker)delegate
 					{
 						lw.ForeColor = ((b == true) ? C.Vert : C.Gris);
-						lw.Text = ((b == true) ? "✔  Tickets actifs : ils arrivent dans ton salon Discord." : ((b == false) ? "Aucun salon réglé." : "État inconnu (serveur ou clé absents)."));
+						lw.Text = ((b == true) ? "✔  Tickets actifs : ils arrivent dans votre salon Discord." : ((b == false) ? "Aucun salon réglé." : "État inconnu (serveur ou clé absents)."));
 					});
 				}
 				catch
@@ -2695,11 +2695,11 @@ internal class FenAdmin : Form, IPage
 			}
 			if (Projet.LireLiens(Str(page, "liens")).Count != Str(page, "liens").Replace("\r", "").Split(new char[1] { '\n' }, StringSplitOptions.RemoveEmptyEntries).Length)
 			{
-				return "Liens utiles de « " + text2 + " » : une ligne par lien « Libellé | https://… », 3 au plus.";
+				return "Liens utiles de « " + text2 + " » : une ligne par lien « Libellé | https://… », 3 au maximum.";
 			}
 			if (Str(page, "ancien_prix").Length > 0 && (!Projet.ParsePrix(Str(page, "ancien_prix"), out var d) || !Projet.ParsePrix(Str(page, "prix"), out var d2) || d <= d2))
 			{
-				return "Ancien prix de « " + text2 + " » : il doit être supérieur au prix actuel (contenu payant).";
+				return "Ancien prix de « " + text2 + " » : il doit être supérieur au prix actuel (mod payant).";
 			}
 			if (Str(page, "vip") == "avance" && Str(page, "public_le") == "")
 			{

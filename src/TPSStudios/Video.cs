@@ -20,7 +20,7 @@ internal static class Video
 		long length = new FileInfo(f).Length;
 		if (length > 1992294400)
 		{
-			return "Fichier trop lourd (1,9 Go au plus).";
+			return "Fichier trop lourd (1,9 Go maximum).";
 		}
 		try
 		{
@@ -54,7 +54,7 @@ internal static class Video
 		}
 		if (secondes > 181.0)
 		{
-			return "Vidéo trop longue : " + (int)secondes / 60 + " min " + (int)secondes % 60 + " s (3 min au plus).";
+			return "Vidéo trop longue : " + (int)secondes / 60 + " min " + (int)secondes % 60 + " s (3 min maximum).";
 		}
 		int num = Math.Max(largeur, hauteur);
 		int num2 = Math.Min(largeur, hauteur);

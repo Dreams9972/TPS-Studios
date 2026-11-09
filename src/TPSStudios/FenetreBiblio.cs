@@ -193,7 +193,7 @@ internal partial class Fenetre
 			try
 			{
 				SuspendreVideos(s: true);
-				bitmap = Snap(zone);
+				bitmap = Figer();
 			}
 			catch
 			{
@@ -206,6 +206,7 @@ internal partial class Fenetre
 		{
 			Transition(bitmap, versMods ? StyleTrans.Pousse : StyleTrans.Retour);
 		}
+		RetirerCouvercle();
 		SuspendreVideos(s: false);
 	}
 
@@ -341,7 +342,7 @@ internal partial class Fenetre
 			{
 				bouton.Text = ((bouton == bChemins) ? "⚙" : ((bouton == bPhotosJeu) ? "▣" : "▶"));
 				bouton.SetBounds(num6 - Zx.P(46), num5 + Zx.P(5), Zx.P(46), Zx.P(44));
-				bulle.SetToolTip(bouton, (bouton == bChemins) ? "Chemins du jeu (OMSI 2 et openOMSI)" : ((bouton == bPhotosJeu) ? "Photos" : "Bande-annonce"));
+				bulle.SetToolTip(bouton, (bouton == bChemins) ? "Dossiers du jeu (OMSI 2 et openOMSI)" : ((bouton == bPhotosJeu) ? "Photos" : "Bande-annonce"));
 				num6 -= Zx.P(54);
 			}
 		}
@@ -697,7 +698,7 @@ internal partial class Fenetre
 			Zone(new Rectangle(rectangle5.X - Zx.P(6), rectangle5.Y - Zx.P(6), rectangle5.Width + Zx.P(12), rectangle5.Height + Zx.P(12)), delegate
 			{
 				BasculerMod(p, omsi);
-			}, flag2 ? "Activer ce mod" : "Désactiver ce mod (ses fichiers sont mis de côté, OMSI ne le charge plus)");
+			}, flag2 ? "Activer ce mod" : "Désactiver ce mod (ses fichiers sont mis de côté, OMSI 2 ne le charge plus)");
 			int num8 = rectangle5.X - Zx.P(14);
 			int y = rectangle4.Y + (rectangle4.Height - Zx.P(32)) / 2;
 			int num9 = r.Right + Zx.P(16) + Zx.P(110);

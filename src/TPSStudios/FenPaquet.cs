@@ -488,7 +488,7 @@ internal class FenPaquet : Form
 			page["parties"] = arrayList;
 		}
 		GitHub.EcrireCatalogue(cat, sha2, "Paquet " + nom + " " + version + " publié depuis le lanceur par " + ((Comptes.Actif != null) ? Comptes.Actif.Pseudo : "admin") + " (" + parties.Count + " partie(s), " + Taille(tailleTotale) + ")");
-		return "✔  " + nom + " " + version + " est en ligne (" + parties.Count + " partie(s), " + Taille(tailleTotale) + ").\n\nLes joueurs verront « METTRE À JOUR ». Aucun fichier du paquet n'est resté sur ce PC : vous pouvez supprimer vos anciens zips de " + nom + ".";
+		return "✔  " + nom + " " + version + " est en ligne (" + parties.Count + " partie(s), " + Taille(tailleTotale) + ").\n\nLes joueurs verront « METTRE À JOUR ». Aucun fichier du paquet n'est resté sur ce PC : vous pouvez supprimer vos anciennes archives ZIP de " + nom + ".";
 	}
 
 	/// <summary>Vrai si le paquet actuellement en ligne télécharge depuis cette release (on ne doit pas y toucher).</summary>

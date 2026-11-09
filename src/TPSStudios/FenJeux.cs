@@ -36,6 +36,16 @@ internal class FenJeux : Form
 
 	private Champ tCats;
 
+	private Champ tSteam;
+
+	private Champ tEditeur;
+
+	private Champ tSortie;
+
+	private Champ tGenres;
+
+	private Champ tDescJ;
+
 	private Segments sgStatut;
 
 	private Option cPlein;
@@ -151,7 +161,7 @@ internal class FenJeux : Form
 			ImporterImage();
 		};
 		base.Controls.Add(bouton3);
-		Lb("Photos : une adresse d'image par ligne (10 au plus), ou ajoute des fichiers depuis ton PC", num, Zx.P(440), num2, Zx.P(20), new Font("Segoe UI", Zx.P(9f)), C.Gris);
+		Lb("Photos : une adresse d'image par ligne (10 au maximum), ou ajoutez des fichiers depuis votre PC", num, Zx.P(440), num2, Zx.P(20), new Font("Segoe UI", Zx.P(9f)), C.Gris);
 		tPhotos = new Champ(multi: true, Zx.P(96));
 		tPhotos.Location = new Point(num, Zx.P(462));
 		tPhotos.Width = num2;
@@ -197,13 +207,28 @@ internal class FenJeux : Form
 		base.Controls.Add(cPlein);
 		boutonsMedias = new Bouton[3] { bouton3, bouton4, bouton5 };
 		Lb("Catégories de tri des mods", Zx.P(870), Zx.P(90), Zx.P(300), Zx.P(20), new Font("Segoe UI Semibold", Zx.P(9.5f)), C.Texte);
-		Lb("Une catégorie par ligne (12 au plus). Elles servent de filtres dans « Mods » et de choix dans les pages de ce jeu.", Zx.P(870), Zx.P(112), Zx.P(300), Zx.P(54), new Font("Segoe UI", Zx.P(9f)), C.Gris);
-		tCats = new Champ(multi: true, Zx.P(300));
+		Lb("Une catégorie par ligne (12 au maximum). Elles servent de filtres dans « Mods » et de choix dans les pages de ce jeu.", Zx.P(870), Zx.P(112), Zx.P(300), Zx.P(54), new Font("Segoe UI", Zx.P(9f)), C.Gris);
+		tCats = new Champ(multi: true, Zx.P(250));
 		tCats.Location = new Point(Zx.P(870), Zx.P(170));
 		tCats.Width = Zx.P(300);
 		tCats.MaxLength = 1000;
 		base.Controls.Add(tCats);
-		Champ[] array = new Champ[8] { tId, tNom, tSous, tUrl, tImage, tPhotos, tVideo, tCats };
+		int xd = Zx.P(870);
+		int wd = Zx.P(300);
+		Lb("Fiche « À propos » du jeu", xd, Zx.P(432), wd, Zx.P(22), new Font("Segoe UI Semibold", Zx.P(9.5f)), C.Texte);
+		tSteam = ChampL("AppID Steam (remplit automatiquement la fiche)", xd, Zx.P(456), wd, 12);
+		tSteam.Indice = "ex. 252530";
+		tEditeur = ChampL("Éditeur / développeur", xd, Zx.P(518), wd, 120);
+		int wm = (wd - Zx.P(10)) / 2;
+		tSortie = ChampL("Date de sortie", xd, Zx.P(580), wm, 40);
+		tGenres = ChampL("Genres", xd + wm + Zx.P(10), Zx.P(580), wm, 120);
+		Lb("Description (si pas de fiche Steam)", xd, Zx.P(642), wd, Zx.P(20), new Font("Segoe UI", Zx.P(9f)), C.Gris);
+		tDescJ = new Champ(multi: true, Zx.P(170));
+		tDescJ.Location = new Point(xd, Zx.P(664));
+		tDescJ.Width = wd;
+		tDescJ.MaxLength = 4000;
+		base.Controls.Add(tDescJ);
+		Champ[] array = new Champ[13] { tId, tNom, tSous, tUrl, tImage, tPhotos, tVideo, tCats, tSteam, tEditeur, tSortie, tGenres, tDescJ };
 		foreach (Champ champ in array)
 		{
 			champ.TextChanged += delegate
@@ -327,6 +352,16 @@ internal class FenJeux : Form
 			tCats.Enabled = cur != null;
 			tCats.Text = ((cur == null) ? "" : ((V(cur, "categories").Trim().Length > 0) ? V(cur, "categories").Replace("\r\n", "\n").Replace("\n", "\r\n") : Categories.Texte(V(cur, "id"))));
 			tVideo.Text = ((cur != null) ? V(cur, "video") : "");
+			Champ[] fiche = new Champ[5] { tSteam, tEditeur, tSortie, tGenres, tDescJ };
+			foreach (Champ c2 in fiche)
+			{
+				c2.Enabled = cur != null;
+			}
+			tSteam.Text = ((cur != null) ? V(cur, "steam") : "");
+			tEditeur.Text = ((cur != null) ? V(cur, "editeur") : "");
+			tSortie.Text = ((cur != null) ? V(cur, "sortie") : "");
+			tGenres.Text = ((cur != null) ? V(cur, "genres") : "");
+			tDescJ.Text = ((cur != null) ? V(cur, "description").Replace("\r\n", "\n").Replace("\n", "\r\n") : "");
 			bool flag = cur != null && V(cur, "id") == "omsi2";
 			tId.Enabled = cur != null && !flag;
 			tUrl.Enabled = cur != null && !flag;
@@ -363,6 +398,12 @@ internal class FenJeux : Form
 			cur["image"] = tImage.Text.Trim();
 			cur["galerie"] = tPhotos.Text.Replace("\r\n", "\n").Trim();
 			cur["video"] = tVideo.Text.Trim();
+			string st = Regex.Match(tSteam.Text, "\\d{1,10}").Value;
+			cur["steam"] = st;
+			cur["editeur"] = tEditeur.Text.Trim();
+			cur["sortie"] = tSortie.Text.Trim();
+			cur["genres"] = tGenres.Text.Trim();
+			cur["description"] = tDescJ.Text.Replace("\r\n", "\n").Trim();
 			cur["categories"] = tCats.Text.Replace("\r\n", "\n").Trim();
 			Categories.Definir(cur["id"], cur["categories"]);
 			cur["statut"] = ((sgStatut.Index > 0) ? statutsId[sgStatut.Index] : "");
@@ -473,7 +514,7 @@ internal class FenJeux : Form
 		using OpenFileDialog openFileDialog = new OpenFileDialog();
 		openFileDialog.Filter = "Images (*.jpg;*.jpeg;*.png)|*.jpg;*.jpeg;*.png";
 		openFileDialog.Multiselect = true;
-		openFileDialog.Title = "Photos du jeu (10 au plus)";
+		openFileDialog.Title = "Photos du jeu (10 au maximum)";
 		if (openFileDialog.ShowDialog(this) != DialogResult.OK)
 		{
 			return;
@@ -484,7 +525,7 @@ internal class FenJeux : Form
 		if (num + fs.Length > 10)
 		{
 			lErr.ForeColor = C.Rouge;
-			lErr.Text = "10 photos au plus (il y en a déjà " + num + ").";
+			lErr.Text = "10 photos au maximum (il y en a déjà " + num + ").";
 			return;
 		}
 		Envoyer("des photos", delegate(Action<string> e)
@@ -517,7 +558,7 @@ internal class FenJeux : Form
 		if (new FileInfo(f).Length > 1992294400)
 		{
 			lErr.ForeColor = C.Rouge;
-			lErr.Text = "Vidéo trop lourde (1,9 Go au plus).";
+			lErr.Text = "Vidéo trop lourde (1,9 Go maximum).";
 			return;
 		}
 		Envoyer("de la vidéo", (Action<string> e) => GitHub.EnvoyerVideo(f, id, e), delegate(string u)

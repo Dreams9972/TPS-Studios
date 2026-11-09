@@ -38,7 +38,7 @@ internal class FenOffrirVip : Form
 		base.Controls.Add(value);
 		Label value2 = new Label
 		{
-			Text = "Entre un code VIP (TPS-VIP-XXXX-XXXX-XXXX) : il sera activé sur le compte de " + ami.Pseudo + ", pas sur le tien. " + ami.Pseudo + " reçoit tous les avantages VIP (badge, bannières, accès anticipé, points, rôle Discord) et est prévenu dans son lanceur.",
+			Text = "Saisissez un code VIP (TPS-VIP-XXXX-XXXX-XXXX) : il sera activé sur le compte de " + ami.Pseudo + ", pas sur le vôtre. " + ami.Pseudo + " reçoit tous les avantages VIP (badge, bannières, accès anticipé, points, rôle Discord) et est prévenu dans son lanceur.",
 			UseMnemonic = false,
 			Font = new Font("Segoe UI", Zx.P(9.5f)),
 			ForeColor = C.Gris,
@@ -55,7 +55,7 @@ internal class FenOffrirVip : Form
 		base.Controls.Add(t);
 		Label value3 = new Label
 		{
-			Text = "Pas encore de code ? Achète le VIP à 5 € : tu reçois un code à offrir.",
+			Text = "Pas encore de code ? Achetez le VIP à 5 € : vous recevez un code à offrir.",
 			Font = new Font("Segoe UI", Zx.P(9f)),
 			ForeColor = C.Gris,
 			BackColor = C.Fond,
@@ -119,7 +119,7 @@ internal class FenOffrirVip : Form
 			string code = t.Text.Trim();
 			if (code.Length < 10)
 			{
-				lErr.Text = "Entre le code VIP à offrir.";
+				lErr.Text = "Saisissez le code VIP à offrir.";
 			}
 			else
 			{

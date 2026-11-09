@@ -232,7 +232,7 @@ internal class FenTray : Form
 		if (!flag3)
 		{
 			t = ((lecteur.Length > 0) ? (lecteur + " est en pause") : "Aucune musique en cours");
-			t2 = ((lecteur.Length > 0) ? "Appuie sur lecture" : ("Ouvre " + Musique.NomMode));
+			t2 = ((lecteur.Length > 0) ? "Appuyez sur lecture" : ("Ouvrez " + Musique.NomMode));
 		}
 		Lang.DrawText(g, t, fT, new Rectangle(Zx.P(66), Zx.P(60), w - Zx.P(82), Zx.P(20)), flag3 ? C.Texte : C.Gris, TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding);
 		Lang.DrawText(g, t2, fS, new Rectangle(Zx.P(66), Zx.P(80), w - Zx.P(82), Zx.P(18)), flag3 ? color : C.Gris, TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding);

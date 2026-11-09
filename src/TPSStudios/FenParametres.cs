@@ -87,9 +87,9 @@ internal class FenParametres : Form, IPage
 	public FenParametres(bool pleinActuel, string versionDispo, bool appFournie = false)
 	{
 		PleinEcran = pleinActuel;
-		Text = "Paramètres";
+		Text = "Réglages";
 		Size hote = Integre.Hote;
-		CW = Math.Min(hote.Width, Zx.P(1140));
+		CW = Math.Max(Math.Min(hote.Width, Zx.P(900)), Math.Min(hote.Width - Zx.P(48), Zx.P(2200)));
 		X0 = (hote.Width - CW) / 2;
 		base.ClientSize = hote;
 		base.FormBorderStyle = FormBorderStyle.None;
@@ -109,7 +109,7 @@ internal class FenParametres : Form, IPage
 		Theme.Fenetre(this);
 		Label value = new Label
 		{
-			Text = "Paramètres",
+			Text = "Réglages",
 			Font = new Font("Segoe UI Semibold", Zx.P(18f)),
 			ForeColor = C.Texte,
 			BackColor = C.Fond,
@@ -152,7 +152,7 @@ internal class FenParametres : Form, IPage
 		cSons = Opt(cadre, 0, "Sons de l'interface", "Un léger son à chaque clic sur un bouton ou un onglet.", Sons.Actifs);
 		Etiquette(cadre, "Page affichée au démarrage", Zx.P(24), Zx.P(116));
 		sgPage = new Segments();
-		sgPage.Items = new string[3] { "Accueil", "Bibliothèque", "Dernier projet joué" };
+		sgPage.Items = new string[3] { "Accueil", "Bibliothèque", "Dernier mod joué" };
 		sgPage.Location = new Point(Zx.P(24), Zx.P(142));
 		sgPage.Width = cw - Zx.P(48);
 		sgPage.Etire = true;
@@ -218,7 +218,7 @@ internal class FenParametres : Form, IPage
 		sgLangue.Etire = true;
 		sgLangue.Index = Math.Max(0, Array.IndexOf(Lang.Codes, Lang.Code));
 		cadre.Controls.Add(sgLangue);
-		Etiquette(cadre, "Taille de l'interface  ·  Automatique : selon ton écran (" + (int)Math.Round(Zx.Auto() * 100f) + " % ici)  ·  s'applique tout de suite", Zx.P(24), Zx.P(394));
+		Etiquette(cadre, "Taille de l'interface  ·  Automatique : selon votre écran (" + (int)Math.Round(Zx.Auto() * 100f) + " % ici)  ·  s'applique tout de suite", Zx.P(24), Zx.P(394));
 		sgTaille = new Segments();
 		sgTaille.Items = Zx.Noms;
 		sgTaille.Location = new Point(Zx.P(24), Zx.P(420));
@@ -242,10 +242,10 @@ internal class FenParametres : Form, IPage
 		cadre2.Controls.Add(bouton);
 		Etiquette(cadre2, (versionDispo != null) ? ("Nouvelle version du lanceur : v" + versionDispo + "   (installée : v" + Config.VERSION + ")") : ("Lanceur v" + Config.VERSION + "  ·  à jour"), Zx.P(312), Zx.P(55)).ForeColor = ((versionDispo != null) ? C.Bleu : C.Gris);
 		cMajL = Opt(cadre2, 1, "Mettre à jour le lanceur automatiquement", "Installe les nouvelles versions au démarrage. Désactivé : un bandeau sur l'accueil vous prévient.", Config.Oui("maj_lanceur", defaut: false), Zx.P(40) + Zx.P(62) - Zx.P(4));
-		cMajP = Opt(cadre2, 2, "Mettre à jour mes projets installés automatiquement", "Au démarrage, un projet à la fois, jamais jeu ouvert.", Config.Oui("maj_auto_projets", defaut: false), Zx.P(40) + Zx.P(62) - Zx.P(4));
+		cMajP = Opt(cadre2, 2, "Mettre à jour mes mods installés automatiquement", "Au démarrage, un mod à la fois, jamais pendant que le jeu est ouvert.", Config.Oui("maj_auto_projets", defaut: false), Zx.P(40) + Zx.P(62) - Zx.P(4));
 		Cadre c = Section("Démarrage et jeu", Zx.P(40) + 3 * Zx.P(62) + Zx.P(6));
 		cRed = Opt(c, 0, "Réduire le lanceur quand le jeu démarre", "Le lanceur se met dans la barre des tâches dès que vous cliquez sur JOUER.", Config.Oui("reduire", defaut: false));
-		cFerme = Opt(c, 2, "Garder le lanceur ouvert quand on clique sur la croix", "Il reste dans la zone de notification (près de l'horloge) ; « Quitter » le ferme pour de bon.", Config.Oui("fermer_reduit", defaut: true));
+		cFerme = Opt(c, 2, "Garder le lanceur ouvert quand vous cliquez sur la croix", "Il reste dans la zone de notification (près de l'horloge) ; « Quitter » le ferme pour de bon.", Config.Oui("fermer_reduit", defaut: true));
 		cDem = Opt(c, 1, "Démarrer le lanceur avec Windows", "Ouvre le lanceur à chaque ouverture de session. Désactivable ici à tout moment.", Demarrage.Actif);
 		Cadre cadre3 = Section("Activité Discord", Zx.P(40) + Zx.P(62) + Zx.P(116));
 		cDisc = Opt(cadre3, 0, "Afficher mon activité sur Discord", "Vos amis Discord voient que vous utilisez TPS Groupe et la carte à laquelle vous jouez.", Config.Oui("discord_presence", defaut: false));
@@ -281,7 +281,7 @@ internal class FenParametres : Form, IPage
 		}
 		for (int j = 0; j < list.Count; j++)
 		{
-			Option value4 = new Option(list[j].Nom, "Mises à jour et sortie de ce contenu", Notifs.Suivi(list[j], omsi))
+			Option value4 = new Option(list[j].Nom, "Mises à jour et sortie de ce mod", Notifs.Suivi(list[j], omsi))
 			{
 				Location = new Point(Zx.P(8), num5 + Zx.P(26) + j * Zx.P(62)),
 				Width = cw - Zx.P(16)
@@ -316,7 +316,7 @@ internal class FenParametres : Form, IPage
 			lMus.ForeColor = ((flag || flag2) ? C.Vert : C.Gris);
 		};
 		majMus();
-		Etiquette(cadre5, "Connecte ton compte dans l'application (une seule fois) : le lanceur pilote ensuite la lecture en cours, sans jamais voir ton mot de passe.", Zx.P(24), Zx.P(166)).MaximumSize = new Size(cw - Zx.P(48), 0);
+		Etiquette(cadre5, "Connectez votre compte dans l'application (une seule fois) : le lanceur pilote ensuite la lecture en cours, sans jamais voir votre mot de passe.", Zx.P(24), Zx.P(166)).MaximumSize = new Size(cw - Zx.P(48), 0);
 		Bouton bouton2 = new Bouton("Connecter Spotify");
 		bouton2.Couleur = Color.FromArgb(30, 185, 84);
 		bouton2.Size = new Size(Zx.P(210), Zx.P(40));
@@ -349,8 +349,8 @@ internal class FenParametres : Form, IPage
 			majMus();
 		};
 		cadre5.Controls.Add(bouton3);
-		Etiquette(cadre5, "Chaque bouton ouvre une page qui t'accompagne : connexion au compte, application ou lecteur web, premier titre.", Zx.P(24), Zx.P(270));
-		Etiquette(cadre5, "Dans la pilule de l'accueil, le bouton à gauche ramène ton lecteur (application ou onglet déjà ouvert) pour changer de playlist.", Zx.P(24), Zx.P(306)).MaximumSize = new Size(cw - Zx.P(48), 0);
+		Etiquette(cadre5, "Chaque bouton ouvre une page qui vous accompagne : connexion au compte, application ou lecteur web, premier titre.", Zx.P(24), Zx.P(270));
+		Etiquette(cadre5, "Dans la pilule de l'accueil, le bouton à gauche ramène votre lecteur (application ou onglet déjà ouvert) pour changer de playlist.", Zx.P(24), Zx.P(306)).MaximumSize = new Size(cw - Zx.P(48), 0);
 		Cadre c2 = Section("Données et dépannage", Zx.P(40) + 4 * Zx.P(52) + Zx.P(10));
 		bCache = Rangee(c2, 0, "Vider le cache", danger: false, delegate
 		{
@@ -387,7 +387,7 @@ internal class FenParametres : Form, IPage
 		}, "Utile pour signaler un problème");
 		Rangee(c2, 3, "Réinitialiser les réglages", danger: true, delegate
 		{
-			if (MessageBox.Show(this, "Remettre tous les réglages du lanceur à zéro ?\n\nLes dossiers du jeu, les profils et les projets installés sont conservés.", Text, MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+			if (MessageBox.Show(this, "Remettre tous les réglages du lanceur à zéro ?\n\nLes dossiers du jeu, les profils et les mods installés sont conservés.", Text, MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
 			{
 				Config.Reinitialiser("omsi", "openomsi");
 				Demarrage.Definir(oui: false);
@@ -404,7 +404,7 @@ internal class FenParametres : Form, IPage
 		base.Controls.Add(panel);
 		Label value5 = new Label
 		{
-			Text = "TPS Groupe Lanceur v" + Config.VERSION,
+			Text = "Lanceur TPS Groupe v" + Config.VERSION,
 			Font = new Font("Segoe UI", Zx.P(9f)),
 			ForeColor = C.Gris,
 			BackColor = C.Cote,

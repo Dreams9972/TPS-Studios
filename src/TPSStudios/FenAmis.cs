@@ -106,7 +106,7 @@ internal class FenAmis : Form, IPage
 		panel2.Controls.Add(value);
 		Label value2 = new Label
 		{
-			Text = "Ajoute des joueurs TPS Groupe et vois en direct quand ils sont en ligne ou en jeu.",
+			Text = "Ajoutez des joueurs TPS Groupe et voyez en direct quand ils sont en ligne ou en jeu.",
 			Font = new Font("Segoe UI", Zx.P(9.5f)),
 			ForeColor = C.Gris,
 			BackColor = C.Fond,
@@ -138,7 +138,7 @@ internal class FenAmis : Form, IPage
 			corps.Controls.Add(label);
 			return label;
 		};
-		func("TON CODE AMI  ·  donne-le à tes amis pour qu'ils t'ajoutent", 6);
+		func("VOTRE CODE AMI  ·  donnez-le à vos amis pour qu'ils vous ajoutent", 6);
 		tCode = new Champ(multi: false, Zx.P(38));
 		tCode.Location = new Point(lx, Zx.P(28));
 		tCode.Width = num4 - Zx.P(118);
@@ -161,7 +161,7 @@ internal class FenAmis : Form, IPage
 			try
 			{
 				Clipboard.SetText(Social.CodeAmi(Social.MonId));
-				Message("✔  Code ami copié : colle-le à ton ami (Discord, message…).", C.Vert);
+				Message("✔  Code ami copié : envoyez-le à votre ami (Discord, message…).", C.Vert);
 			}
 			catch
 			{
@@ -185,11 +185,11 @@ internal class FenAmis : Form, IPage
 			string id = Social.IdDepuisCode(tAjout.Text);
 			if (id == null)
 			{
-				Message("✖  Code ami invalide : 16 caractères (chiffres et lettres A à F), par ex. 1A2B-3C4D-5E6F-7A8B.", C.Rouge);
+				Message("✖  Code ami invalide : 16 caractères (chiffres et lettres A à F), ex. 1A2B-3C4D-5E6F-7A8B.", C.Rouge);
 			}
 			else if (id == Social.MonId)
 			{
-				Message("C'est ton propre code ami.", C.Orange);
+				Message("C'est votre propre code ami.", C.Orange);
 			}
 			else
 			{
@@ -375,7 +375,7 @@ internal class FenAmis : Form, IPage
 			}
 			if (premier && lMsg.ForeColor != C.Rouge)
 			{
-				Message("Ton pseudo TPS : " + Social.Pseudo + "  ·  tes amis voient ton statut et tes mods, personne d'autre.", C.Gris);
+				Message("Votre pseudo TPS : " + Social.Pseudo + "  ·  vos amis voient votre statut et vos mods, personne d'autre.", C.Gris);
 			}
 			MajTaille();
 		});
@@ -464,7 +464,7 @@ internal class FenAmis : Form, IPage
 			Agir(() => Social.DemanderAmi(a.Id), "✔  Demande envoyée à " + a.Pseudo);
 			break;
 		case "retirer":
-			Agir(() => Social.RetirerAmi(a.Id), a.Pseudo + " a été retiré de tes amis");
+			Agir(() => Social.RetirerAmi(a.Id), a.Pseudo + " a été retiré de vos amis");
 			break;
 		case "vip":
 			Message("\ud83c\udf81  Le VIP a été offert à " + a.Pseudo + " : il sera prévenu dans son lanceur.", C.Or);
@@ -575,7 +575,7 @@ internal class FenAmis : Form, IPage
 		clicsR.Clear();
 		if (tq.Text.Trim().Length < 2)
 		{
-			Lang.DrawText(g, "Tape au moins 2 lettres du pseudo d'un joueur.\nLe joueur doit avoir déjà utilisé les fonctions en ligne du lanceur.", fSt, new Rectangle(Zx.P(4), Zx.P(6), w - Zx.P(8), Zx.P(60)), C.Gris, TextFormatFlags.WordBreak | TextFormatFlags.NoPadding);
+			Lang.DrawText(g, "Tapez au moins 2 lettres du pseudo d'un joueur.\nLe joueur doit avoir déjà utilisé les fonctions en ligne du lanceur.", fSt, new Rectangle(Zx.P(4), Zx.P(6), w - Zx.P(8), Zx.P(60)), C.Gris, TextFormatFlags.WordBreak | TextFormatFlags.NoPadding);
 			return;
 		}
 		if (rechEnCours && res.Count == 0)
@@ -596,7 +596,7 @@ internal class FenAmis : Form, IPage
 				break;
 			}
 			Ami aa = re;
-			Ligne(g, re, num, w, (re.Lien == "ami") ? "Déjà ton ami" : ((re.Lien == "envoyee") ? "Demande envoyée" : ((re.Lien == "recue") ? "Il t'a demandé en ami" : "Joueur TPS Groupe")), C.Gris, point: false, sourisR);
+			Ligne(g, re, num, w, (re.Lien == "ami") ? "Déjà votre ami" : ((re.Lien == "envoyee") ? "Demande envoyée" : ((re.Lien == "recue") ? "Il vous a demandé en ami" : "Joueur TPS Groupe")), C.Gris, point: false, sourisR);
 			if (re.Lien == "")
 			{
 				Bt(g, clicsR, sourisR, w - Zx.P(12), num + 11, "＋  Ajouter", C.Jade, plein: true, delegate
@@ -608,7 +608,7 @@ internal class FenAmis : Form, IPage
 			{
 				Bt(g, clicsR, sourisR, w - Zx.P(12), num + 11, "Accepter", C.Vert, plein: true, delegate
 				{
-					Agir(() => Social.AccepterAmi(aa.Id), "✔  " + aa.Pseudo + " est maintenant ton ami");
+					Agir(() => Social.AccepterAmi(aa.Id), "✔  " + aa.Pseudo + " est maintenant votre ami");
 				});
 			}
 			else
@@ -637,14 +637,14 @@ internal class FenAmis : Form, IPage
 			foreach (Ami recue in Social.Recues)
 			{
 				Ami aa3 = recue;
-				Ligne(g, recue, num, w, "Veut t'ajouter en ami", C.Gris, point: false, sourisL);
+				Ligne(g, recue, num, w, "Veut vous ajouter en ami", C.Gris, point: false, sourisL);
 				Rectangle rectangle = Bt(g, clicsL, sourisL, w - Zx.P(12), num + 11, "Refuser", C.Gris, plein: false, delegate
 				{
 					Agir(() => Social.RetirerAmi(aa3.Id), "Demande de " + aa3.Pseudo + " refusée");
 				});
 				Bt(g, clicsL, sourisL, rectangle.X - Zx.P(8), num + 11, "Accepter", C.Vert, plein: true, delegate
 				{
-					Agir(() => Social.AccepterAmi(aa3.Id), "✔  " + aa3.Pseudo + " est maintenant ton ami");
+					Agir(() => Social.AccepterAmi(aa3.Id), "✔  " + aa3.Pseudo + " est maintenant votre ami");
 				});
 				clicsL.Add(new KeyValuePair<Rectangle, Action>(new Rectangle(0, num, w, Zx.P(54)), delegate
 				{
@@ -666,7 +666,7 @@ internal class FenAmis : Form, IPage
 		num += Zx.P(32);
 		if (list.Count == 0)
 		{
-			Lang.DrawText(g, "Pas encore d'amis : ajoute-les avec leur code ami ou cherche-les à gauche.", fSt, new Rectangle(Zx.P(4), num + Zx.P(6), w - Zx.P(8), Zx.P(48)), C.Gris, TextFormatFlags.WordBreak | TextFormatFlags.NoPadding);
+			Lang.DrawText(g, "Pas encore d'amis : ajoutez-les avec leur code ami ou cherchez-les à gauche.", fSt, new Rectangle(Zx.P(4), num + Zx.P(6), w - Zx.P(8), Zx.P(48)), C.Gris, TextFormatFlags.WordBreak | TextFormatFlags.NoPadding);
 			num += Zx.P(62);
 		}
 		foreach (Ami item2 in list)
@@ -675,9 +675,9 @@ internal class FenAmis : Form, IPage
 			Ligne(g, item2, num, w, item2.EnLigne ? item2.Statut : "Hors ligne", item2.EnLigne ? (item2.Statut.StartsWith("En jeu") ? C.Orange : C.Vert) : C.Gris, point: true, sourisL);
 			Rectangle rectangle2 = Bt(g, clicsL, sourisL, w - Zx.P(12), num + 11, "Retirer", C.Rouge, plein: false, delegate
 			{
-				if (MessageBox.Show(this, "Retirer « " + aa2.Pseudo + " » de tes amis ?", "Amis", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+				if (MessageBox.Show(this, "Retirer « " + aa2.Pseudo + " » de vos amis ?", "Amis", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
 				{
-					Agir(() => Social.RetirerAmi(aa2.Id), aa2.Pseudo + " a été retiré de tes amis");
+					Agir(() => Social.RetirerAmi(aa2.Id), aa2.Pseudo + " a été retiré de vos amis");
 				}
 			});
 			Bt(g, clicsL, sourisL, rectangle2.X - Zx.P(8), num + 11, "Profil et mods", C.Jade, plein: false, delegate

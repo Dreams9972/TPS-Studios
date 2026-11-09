@@ -392,7 +392,7 @@ internal static class Progression
 		list.Add(D("discord", "Membre de la communauté", "Ouvrir l'invitation du Discord TPS Groupe", "\ue8f2", 30, 1, (Compte c) => S(c, "discord")));
 		List<DefSucces> list2 = list;
 		list2.AddRange(P("lanc", new string[5] { "l1", "l10", "l50", "l200", "l500" }, new string[5] { "Premier voyage", "Habitué", "Voyageur régulier", "Chauffeur de légende", "Pilier de la ligne" }, "Jouer {0} jour{1} à une carte lancée depuis le lanceur", "\ue768", new int[5] { 1, 10, 50, 200, 500 }, new int[5] { 50, 120, 300, 900, 2000 }, (Compte c) => S(c, "lanc_jours")));
-		list2.AddRange(P("cont", new string[4] { "c2", "c5", "c10", "c20" }, new string[4] { "Curieux", "Explorateur", "Globe-trotteur", "Encyclopédie vivante" }, "Jouer à {0} contenus différents", "\ue909", new int[4] { 2, 5, 10, 20 }, new int[4] { 80, 200, 500, 1200 }, (Compte c) => c.Lancements.Count));
+		list2.AddRange(P("cont", new string[4] { "c2", "c5", "c10", "c20" }, new string[4] { "Curieux", "Explorateur", "Globe-trotteur", "Encyclopédie vivante" }, "Jouer à {0} mods différents", "\ue909", new int[4] { 2, 5, 10, 20 }, new int[4] { 80, 200, 500, 1200 }, (Compte c) => c.Lancements.Count));
 		list2.AddRange(P("serie", new string[5] { "s3", "s7", "s30", "s100", "s365" }, new string[5] { "Fidèle", "Assidu", "Inarrêtable", "Gardien du lanceur", "Une année entière" }, "Ouvrir le lanceur {0} jours de suite", "\ue787", new int[5] { 3, 7, 30, 100, 365 }, new int[5] { 60, 150, 600, 2000, 5000 }, (Compte c) => c.SerieMax));
 		list2.AddRange(P("jours", new string[4] { "j7", "j30", "j100", "j365" }, new string[4] { "De passage", "Habitué du lanceur", "Fidèle au poste", "Résident TPS" }, "Ouvrir le lanceur {0} jours au total", "\ue163", new int[4] { 7, 30, 100, 365 }, new int[4] { 60, 200, 700, 2000 }, (Compte c) => S(c, "jours")));
 		list2.AddRange(P("temps", new string[4] { "m60", "m600", "m3000", "m6000" }, new string[4] { "Une heure de route", "Dix heures au volant", "Cinquante heures", "Cent heures de service" }, "Jouer {0} minutes depuis le lanceur", "\ue916", new int[4] { 60, 600, 3000, 6000 }, new int[4] { 100, 300, 900, 2000 }, (Compte c) => S(c, "sec_compte") / 60));
@@ -414,7 +414,7 @@ internal static class Progression
 		if (complets.TryGetValue(id, out var value))
 		{
 			value.Objectif = Math.Max(1, contenus);
-			value.Desc = "Jouer à chacun des " + Math.Max(1, contenus) + " contenus " + nom;
+			value.Desc = "Jouer à chacun des " + Math.Max(1, contenus) + " mods " + nom;
 			return;
 		}
 		Defs.Add(D(g + "depart", nom + " : premier départ", "Lancer " + nom + " depuis le lanceur", "\ue768", 60, 1, (Compte c) => (S(c, g + "jours") > 0) ? 1 : 0));
@@ -439,7 +439,7 @@ internal static class Progression
 			nom + " : première carte",
 			nom + " : réseau en construction",
 			nom + " : réseau complet"
-		}, "Installer {0} contenu{1} " + nom + " différent{1}", "\ue896", new int[3] { 1, 3, 10 }, new int[3] { 50, 150, 500 }, (Compte c) => S(c, g + "inst")));
+		}, "Installer {0} mod{1} " + nom + " différent{1}", "\ue896", new int[3] { 1, 3, 10 }, new int[3] { 50, 150, 500 }, (Compte c) => S(c, g + "inst")));
 		Defs.AddRange(P(g + "jours", new string[3]
 		{
 			g + "j5",
@@ -451,7 +451,7 @@ internal static class Progression
 			nom + " : passionné",
 			nom + " : inconditionnel"
 		}, "Jouer à " + nom + " {0} jour{1} différent{1}", "\ue787", new int[3] { 5, 30, 100 }, new int[3] { 100, 400, 1200 }, (Compte c) => S(c, g + "jours")));
-		value = D(g + "tout", nom + " : complétionniste", "Jouer à chacun des " + Math.Max(1, contenus) + " contenus " + nom, "\ue73e", 800, Math.Max(1, contenus), (Compte c) => S(c, g + "contenus"));
+		value = D(g + "tout", nom + " : complétionniste", "Jouer à chacun des " + Math.Max(1, contenus) + " mods " + nom, "\ue73e", 800, Math.Max(1, contenus), (Compte c) => S(c, g + "contenus"));
 		Defs.Add(value);
 		complets[id] = value;
 		if (id == "omsi2")

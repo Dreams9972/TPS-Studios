@@ -183,7 +183,7 @@ internal class FenAmiProfil : Form
 			bAct.Text = "Retirer de mes amis";
 			bAct.Click += delegate
 			{
-				if (MessageBox.Show(this, "Retirer « " + a.Pseudo + " » de tes amis ?", "Amis", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+				if (MessageBox.Show(this, "Retirer « " + a.Pseudo + " » de vos amis ?", "Amis", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
 				{
 					Demande = "retirer";
 					base.DialogResult = DialogResult.OK;
@@ -227,7 +227,7 @@ internal class FenAmiProfil : Form
 			num += Zx.P(48);
 		}
 		Lang.DrawText(g, "Niv. " + ami.Niveau, fM, new Point(num, Zx.P(44)), Color.FromArgb(255, 196, 140));
-		string t = ((pr != null) ? ((!pr.EstAmi) ? "Pas encore dans tes amis" : (pr.A.EnLigne ? pr.A.Statut : "Hors ligne")) : ((err != null) ? ("✖  " + err) : "Chargement du profil…"));
+		string t = ((pr != null) ? ((!pr.EstAmi) ? "Pas encore dans vos amis" : (pr.A.EnLigne ? pr.A.Statut : "Hors ligne")) : ((err != null) ? ("✖  " + err) : "Chargement du profil…"));
 		Lang.DrawText(g, t, fT, new Rectangle(Zx.P(132), Zx.P(76), w - Zx.P(160), Zx.P(20)), (pr == null || !pr.EstAmi || !pr.A.EnLigne) ? ((err != null) ? C.Rouge : C.Gris) : (pr.A.Statut.StartsWith("En jeu") ? C.Orange : C.Vert), TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding);
 		Lang.DrawText(g, "Code ami : " + Social.CodeAmi(ami.Id), FenAmis.fSt, new Point(Zx.P(132), Zx.P(98)), C.Gris);
 		if (pr == null)
@@ -306,7 +306,7 @@ internal class FenAmiProfil : Form
 			string pid = i[0];
 			if (flag)
 			{
-				Lang.DrawText(g, "Tu l'as aussi ✔", FenAmis.fSt, new Rectangle(num3 + num4 - Zx.P(220), num2, Zx.P(206), Zx.P(42)), C.Vert, TextFormatFlags.Right | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+				Lang.DrawText(g, "Vous l'avez aussi ✔", FenAmis.fSt, new Rectangle(num3 + num4 - Zx.P(220), num2, Zx.P(206), Zx.P(42)), C.Vert, TextFormatFlags.Right | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
 			}
 			else if (projet != null)
 			{

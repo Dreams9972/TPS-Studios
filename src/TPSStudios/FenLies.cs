@@ -85,7 +85,7 @@ internal class FenLies : Form
 			g.InterpolationMode = InterpolationMode.HighQualityBilinear;
 			if (fenLies.l.Count == 0)
 			{
-				Lang.DrawText(g, (fenLies.tous.Count == 0) ? "Aucun autre contenu pour l'instant." : "Aucun mod lié ne correspond à cette recherche.", fN, new Rectangle(0, 0, w, Zx.P(60)), C.Gris, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+				Lang.DrawText(g, (fenLies.tous.Count == 0) ? "Aucun autre mod pour l'instant." : "Aucun mod lié ne correspond à cette recherche.", fN, new Rectangle(0, 0, w, Zx.P(60)), C.Gris, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
 			}
 			else
 			{

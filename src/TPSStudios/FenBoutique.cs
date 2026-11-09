@@ -79,7 +79,7 @@ internal class FenBoutique : Form, IPage
 		ForeColor = C.Texte;
 		Font = new Font("Segoe UI", Zx.P(10f));
 		base.ClientSize = Integre.Hote;
-		CW = Math.Min(base.ClientSize.Width, Zx.P(1180));
+		CW = Math.Max(Math.Min(base.ClientSize.Width, Zx.P(900)), Math.Min(base.ClientSize.Width - Zx.P(48), Zx.P(2200)));
 		X0 = (base.ClientSize.Width - CW) / 2;
 		haut = new ZoneDessin();
 		haut.Dock = DockStyle.Top;
@@ -424,7 +424,7 @@ internal class FenBoutique : Form, IPage
 		}
 		else
 		{
-			int num3 = 3;
+			int num3 = Math.Max(3, Math.Min(5, num2 / Zx.P(420)));
 			int num4 = Zx.P(16);
 			int num5 = (num2 - (num3 - 1) * num4) / num3;
 			int num6 = num5 * 9 / 16 + 150;
@@ -495,7 +495,7 @@ internal class FenBoutique : Form, IPage
 		}
 		Lang.DrawText(g, "COSMÉTIQUES  ·  RÉSERVÉS AUX MEMBRES VIP", fSec, new Point(num + Zx.P(2), y), C.Gris);
 		y += Zx.P(24);
-		int num12 = 3;
+		int num12 = Math.Max(3, Math.Min(5, num2 / Zx.P(380)));
 		int num13 = Zx.P(16);
 		int num14 = (num2 - (num12 - 1) * num13) / num12;
 		int num15 = Zx.P(214);
