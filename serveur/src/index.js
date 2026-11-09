@@ -63,6 +63,22 @@ async function assureLikesCom(env) {
   await env.DB.prepare('CREATE TABLE IF NOT EXISTS likes_commentaires (commentaire_id INTEGER NOT NULL, joueur_id TEXT NOT NULL, cree INTEGER NOT NULL, PRIMARY KEY (commentaire_id, joueur_id))').run();
   tableLikesCom = true;
 }
+// apparence publique d'un joueur (bannière, couleurs, décor, bio…) vue par ses amis (v2.9.7)
+let tableApparence = false;
+async function assureApparence(env) {
+  if (tableApparence) return;
+  await env.DB.prepare('CREATE TABLE IF NOT EXISTS apparence (joueur_id TEXT PRIMARY KEY, donnees TEXT NOT NULL, maj INTEGER NOT NULL)').run();
+  tableApparence = true;
+}
+const APP_TEXTES = { ban_type: 12, ban_motif: 12, deco: 24, bio: 200, statut: 60, jeu_favori: 40, lieu: 40 };
+const APP_NOMBRES = { couleur: [0, 64], banniere: [0, 64], couleur_perso: [-2147483648, 2147483647], ban_c1: [-2147483648, 2147483647], ban_c2: [-2147483648, 2147483647], ban_angle: [0, 360], succes: [0, 10000], lancements: [0, 10000000], secondes: [0, 2000000000], mods: [0, 1000] };
+function apparencePropre(c) {
+  const o = {};
+  for (const [k, n] of Object.entries(APP_TEXTES)) if (c[k] !== undefined) o[k] = String(c[k] ?? '').replace(/[\u0000-\u001f\u007f]/g, ' ').trim().slice(0, n);
+  for (const [k, [a, b]] of Object.entries(APP_NOMBRES)) if (c[k] !== undefined) { const v = parseInt(c[k], 10); if (Number.isFinite(v)) o[k] = Math.max(a, Math.min(b, v)); }
+  return o;
+}
+const lireApparence = (t) => { try { return t ? JSON.parse(t) : {}; } catch { return {}; } };
 const PRESENCE = 150;   // secondes : au-delà, le joueur est considéré hors ligne
 const AMIS_PRESENCE = PRESENCE, AMIS_MAX = 200;
 const MES_AMIS = "WITH mes(id) AS (SELECT CASE WHEN a = ? THEN b ELSE a END FROM amis WHERE etat = 'ami' AND (a = ? OR b = ?)) ";   // mes amis (3 paramètres : mon id)
@@ -222,6 +238,14 @@ async function route(request, env) {
   }
 
   // amis : demandes, acceptation, retrait ; le statut en direct d'un joueur n'est visible que par ses amis
+  if (chemin === '/v1/apparence' && m === 'PUT') {
+    if (!moi) return erreur(401, 'jeton absent ou invalide');
+    if (!(await limite(env, 'app:' + moi.id, 60, 3600))) return erreur(429, 'trop de mises à jour');
+    await assureApparence(env);
+    const o = apparencePropre(await corps(request));
+    await env.DB.prepare('INSERT OR REPLACE INTO apparence (joueur_id, donnees, maj) VALUES (?, ?, ?)').bind(moi.id, JSON.stringify(o), maintenant()).run();
+    return rep({ ok: true });
+  }
   // ma liste de mods installés (visible seulement par mes amis)
   if (chemin === '/v1/mods' && m === 'PUT') {
     if (!moi) return erreur(401, 'jeton absent ou invalide');
@@ -240,7 +264,9 @@ async function route(request, env) {
     if (!j) return erreur(404, 'joueur introuvable');
     const ami = await estAmi(env, moi.id, id);
     const communs = await env.DB.prepare(MES_AMIS + "SELECT j.id, j.pseudo, j.niveau FROM amis a JOIN joueurs j ON j.id = (CASE WHEN a.a = ? THEN a.b ELSE a.a END) WHERE a.etat = 'ami' AND (a.a = ? OR a.b = ?) AND j.id IN (SELECT id FROM mes) AND j.banni = 0 ORDER BY j.pseudo_min LIMIT 50").bind(moi.id, moi.id, moi.id, id, id, id).all();
-    const o = { id: j.id, pseudo: j.pseudo, niveau: j.niveau, vip: !!j.vip, cree: j.cree, ami, communs: communs.results.map((x) => ({ id: x.id, pseudo: x.pseudo, niveau: x.niveau })) };
+    await assureApparence(env);
+    const ap = await env.DB.prepare('SELECT donnees FROM apparence WHERE joueur_id = ?').bind(id).first();
+    const o = { id: j.id, pseudo: j.pseudo, niveau: j.niveau, vip: !!j.vip, cree: j.cree, ami, apparence: lireApparence(ap && ap.donnees), communs: communs.results.map((x) => ({ id: x.id, pseudo: x.pseudo, niveau: x.niveau })) };
     if (ami) {
       const p = await env.DB.prepare('SELECT statut FROM presence WHERE joueur_id = ? AND vu > ?').bind(id, maintenant() - PRESENCE).first(), md = await env.DB.prepare('SELECT liste, maj FROM mods_joueur WHERE joueur_id = ?').bind(id).first();
       o.statut = p ? p.statut : ''; o.en_ligne = !!p; o.mods = md ? JSON.parse(md.liste) : []; o.mods_maj = md ? md.maj : 0;
@@ -273,10 +299,11 @@ async function route(request, env) {
     const liens = await env.DB.prepare(MES_AMIS + "SELECT a, b FROM amis WHERE etat = 'ami' AND a IN (SELECT id FROM mes) AND b IN (SELECT id FROM mes)").bind(moi.id, moi.id, moi.id).all(), communs = {};
     for (const x of liens.results) { communs[x.a] = (communs[x.a] || 0) + 1; communs[x.b] = (communs[x.b] || 0) + 1; }
     const cad = await env.DB.prepare('SELECT c.quoi, c.cree, j.pseudo FROM cadeaux c JOIN joueurs j ON j.id = c.de WHERE c.a = ? AND c.vu = 0 ORDER BY c.id').bind(moi.id).all();
-    const l = await env.DB.prepare('SELECT a.etat, a.de, j.id, j.pseudo, j.niveau, (SELECT 1 FROM vip v WHERE v.joueur_id = j.id) AS vip, (SELECT p.statut FROM presence p WHERE p.joueur_id = j.id AND p.vu > ?) AS statut FROM amis a JOIN joueurs j ON j.id = (CASE WHEN a.a = ? THEN a.b ELSE a.a END) WHERE (a.a = ? OR a.b = ?) AND j.banni = 0 ORDER BY j.pseudo_min').bind(maintenant() - AMIS_PRESENCE, moi.id, moi.id, moi.id).all();
+    await assureApparence(env);
+    const l = await env.DB.prepare('SELECT a.etat, a.de, j.id, j.pseudo, j.niveau, j.cree, (SELECT 1 FROM vip v WHERE v.joueur_id = j.id) AS vip, (SELECT ap.donnees FROM apparence ap WHERE ap.joueur_id = j.id) AS apparence, (SELECT p.statut FROM presence p WHERE p.joueur_id = j.id AND p.vu > ?) AS statut FROM amis a JOIN joueurs j ON j.id = (CASE WHEN a.a = ? THEN a.b ELSE a.a END) WHERE (a.a = ? OR a.b = ?) AND j.banni = 0 ORDER BY j.pseudo_min').bind(maintenant() - AMIS_PRESENCE, moi.id, moi.id, moi.id).all();
     const amis = [], recues = [], envoyees = [];
     for (const x of l.results) {
-      const o = { id: x.id, pseudo: x.pseudo, niveau: x.niveau, vip: !!x.vip, communs: communs[x.id] || 0 };
+      const o = { id: x.id, pseudo: x.pseudo, niveau: x.niveau, vip: !!x.vip, cree: x.cree || 0, communs: communs[x.id] || 0, apparence: lireApparence(x.apparence) };
       if (x.etat === 'ami') amis.push({ ...o, statut: x.statut || '', en_ligne: !!x.statut });
       else (x.de === moi.id ? envoyees : recues).push(o);
     }
@@ -285,10 +312,15 @@ async function route(request, env) {
   if (chemin === '/v1/joueurs/recherche' && m === 'GET') {
     if (!moi) return erreur(401, 'jeton absent ou invalide');
     if (!(await limite(env, 'rech:' + moi.id, 120, 3600))) return erreur(429, 'trop de recherches, patientez un peu');
-    const q = propre(url.searchParams.get('q'), 20).toLowerCase(); if (q.length < 2) return rep({ joueurs: [] });
-    const motif = q.replace(/[\\%_]/g, (c) => '\\' + c) + '%';
-    const l = await env.DB.prepare(MES_AMIS + "SELECT j.id, j.pseudo, j.niveau, (SELECT 1 FROM vip v WHERE v.joueur_id = j.id) AS vip, (SELECT a.etat || ':' || a.de FROM amis a WHERE (a.a = j.id AND a.b = ?) OR (a.b = j.id AND a.a = ?)) AS lien, (SELECT COUNT(*) FROM amis k WHERE k.etat = 'ami' AND ((k.a = j.id AND k.b IN (SELECT id FROM mes)) OR (k.b = j.id AND k.a IN (SELECT id FROM mes)))) AS communs FROM joueurs j WHERE j.pseudo_min LIKE ? ESCAPE '\\' AND j.id <> ? AND j.banni = 0 ORDER BY length(j.pseudo_min), j.pseudo_min LIMIT 10").bind(moi.id, moi.id, moi.id, moi.id, moi.id, motif, moi.id).all();
-    return rep({ joueurs: l.results.map((x) => ({ id: x.id, pseudo: x.pseudo, niveau: x.niveau, vip: !!x.vip, communs: x.communs || 0, lien: !x.lien ? '' : (x.lien.startsWith('ami') ? 'ami' : (x.lien.endsWith(':' + moi.id) ? 'envoyee' : 'recue')) })) });
+    const q = propre(url.searchParams.get('q'), 24).toLowerCase(); if (q.length < 2) return rep({ joueurs: [] });
+    const code = q.replace(/[^0-9a-f]/g, '');
+    const parCode = /^[0-9a-f-\s]{16,24}$/.test(q) && code.length === 16;
+    const motif = parCode ? code : ('%' + q.replace(/[\\%_]/g, (c) => '\\' + c) + '%');
+    await assureApparence(env);
+    const l = await env.DB.prepare(MES_AMIS + "SELECT j.id, j.pseudo, j.niveau, (SELECT 1 FROM vip v WHERE v.joueur_id = j.id) AS vip, (SELECT a.etat || ':' || a.de FROM amis a WHERE (a.a = j.id AND a.b = ?) OR (a.b = j.id AND a.a = ?)) AS lien, (SELECT COUNT(*) FROM amis k WHERE k.etat = 'ami' AND ((k.a = j.id AND k.b IN (SELECT id FROM mes)) OR (k.b = j.id AND k.a IN (SELECT id FROM mes)))) AS communs FROM joueurs j WHERE " + (parCode ? "j.id = ?" : "j.pseudo_min LIKE ? ESCAPE '\\'") + " AND j.id <> ? AND j.banni = 0 ORDER BY (j.pseudo_min LIKE ? ESCAPE '\\') DESC, length(j.pseudo_min), j.pseudo_min LIMIT 20").bind(moi.id, moi.id, moi.id, moi.id, moi.id, motif, moi.id, q.replace(/[\\%_]/g, (c) => '\\' + c) + '%').all();
+    const apps = {};
+    if (l.results.length) { const ids = l.results.map((x) => x.id); const a2 = await env.DB.prepare('SELECT joueur_id, donnees FROM apparence WHERE joueur_id IN (' + ids.map(() => '?').join(',') + ')').bind(...ids).all(); for (const y of a2.results) { const d = lireApparence(y.donnees); apps[y.joueur_id] = { couleur: d.couleur, banniere: d.banniere, couleur_perso: d.couleur_perso, ban_type: d.ban_type, ban_motif: d.ban_motif, ban_c1: d.ban_c1, ban_c2: d.ban_c2, ban_angle: d.ban_angle, deco: d.deco }; } }
+    return rep({ joueurs: l.results.map((x) => ({ id: x.id, pseudo: x.pseudo, niveau: x.niveau, vip: !!x.vip, communs: x.communs || 0, apparence: apps[x.id] || {}, lien: !x.lien ? '' : (x.lien.startsWith('ami') ? 'ami' : (x.lien.endsWith(':' + moi.id) ? 'envoyee' : 'recue')) })) });
   }
   if (chemin === '/v1/amis/demande' && m === 'POST') {
     if (!moi) return erreur(401, 'jeton absent ou invalide');
