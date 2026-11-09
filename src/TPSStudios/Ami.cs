@@ -21,6 +21,9 @@ internal class Ami
 
 	public bool EnLigne;
 
+	/// <summary>Rôle donné par un administrateur : "", "equipe", "modo" ou "admin".</summary>
+	public string Role = "";
+
 	/// <summary>Date d'inscription sur le serveur (secondes Unix), 0 si inconnue.</summary>
 	public long Cree;
 

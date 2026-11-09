@@ -37,6 +37,43 @@ internal static class Badge
 		Color.FromArgb(60, 78, 214)
 	};
 
+	/// <summary>Pastille de rôle (Admin, Équipe, Modo) ; renvoie sa largeur (0 si pas de rôle).</summary>
+	public static int Role(Graphics g, string role, int x, int y)
+	{
+		string t;
+		Color c;
+		switch (role)
+		{
+		case "admin":
+			t = "ADMIN";
+			c = Color.FromArgb(230, 70, 70);
+			break;
+		case "equipe":
+			t = "ÉQUIPE";
+			c = C.Orange;
+			break;
+		case "modo":
+			t = "MODO";
+			c = Color.FromArgb(60, 140, 255);
+			break;
+		default:
+			return 0;
+		}
+		using Font f = new Font("Segoe UI Semibold", Zx.P(7.5f));
+		int w = Lang.MeasureText(t, f).Width + Zx.P(14);
+		Rectangle r = new Rectangle(x, y, w, Zx.P(18));
+		SmoothingMode sm = g.SmoothingMode;
+		g.SmoothingMode = SmoothingMode.AntiAlias;
+		using (GraphicsPath p = Bouton.Rond(r, Zx.P(9)))
+		{
+			using SolidBrush b = new SolidBrush(c);
+			g.FillPath(b, p);
+		}
+		Lang.DrawText(g, t, f, r, Color.White, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+		g.SmoothingMode = sm;
+		return w;
+	}
+
 	public static void PilleVip(Graphics g, Rectangle r)
 	{
 		SmoothingMode smoothingMode = g.SmoothingMode;

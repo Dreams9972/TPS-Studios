@@ -4,8 +4,31 @@
 // modération par clé administrateur (secret Cloudflare ADMIN_KEY, jamais dans le code), aucune donnée personnelle (pas d'e-mail, pas d'adresse IP stockée en clair).
 
 const MOD = /^[a-z0-9][a-z0-9_-]{1,39}$/;
-const PSEUDO = /^[\p{L}\p{N} _().\[\]\-]{2,20}$/u;
-const RESERVE = /(admin|modo|staff|\btps\b)/i;      // pseudos réservés à l'équipe (inscription avec la clé administrateur)
+// pseudo : tous les caractères visibles (lettres, chiffres, ponctuation, symboles), au moins une lettre ou un chiffre
+const PSEUDO = /^(?=.*[\p{L}\p{N}])[\p{L}\p{M}\p{N}\p{P}\p{S} ]{2,20}$/u;
+const RESERVE = /(admin|modo|staff)/i;      // rôles de l'équipe : seul un administrateur peut les porter ou les donner
+// pseudos interdits : insultes, vulgarités, haine, violence (accents, chiffres « l33t », répétitions et séparateurs déjoués)
+const MOTS_INTERDITS_PARTOUT = ['connard', 'connasse', 'salope', 'encule', 'enculer', 'batard', 'niquetamere', 'niquetonpere', 'niquer', 'niqueta', 'tagueule', 'fermetagueule', 'fils2pute', 'filsdepute', 'enfoire', 'petasse', 'pouffiasse', 'branleur', 'branlette', 'trouduc', 'couille', 'bougnoul', 'bicot', 'youpin', 'negro', 'negre', 'nazi', 'hitler', 'pedophil', 'violeur', 'terroris', 'jihad', 'daech', 'fuck', 'fucker', 'motherfuck', 'bitch', 'whore', 'nigger', 'nigga', 'faggot', 'retarded', 'porno', 'pornhub', 'penis', 'vagin', 'masturb', 'sodomi', 'zoophil', 'trisomique', 'mongolien', 'tapette', 'gouine', 'suicid', 'killyourself', 'kys'];
+const MOTS_INTERDITS_SEULS = ['con', 'cons', 'pute', 'putes', 'pd', 'pede', 'fdp', 'ntm', 'tg', 'bite', 'chatte', 'cul', 'merde', 'foutre', 'viol', 'nique', 'sex', 'sexe', 'shit', 'slut', 'cunt', 'rape', 'pedo', 'abruti', 'debile', 'mongol', 'isis', 'kkk', 'ss'];
+function normPseudo(p) {
+  return String(p ?? '').normalize('NFD').replace(/\p{M}/gu, '').toLowerCase()
+    .replace(/[0@]/g, (c) => (c === '0' ? 'o' : 'a')).replace(/1|!|\|/g, 'i').replace(/3/g, 'e').replace(/4/g, 'a').replace(/5|\$/g, 's').replace(/7/g, 't').replace(/8/g, 'b');
+}
+function pseudoInterdit(p) {
+  const n = normPseudo(p), compact = n.replace(/[^a-z]/g, '').replace(/(.)\1+/g, '$1');
+  if (MOTS_INTERDITS_PARTOUT.some((m) => compact.includes(m.replace(/(.)\1+/g, '$1')))) return true;
+  const mots = n.split(/[^a-z]+/).filter(Boolean).map((m) => m.replace(/(.)\1+/g, '$1'));
+  if (mots.length > 1 && mots.every((m) => m.length === 1) && MOTS_INTERDITS_SEULS.includes(compact)) return true;   // « b.i.t.e »
+  return mots.some((m) => MOTS_INTERDITS_SEULS.includes(m));
+}
+// rôles donnés par un administrateur : 'equipe' (badge Équipe), 'modo' (peut supprimer les commentaires)
+const ROLES = ['joueur', 'equipe', 'modo'];
+let tableRoles = false;
+async function assureRoles(env) {
+  if (tableRoles) return;
+  await env.DB.prepare('CREATE TABLE IF NOT EXISTS roles (joueur_id TEXT PRIMARY KEY, role TEXT NOT NULL, par TEXT, cree INTEGER NOT NULL)').run();
+  tableRoles = true;
+}
 const COMMENTAIRE_MAX = 500, CORPS_MAX = 4096, HISTORIQUE = 100;
 const ENTETES = { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', 'x-content-type-options': 'nosniff', 'referrer-policy': 'no-referrer' };
 
@@ -39,7 +62,8 @@ async function joueur(request, env) {
   const h = request.headers.get('authorization') || ''; if (!h.startsWith('Bearer ')) return null;
   const jeton = h.slice(7).trim(), p = jeton.indexOf('.'); if (p < 8 || p > 40 || jeton.length > 120) return null;
   const id = jeton.slice(0, p), secret = jeton.slice(p + 1);
-  const j = await env.DB.prepare('SELECT j.id, j.secret_hash, j.pseudo, j.niveau, j.admin, j.banni, (SELECT depuis FROM vip v WHERE v.joueur_id = j.id) AS vip_depuis FROM joueurs j WHERE j.id = ?').bind(id).first();
+  await assureRoles(env);
+  const j = await env.DB.prepare('SELECT j.id, j.secret_hash, j.pseudo, j.niveau, j.admin, j.banni, (SELECT depuis FROM vip v WHERE v.joueur_id = j.id) AS vip_depuis, (SELECT r.role FROM roles r WHERE r.joueur_id = j.id) AS role FROM joueurs j WHERE j.id = ?').bind(id).first();
   if (!j || j.banni || !egal(j.secret_hash, await sha256(secret))) return null;
   return j;
 }
@@ -55,7 +79,7 @@ async function adminOk(request, env) {
 
 async function avis(env, mod, msg) { await env.SALLE.get(env.SALLE.idFromName(mod)).fetch('https://salle/emettre', { method: 'POST', body: JSON.stringify(msg) }); }
 async function compteLikes(env, mod) { return (await env.DB.prepare('SELECT COUNT(*) AS n FROM likes WHERE mod_id = ?').bind(mod).first()).n; }
-const commentaireJson = (r, moi) => ({ id: r.id, auteur: r.pseudo, niveau: r.niveau, admin: !!r.admin, vip: !!r.vip, statut: r.statut || '', texte: r.texte, cree: r.cree, moi: !!moi && r.joueur_id === moi.id, likes: r.likes || 0, aime: !!r.aime });
+const commentaireJson = (r, moi) => ({ id: r.id, auteur: r.pseudo, niveau: r.niveau, admin: !!r.admin, role: r.role || '', vip: !!r.vip, statut: r.statut || '', texte: r.texte, cree: r.cree, moi: !!moi && r.joueur_id === moi.id, likes: r.likes || 0, aime: !!r.aime });
 // J'aime sur les commentaires (v2.9) : table créée au besoin (voir migrations/0002_likes_commentaires.sql)
 let tableLikesCom = false;
 async function assureLikesCom(env) {
@@ -114,21 +138,23 @@ async function route(request, env) {
   if (m === 'POST' && chemin === '/v1/inscription') {
     if (!(await limite(env, 'ins:' + (await ip(request)), 10, 3600))) return erreur(429, 'trop d\'inscriptions depuis cette connexion, réessayez plus tard');
     const c = await corps(request), pseudo = propre(c.pseudo, 20), admin = await adminOk(request, env);
-    if (!PSEUDO.test(pseudo)) return erreur(400, 'pseudo invalide (2 à 20 lettres, chiffres, espaces, _ ( ) . -)');
-    if (RESERVE.test(pseudo) && !admin) return erreur(403, 'pseudo réservé à l\'équipe TPS Studios');
+    if (!PSEUDO.test(pseudo)) return erreur(400, 'pseudo invalide (2 à 20 caractères, au moins une lettre ou un chiffre)');
+    if (pseudoInterdit(pseudo)) return erreur(400, 'pseudo interdit : insultes, vulgarités et propos haineux ou violents ne sont pas acceptés');
+    if (RESERVE.test(pseudo) && !admin) return erreur(403, 'pseudo réservé à l\'équipe TPS Groupe');
     if (await env.DB.prepare('SELECT 1 FROM joueurs WHERE pseudo_min = ?').bind(pseudo.toLowerCase()).first()) return erreur(409, 'ce pseudo est déjà pris');
     const id = hex(alea(8)), secret = b64url(alea(32));
     await env.DB.prepare('INSERT INTO joueurs (id, secret_hash, pseudo, pseudo_min, niveau, admin, banni, cree) VALUES (?, ?, ?, ?, 1, ?, 0, ?)').bind(id, await sha256(secret), pseudo, pseudo.toLowerCase(), admin ? 1 : 0, maintenant()).run();
     return rep({ id, secret, pseudo, jeton: id + '.' + secret, admin }, 201);
   }
 
+  await assureRoles(env);
   const moi = await joueur(request, env);
 
   if (chemin === '/v1/moi') {
     if (!moi) return erreur(401, 'jeton absent ou invalide');
     if (m === 'GET') {
       const v = await env.DB.prepare('SELECT COUNT(*) AS n FROM likes WHERE joueur_id = ?').bind(moi.id).first(), k = await env.DB.prepare('SELECT COUNT(*) AS n FROM commentaires WHERE joueur_id = ? AND supprime = 0').bind(moi.id).first();
-      return rep({ id: moi.id, pseudo: moi.pseudo, niveau: moi.niveau, admin: !!moi.admin, vip: !!moi.vip_depuis, vip_depuis: moi.vip_depuis || 0, votes: v.n, commentaires: k.n });
+      return rep({ id: moi.id, pseudo: moi.pseudo, niveau: moi.niveau, admin: !!moi.admin, role: moi.role || '', vip: !!moi.vip_depuis, vip_depuis: moi.vip_depuis || 0, votes: v.n, commentaires: k.n });
     }
     if (m === 'PUT') {   // niveau affiché (informatif) et changement de pseudo
       if (!(await limite(env, 'moi:' + moi.id, 20, 3600))) return erreur(429, 'trop de modifications');
@@ -136,8 +162,9 @@ async function route(request, env) {
       let pseudo = moi.pseudo;
       if (c.pseudo !== undefined && propre(c.pseudo, 20) !== moi.pseudo) {
         pseudo = propre(c.pseudo, 20);
-        if (!PSEUDO.test(pseudo)) return erreur(400, 'pseudo invalide');
-        if (RESERVE.test(pseudo) && !moi.admin) return erreur(403, 'pseudo réservé');
+        if (!PSEUDO.test(pseudo)) return erreur(400, 'pseudo invalide (2 à 20 caractères, au moins une lettre ou un chiffre)');
+        if (pseudoInterdit(pseudo)) return erreur(400, 'pseudo interdit : insultes, vulgarités et propos haineux ou violents ne sont pas acceptés');
+        if (RESERVE.test(pseudo) && !moi.admin && !moi.role) return erreur(403, 'pseudo réservé à l\'équipe TPS Groupe');
         if (await env.DB.prepare('SELECT 1 FROM joueurs WHERE pseudo_min = ? AND id <> ?').bind(pseudo.toLowerCase(), moi.id).first()) return erreur(409, 'ce pseudo est déjà pris');
       }
       await env.DB.prepare('UPDATE joueurs SET niveau = ?, pseudo = ?, pseudo_min = ? WHERE id = ?').bind(niveau, pseudo, pseudo.toLowerCase(), moi.id).run();
@@ -175,7 +202,7 @@ async function route(request, env) {
     const likes = await compteLikes(env, mod);
     const aime = moi ? !!(await env.DB.prepare('SELECT 1 FROM likes WHERE mod_id = ? AND joueur_id = ?').bind(mod, moi.id).first()) : false;
     await assureLikesCom(env);
-    const lignes = await env.DB.prepare('SELECT c.id, c.joueur_id, c.texte, c.cree, j.pseudo, j.niveau, j.admin, (SELECT 1 FROM vip v WHERE v.joueur_id = c.joueur_id) AS vip, (SELECT p.statut FROM presence p WHERE p.joueur_id = c.joueur_id AND p.vu > ?) AS statut, (SELECT COUNT(*) FROM likes_commentaires lc WHERE lc.commentaire_id = c.id) AS likes, (SELECT 1 FROM likes_commentaires lc WHERE lc.commentaire_id = c.id AND lc.joueur_id = ?) AS aime FROM commentaires c JOIN joueurs j ON j.id = c.joueur_id WHERE c.mod_id = ? AND c.supprime = 0 ORDER BY c.id DESC LIMIT ?').bind(maintenant() - PRESENCE, moi ? moi.id : '', mod, HISTORIQUE).all();
+    const lignes = await env.DB.prepare('SELECT c.id, c.joueur_id, c.texte, c.cree, j.pseudo, j.niveau, j.admin, (SELECT r.role FROM roles r WHERE r.joueur_id = c.joueur_id) AS role, (SELECT 1 FROM vip v WHERE v.joueur_id = c.joueur_id) AS vip, (SELECT p.statut FROM presence p WHERE p.joueur_id = c.joueur_id AND p.vu > ?) AS statut, (SELECT COUNT(*) FROM likes_commentaires lc WHERE lc.commentaire_id = c.id) AS likes, (SELECT 1 FROM likes_commentaires lc WHERE lc.commentaire_id = c.id AND lc.joueur_id = ?) AS aime FROM commentaires c JOIN joueurs j ON j.id = c.joueur_id WHERE c.mod_id = ? AND c.supprime = 0 ORDER BY c.id DESC LIMIT ?').bind(maintenant() - PRESENCE, moi ? moi.id : '', mod, HISTORIQUE).all();
     return rep({ likes, aime, commentaires: lignes.results.reverse().map((x) => commentaireJson(x, moi)) });
   }
 
@@ -204,7 +231,7 @@ async function route(request, env) {
     if (!(await limite(env, 'cj:' + moi.id, 40, 86400))) return erreur(429, 'limite de commentaires atteinte pour aujourd\'hui');
     if (await env.DB.prepare('SELECT 1 FROM commentaires WHERE joueur_id = ? AND mod_id = ? AND texte = ? AND cree > ?').bind(moi.id, mod, texte, maintenant() - 300).first()) return erreur(409, 'commentaire déjà publié');
     const cree = maintenant(), res = await env.DB.prepare('INSERT INTO commentaires (mod_id, joueur_id, texte, cree, supprime) VALUES (?, ?, ?, ?, 0)').bind(mod, moi.id, texte, cree).run();
-    const com = { id: res.meta.last_row_id, auteur: moi.pseudo, niveau: moi.niveau, admin: !!moi.admin, vip: !!moi.vip_depuis, texte, cree };
+    const com = { id: res.meta.last_row_id, auteur: moi.pseudo, niveau: moi.niveau, admin: !!moi.admin, role: moi.role || '', vip: !!moi.vip_depuis, texte, cree };
     if (moi.vip_depuis && await limite(env, 'ptc:' + moi.id, 3, 86400)) await crediter(env, moi.id, BONUS_COMM);   // 3 commentaires récompensés par jour
     await avis(env, mod, { t: 'commentaire', c: com });
     return rep({ ...com, moi: true }, 201);
@@ -231,7 +258,7 @@ async function route(request, env) {
     if (!moi && !admin) return erreur(401, 'jeton absent ou invalide');
     const c = await env.DB.prepare('SELECT id, mod_id, joueur_id FROM commentaires WHERE id = ? AND supprime = 0').bind(id).first();
     if (!c) return erreur(404, 'commentaire introuvable');
-    if (!admin && !(moi && (c.joueur_id === moi.id || moi.admin))) return erreur(403, 'action refusée');
+    if (!admin && !(moi && (c.joueur_id === moi.id || moi.admin || moi.role === 'modo'))) return erreur(403, 'action refusée');
     await env.DB.prepare('UPDATE commentaires SET supprime = 1 WHERE id = ?').bind(id).run();
     await avis(env, c.mod_id, { t: 'supprime', id });
     return rep({ ok: true });
@@ -260,13 +287,13 @@ async function route(request, env) {
   if (r && m === 'GET') {
     if (!moi) return erreur(401, 'jeton absent ou invalide');
     if (!(await limite(env, 'prof:' + moi.id, 240, 3600))) return erreur(429, 'trop de demandes');
-    const id = r[1], j = await env.DB.prepare('SELECT id, pseudo, niveau, cree, (SELECT 1 FROM vip v WHERE v.joueur_id = id) AS vip FROM joueurs WHERE id = ? AND banni = 0').bind(id).first();
+    const id = r[1], j = await env.DB.prepare('SELECT id, pseudo, niveau, cree, admin, (SELECT r.role FROM roles r WHERE r.joueur_id = id) AS role, (SELECT 1 FROM vip v WHERE v.joueur_id = id) AS vip FROM joueurs WHERE id = ? AND banni = 0').bind(id).first();
     if (!j) return erreur(404, 'joueur introuvable');
     const ami = await estAmi(env, moi.id, id);
     const communs = await env.DB.prepare(MES_AMIS + "SELECT j.id, j.pseudo, j.niveau FROM amis a JOIN joueurs j ON j.id = (CASE WHEN a.a = ? THEN a.b ELSE a.a END) WHERE a.etat = 'ami' AND (a.a = ? OR a.b = ?) AND j.id IN (SELECT id FROM mes) AND j.banni = 0 ORDER BY j.pseudo_min LIMIT 50").bind(moi.id, moi.id, moi.id, id, id, id).all();
     await assureApparence(env);
     const ap = await env.DB.prepare('SELECT donnees FROM apparence WHERE joueur_id = ?').bind(id).first();
-    const o = { id: j.id, pseudo: j.pseudo, niveau: j.niveau, vip: !!j.vip, cree: j.cree, ami, apparence: lireApparence(ap && ap.donnees), communs: communs.results.map((x) => ({ id: x.id, pseudo: x.pseudo, niveau: x.niveau })) };
+    const o = { id: j.id, pseudo: j.pseudo, niveau: j.niveau, vip: !!j.vip, role: j.admin ? 'admin' : (j.role || ''), cree: j.cree, ami, apparence: lireApparence(ap && ap.donnees), communs: communs.results.map((x) => ({ id: x.id, pseudo: x.pseudo, niveau: x.niveau })) };
     if (ami) {
       const p = await env.DB.prepare('SELECT statut FROM presence WHERE joueur_id = ? AND vu > ?').bind(id, maintenant() - PRESENCE).first(), md = await env.DB.prepare('SELECT liste, maj FROM mods_joueur WHERE joueur_id = ?').bind(id).first();
       o.statut = p ? p.statut : ''; o.en_ligne = !!p; o.mods = md ? JSON.parse(md.liste) : []; o.mods_maj = md ? md.maj : 0;
@@ -300,10 +327,10 @@ async function route(request, env) {
     for (const x of liens.results) { communs[x.a] = (communs[x.a] || 0) + 1; communs[x.b] = (communs[x.b] || 0) + 1; }
     const cad = await env.DB.prepare('SELECT c.quoi, c.cree, j.pseudo FROM cadeaux c JOIN joueurs j ON j.id = c.de WHERE c.a = ? AND c.vu = 0 ORDER BY c.id').bind(moi.id).all();
     await assureApparence(env);
-    const l = await env.DB.prepare('SELECT a.etat, a.de, j.id, j.pseudo, j.niveau, j.cree, (SELECT 1 FROM vip v WHERE v.joueur_id = j.id) AS vip, (SELECT ap.donnees FROM apparence ap WHERE ap.joueur_id = j.id) AS apparence, (SELECT p.statut FROM presence p WHERE p.joueur_id = j.id AND p.vu > ?) AS statut FROM amis a JOIN joueurs j ON j.id = (CASE WHEN a.a = ? THEN a.b ELSE a.a END) WHERE (a.a = ? OR a.b = ?) AND j.banni = 0 ORDER BY j.pseudo_min').bind(maintenant() - AMIS_PRESENCE, moi.id, moi.id, moi.id).all();
+    const l = await env.DB.prepare('SELECT a.etat, a.de, j.id, j.pseudo, j.niveau, j.cree, j.admin, (SELECT r.role FROM roles r WHERE r.joueur_id = j.id) AS role, (SELECT 1 FROM vip v WHERE v.joueur_id = j.id) AS vip, (SELECT ap.donnees FROM apparence ap WHERE ap.joueur_id = j.id) AS apparence, (SELECT p.statut FROM presence p WHERE p.joueur_id = j.id AND p.vu > ?) AS statut FROM amis a JOIN joueurs j ON j.id = (CASE WHEN a.a = ? THEN a.b ELSE a.a END) WHERE (a.a = ? OR a.b = ?) AND j.banni = 0 ORDER BY j.pseudo_min').bind(maintenant() - AMIS_PRESENCE, moi.id, moi.id, moi.id).all();
     const amis = [], recues = [], envoyees = [];
     for (const x of l.results) {
-      const o = { id: x.id, pseudo: x.pseudo, niveau: x.niveau, vip: !!x.vip, cree: x.cree || 0, communs: communs[x.id] || 0, apparence: lireApparence(x.apparence) };
+      const o = { id: x.id, pseudo: x.pseudo, niveau: x.niveau, vip: !!x.vip, role: x.admin ? 'admin' : (x.role || ''), cree: x.cree || 0, communs: communs[x.id] || 0, apparence: lireApparence(x.apparence) };
       if (x.etat === 'ami') amis.push({ ...o, statut: x.statut || '', en_ligne: !!x.statut });
       else (x.de === moi.id ? envoyees : recues).push(o);
     }
@@ -440,6 +467,19 @@ async function route(request, env) {
     const c = await corps(request), id = propre(c.id, 40), n = Math.max(-100000, Math.min(100000, parseInt(c.n, 10) || 0));
     if (n > 0) await crediter(env, id, n); else if (n < 0) await env.DB.prepare('UPDATE points SET solde = MAX(0, solde + ?) WHERE joueur_id = ?').bind(n, id).run();
     return rep({ ok: true });
+  }
+  // rôles : seul un administrateur peut donner un rôle supérieur (Équipe, Modérateur) ou le retirer
+  if (m === 'POST' && chemin === '/v1/admin/role') {
+    const cle = await adminOk(request, env);
+    if (!cle && !(moi && moi.admin)) return erreur(403, 'seul un administrateur peut donner un rôle');
+    const c = await corps(request), id = propre(c.id, 40).toLowerCase(), role = propre(c.role, 12).toLowerCase();
+    if (!/^[0-9a-f]{16}$/.test(id) || !ROLES.includes(role)) return erreur(400, 'joueur ou rôle invalide');
+    if (moi && id === moi.id) return erreur(400, 'vous ne pouvez pas changer votre propre rôle');
+    if (!(await env.DB.prepare('SELECT 1 FROM joueurs WHERE id = ?').bind(id).first())) return erreur(404, 'joueur introuvable');
+    await assureRoles(env);
+    if (role === 'joueur') await env.DB.prepare('DELETE FROM roles WHERE joueur_id = ?').bind(id).run();
+    else await env.DB.prepare('INSERT OR REPLACE INTO roles (joueur_id, role, par, cree) VALUES (?, ?, ?, ?)').bind(id, role, moi ? moi.id : 'cle', maintenant()).run();
+    return rep({ ok: true, role });
   }
   if (m === 'POST' && chemin === '/v1/admin/vip/codes') {
     if (!await adminOk(request, env)) return erreur(403, 'action refusée');

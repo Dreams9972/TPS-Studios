@@ -17,6 +17,27 @@ internal static class Social
 
 	public static string Pseudo = "";
 
+	/// <summary>Mon rôle sur le serveur : "", "equipe" ou "modo" (donné par un administrateur).</summary>
+	public static string Role = "";
+
+	public static bool PeutModerer => EstAdmin || Role == "modo";
+
+	/// <summary>Donne un rôle à un joueur (administrateurs seulement) : "joueur", "equipe" ou "modo".</summary>
+	public static string DonnerRole(string id, string role)
+	{
+		int st;
+		Dictionary<string, object> r = AppelAuth("POST", "/v1/admin/role", new Dictionary<string, object>
+		{
+			{ "id", id },
+			{ "role", role }
+		}, out st);
+		if (st != 200)
+		{
+			return Msg(r, "rôle non modifié");
+		}
+		return null;
+	}
+
 	public static bool EstAdmin;
 
 	private static string jeton = "";
@@ -295,6 +316,10 @@ internal static class Social
 				if (dictionary.TryGetValue("statut", out value2))
 				{
 					ami.Statut = Convert.ToString(value2);
+				}
+				if (dictionary.TryGetValue("role", out value2) && value2 is string)
+				{
+					ami.Role = (string)value2;
 				}
 				if (dictionary.TryGetValue("cree", out value2) && value2 != null && !(value2 is IEnumerable))
 				{
@@ -879,7 +904,7 @@ internal static class Social
 	/// <summary>Pseudo accepté par le serveur : 2 à 20 lettres, chiffres, espaces, _ ( ) . -</summary>
 	public static string PseudoServeur(string p)
 	{
-		string s = Regex.Replace((p ?? "").Trim(), "[^\\p{L}\\p{N} _().\\[\\]\\-]", "");
+		string s = Regex.Replace((p ?? "").Trim(), "[\\p{C}]", "");
 		s = Regex.Replace(s, "\\s+", " ").Trim();
 		if (s.Length > 20)
 		{
@@ -964,7 +989,7 @@ internal static class Social
 	/// <summary>Retire les mots réservés à l'équipe (admin, modo, staff, TPS) et les crochets vides qui restent.</summary>
 	public static string SansMotsReserves(string p)
 	{
-		string s = Regex.Replace(p ?? "", "(admin|modo|staff|\\btps\\b)", "", RegexOptions.IgnoreCase);
+		string s = Regex.Replace(p ?? "", "(admin|modo|staff)", "", RegexOptions.IgnoreCase);
 		s = Regex.Replace(s, "[\\[(]\\s*[\\])]", "");
 		s = Regex.Replace(s, "\\s+", " ").Trim(' ', '_', '-', '.');
 		return s;
@@ -1036,6 +1061,7 @@ internal static class Social
 		comSocial.Texte = Convert.ToString(d.ContainsKey("texte") ? d["texte"] : "");
 		comSocial.Niveau = ((!d.ContainsKey("niveau")) ? 1 : Convert.ToInt32(d["niveau"]));
 		comSocial.Admin = d.ContainsKey("admin") && Convert.ToBoolean(d["admin"]);
+		comSocial.Role = (d.ContainsKey("role") ? Convert.ToString(d["role"]) : "");
 		comSocial.Vip = d.ContainsKey("vip") && Convert.ToBoolean(d["vip"]);
 		comSocial.Statut = (d.ContainsKey("statut") ? Convert.ToString(d["statut"]) : "");
 		comSocial.Cree = (d.ContainsKey("cree") ? Convert.ToInt64(d["cree"]) : 0);
@@ -1136,6 +1162,10 @@ internal static class Social
 		if (st == 200 && dictionary != null && dictionary.ContainsKey("vip"))
 		{
 			Vip = Convert.ToBoolean(dictionary["vip"]);
+		}
+		if (st == 200 && dictionary != null)
+		{
+			Role = (dictionary.ContainsKey("role") ? Convert.ToString(dictionary["role"]) : "");
 		}
 		if (st != 200)
 		{

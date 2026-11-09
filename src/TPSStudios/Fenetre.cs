@@ -56,6 +56,9 @@ internal partial class Fenetre : Form
 		/// <summary>Adresse ouverte par un clic sur la case (articles du site web).</summary>
 		public string Lien = "";
 
+		/// <summary>Icône (Segoe MDL2) affichée en grand quand la fiche n'a pas d'image.</summary>
+		public string Glyphe = "";
+
 		public Bitmap Cache;
 
 		public Size CacheTaille;
@@ -1945,16 +1948,10 @@ internal partial class Fenetre : Form
 			Size size = Lang.MeasureText(comSocial.Auteur, fComNom, new Size(Zx.P(400), Zx.P(24)), TextFormatFlags.NoPadding);
 			Lang.DrawText(g, comSocial.Auteur, fComNom, new Point(num4, num + Zx.P(12)), C.Texte);
 			int num5 = num4 + size.Width + Zx.P(10);
-			if (comSocial.Admin)
+			string roleCom = (comSocial.Admin ? "admin" : comSocial.Role);
+			if (roleCom.Length > 0)
 			{
-				Rectangle r2 = new Rectangle(num5, num + Zx.P(13), Zx.P(52), Zx.P(18));
-				using (GraphicsPath path2 = Bouton.Rond(r2, Zx.P(9)))
-				{
-					using SolidBrush brush3 = new SolidBrush(C.Orange);
-					g.FillPath(brush3, path2);
-				}
-				Lang.DrawText(g, "ÉQUIPE", fPetit, r2, Color.White, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
-				num5 += Zx.P(60);
+				num5 += Badge.Role(g, roleCom, num5, num + Zx.P(13)) + Zx.P(8);
 			}
 			if (comSocial.Vip)
 			{
@@ -1992,7 +1989,7 @@ internal partial class Fenetre : Form
 			Lang.DrawText(g, text9, fPetit, rectangle9, comSocial.Aime ? C.Orange : Color.FromArgb(200, 208, 228), TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
 			rLikeCom.Add(Rectangle.Inflate(rectangle9, Zx.P(4), Zx.P(4)));
 			idLikeCom.Add(comSocial.Id);
-			if (comSocial.Moi || Social.EstAdmin)
+			if (comSocial.Moi || Social.PeutModerer)
 			{
 				Size size3 = Lang.MeasureText("Supprimer", fPetit);
 				Rectangle rectangle2 = new Rectangle(w - Zx.P(16) - size3.Width, num + Zx.P(12), size3.Width, Zx.P(18));
@@ -6051,8 +6048,7 @@ internal partial class Fenetre : Form
 			}
 			else
 			{
-				using LinearGradientBrush brush = new LinearGradientBrush(new Rectangle(0, 0, width, height + 1), C.JadeFonce, C.Cote, 35f);
-				graphics.FillRectangle(brush, 0, 0, width, height);
+				SansImage(graphics, d, new Rectangle(0, 0, width, height));
 			}
 			using (LinearGradientBrush linearGradientBrush = new LinearGradientBrush(new Rectangle(0, 0, width, height), Color.FromArgb(235, 6, 8, 20), Color.FromArgb(0, 6, 8, 20), LinearGradientMode.Horizontal))
 			{
@@ -6150,8 +6146,7 @@ internal partial class Fenetre : Form
 		}
 		else
 		{
-			using LinearGradientBrush brush2 = new LinearGradientBrush(rect, C.JadeFonce, C.Cote, 35f);
-			g.FillRectangle(brush2, rect);
+			SansImage(g, d, rect);
 		}
 		using (Pen pen = new Pen(C.Ligne))
 		{
@@ -6175,11 +6170,19 @@ internal partial class Fenetre : Form
 			int num9 = Math.Min(Zx.P(30), Math.Max(0, num8 - num7));
 			Lang.DrawText(g, d.Titre, f, new Rectangle(num, num7, num3, num9), C.Texte, TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding);
 			num7 += num9 + Zx.P(4);
-			int num10 = Math.Max(0, num8 - num7);
+			int hLigne = Lang.MeasureText("Ag", f2).Height;
+			int hDetail = ((d.Detail.Length > 0) ? (Lang.MeasureText("Ag", fPetit).Height + Zx.P(8)) : 0);
+			int num10 = Math.Max(0, num8 - num7 - hDetail);
 			if (d.Sous.Length > 0 && num10 >= Zx.P(16))
 			{
-				int num11 = Math.Max(1, Math.Min(3, num10 / Lang.MeasureText("Ag", f2).Height));
-				Lang.DrawText(g, d.Sous, f2, new Rectangle(num, num7, num3, num11 * Lang.MeasureText("Ag", f2).Height), Color.FromArgb(200, 208, 228), TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix | TextFormatFlags.TextBoxControl | TextFormatFlags.WordBreak | TextFormatFlags.NoPadding);
+				int besoin = Lang.MeasureText(d.Sous, f2, new Size(num3, Zx.P(2000)), TextFormatFlags.WordBreak | TextFormatFlags.NoPadding).Height;
+				int num11 = Math.Max(1, Math.Min(Math.Max(1, num10 / hLigne), (besoin + hLigne - 1) / hLigne));
+				Lang.DrawText(g, d.Sous, f2, new Rectangle(num, num7, num3, num11 * hLigne), Color.FromArgb(200, 208, 228), TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix | TextFormatFlags.TextBoxControl | TextFormatFlags.WordBreak | TextFormatFlags.NoPadding);
+				num7 += num11 * hLigne + Zx.P(8);
+			}
+			if (d.Detail.Length > 0 && num7 + hDetail <= num8 + Zx.P(8))
+			{
+				Lang.DrawText(g, d.Detail, fPetit, new Rectangle(num, num7, num3, hDetail), Color.FromArgb(160, 172, 200), TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding);
 			}
 		}
 		if (d.Ouvrir != null)
@@ -6198,9 +6201,39 @@ internal partial class Fenetre : Form
 		g.DrawPath(pen2, path);
 	}
 
+	private static readonly Font fGlypheDiapo = new Font("Segoe MDL2 Assets", Zx.P(54f));
+
+	/// <summary>Fiche sans image : fond aux couleurs de la fiche et son icône en grand (ou le logo).</summary>
+	private void SansImage(Graphics g, Diapo d, Rectangle r)
+	{
+		Color c = d.Couleur;
+		using (LinearGradientBrush b = new LinearGradientBrush(new Rectangle(r.X, r.Y, r.Width, r.Height + 1), Color.FromArgb(255, (int)(c.R * 0.55), (int)(c.G * 0.55), (int)(c.B * 0.55)), Color.FromArgb(255, 14, 16, 36), 35f))
+		{
+			g.FillRectangle(b, r);
+		}
+		using (GraphicsPath halo = new GraphicsPath())
+		{
+			int t = Math.Min(r.Width, r.Height);
+			halo.AddEllipse(r.X + r.Width / 2 - t / 2, r.Y + r.Height / 2 - t / 2, t, t);
+			using PathGradientBrush pg = new PathGradientBrush(halo);
+			pg.CenterColor = Color.FromArgb(90, c);
+			pg.SurroundColors = new Color[1] { Color.FromArgb(0, c) };
+			g.FillPath(pg, halo);
+		}
+		if (d.Glyphe.Length > 0)
+		{
+			Lang.DrawText(g, d.Glyphe, fGlypheDiapo, r, Color.FromArgb(230, 255, 255, 255), TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+		}
+		else if (logo != null)
+		{
+			int t2 = Math.Min(Zx.P(96), Math.Min(r.Width, r.Height) / 2);
+			g.DrawImage(logo, r.X + (r.Width - t2) / 2, r.Y + (r.Height - t2) / 2, t2, t2);
+		}
+	}
+
 	private static int HautImagePetite(int W, int H)
 	{
-		return Math.Max((int)((double)W * 0.36), Math.Min((int)((double)W * 0.62), H - Zx.P(132)));
+		return Math.Max((int)((double)W * 0.36), H - Zx.P(210));
 	}
 
 	private Bitmap CacheDiapo(Diapo d)
@@ -6990,12 +7023,18 @@ internal partial class Fenetre : Form
 				OuvrirSite(lien);
 			});
 			da.Lien = lien;
+			da.Glyphe = "\ue774";
 			list.Insert(pos++, da);
 		}
 		foreach (Annonce an in annonces)
 		{
 			Projet pm = an.Mod;
-			Diapo di = NouvelleDiapo("Info", an.Couleur, an.Titre, an.Texte, "", null, (pm != null) ? "Voir la page" : ((site.Length > 0) ? "Voir le site" : ""), (pm != null) ? ((Action)delegate
+			Image imgMod = null;
+			if (pm != null)
+			{
+				images.TryGetValue(pm.Id, out imgMod);
+			}
+			Diapo di = NouvelleDiapo("Info", an.Couleur, an.Titre, an.Texte, "", imgMod, (pm != null) ? "Voir la page" : ((site.Length > 0) ? "Voir le site" : ""), (pm != null) ? ((Action)delegate
 			{
 				Choisir(pm);
 				ShowVue(Vue.Projet);
@@ -7003,6 +7042,7 @@ internal partial class Fenetre : Form
 			{
 				OuvrirSite(site);
 			}) : null));
+			di.Glyphe = an.Glyphe ?? "";
 			list.Insert(pos++, di);
 		}
 		if (list.Count == 0)
