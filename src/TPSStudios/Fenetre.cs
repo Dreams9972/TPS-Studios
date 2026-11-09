@@ -589,7 +589,7 @@ internal partial class Fenetre : Form
 
 	private List<KeyValuePair<Rectangle, Annonce>> rAnnonces = new List<KeyValuePair<Rectangle, Annonce>>();
 
-	private static readonly string[] NouveautesLanceur = new string[4] { "Bande-annonce et photos sur les pages des jeux et des mods", "« À propos » façon Steam", "Flèche pour glisser vers tous les mods", "Nouvelles transitions et profil plein écran" };
+	private static readonly string[] NouveautesLanceur = new string[4] { "TPS Studios devient TPS Groupe", "Alerte de mise à jour sur l'accueil", "Bandes-annonces YouTube dans les pages", "Lanceur plus fluide et page du jeu sans défilement" };
 
 	private static readonly Font fAnT2 = new Font("Segoe UI Semibold", Zx.P(11f));
 
@@ -6213,6 +6213,13 @@ internal partial class Fenetre : Form
 					flag2 = true;
 				}
 			}
+			bool flagMaj = !rMajA.IsEmpty && MajAAfficher && rMajA.Contains(e.Location);
+			if (flagMaj != majSurvol)
+			{
+				majSurvol = flagMaj;
+				pAccueil.Invalidate(Rectangle.Inflate(rMajA, Zx.P(4), Zx.P(4)));
+			}
+			flag2 = flag2 || flagMaj;
 			pAccueil.Cursor = ((flag || flag2 || rProfil.Contains(e.Location)) ? Cursors.Hand : Cursors.Default);
 			if (!rAmisA.IsEmpty && Social.Actif && rAmisA.Contains(e.Location))
 			{
@@ -6278,6 +6285,12 @@ internal partial class Fenetre : Form
 		{
 			if (e.Button == MouseButtons.Left && couches.Count <= 0)
 			{
+				if (!rMajA.IsEmpty && MajAAfficher && rMajA.Contains(e.Location) && Opt("alerte_type") != "important")
+				{
+					Sons.Clic();
+					ClicMaj();
+					return;
+				}
 				if (rProfil.Contains(e.Location) || rDiscord.Contains(e.Location) || rCarte.Contains(e.Location))
 				{
 					Sons.Clic();
@@ -6703,7 +6716,14 @@ internal partial class Fenetre : Form
 		});
 		T("bandeau", delegate
 		{
-			PeindreBandeau(g);
+			if (MajAAfficher && Opt("alerte_type") != "important")
+			{
+				PeindreMaj(g);
+			}
+			else
+			{
+				PeindreBandeau(g);
+			}
 		});
 		T("nouveautes", delegate
 		{
@@ -7878,7 +7898,9 @@ internal partial class Fenetre : Form
 		int width2 = Math.Max(Zx.P(230), Math.Min(Zx.P(270), (int)((double)width * 0.14)));
 		int num2 = Math.Max(Zx.P(64), Math.Min(Zx.P(78), (int)((double)height * 0.07)));
 		rProfil = new Rectangle(num, num, width2, num2);
-		int num3 = num + Zx.P(200);
+		CalculerMajAccueil();
+		bool flag0 = MajAAfficher || Opt("alerte").Length > 0 || Maintenance;
+		int num3 = num + (flag0 ? Zx.P(262) : Zx.P(200));
 		int num4 = height - num - Zx.P(14);
 		int num5 = Math.Max(Zx.P(220), num4 - num3);
 		int count = tuilesA.Count;
@@ -7923,7 +7945,8 @@ internal partial class Fenetre : Form
 			rInfos = ((num15 >= Zx.P(84)) ? new Rectangle(num12, num14, num11, num15) : Rectangle.Empty);
 			rPilule = (rInfos.IsEmpty ? Rectangle.Empty : new Rectangle(rInfos.X, rInfos.Bottom + Zx.P(16), rInfos.Width, Zx.P(44)));
 		}
-		rBandeau = new Rectangle(num9, rProfil.Bottom + Zx.P(4), num7, Zx.P(30));
+		rBandeau = new Rectangle(num9, num + Zx.P(202), num7, Zx.P(36));
+		rMajA = (MajAAfficher ? new Rectangle(num9, num + Zx.P(198), num7, Zx.P(48)) : Rectangle.Empty);
 		ThemeBase.Cartes = (rInfos.IsEmpty ? new Rectangle[2] { rProfil, rCarte } : new Rectangle[3] { rProfil, rCarte, rInfos });
 		rDiscord = new Rectangle(Zx.P(24), height - Zx.P(24) - Zx.P(48), Zx.P(250), Zx.P(48));
 		int num16 = Math.Max((int)((double)height * 0.37), rProfil.Y + Zx.P(452) + Zx.P(20));
