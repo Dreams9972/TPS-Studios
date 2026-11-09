@@ -1361,6 +1361,43 @@ internal class FenAdmin : Form, IPage
 			tPrereq.Text = Str(cur, "prerequis");
 			sgRuban.Index = Math.Max(0, Array.IndexOf(Projet.RubansId, Str(cur, "ruban")));
 			tVideo.Text = (videosEnAttente.ContainsKey(Str(cur, "id")) ? videosEnAttente[Str(cur, "id")] : Str(cur, "video"));
+			if (tEditeur.Text.Length == 0)
+			{
+				tEditeur.Text = "TPS Groupe";
+			}
+			if (tVideo.Text.Length == 0)
+			{
+				Dictionary<string, object> page0 = cur;
+				string yt = YouTube.TrailerPour(new Projet
+				{
+					Nom = Str(cur, "nom")
+				}, null, delegate
+				{
+					try
+					{
+						BeginInvoke((MethodInvoker)delegate
+						{
+							if (!base.IsDisposed && cur == page0 && tVideo.Text.Length == 0)
+							{
+								bool c0 = charge;
+								charge = true;
+								tVideo.Text = YouTube.TrailerPour(new Projet
+								{
+									Nom = Str(page0, "nom")
+								}, null, null) ?? "";
+								charge = c0;
+							}
+						});
+					}
+					catch
+					{
+					}
+				});
+				if (yt != null)
+				{
+					tVideo.Text = yt;
+				}
+			}
 			tLiens.Text = Str(cur, "liens").Replace("\r\n", "\n").Replace("\n", "\r\n");
 			tAncien.Text = (Projet.ParsePrix(Str(cur, "ancien_prix"), out var d2) ? d2.ToString("0.00", CultureInfo.GetCultureInfo("fr-FR")) : "");
 			tLies.Text = Str(cur, "lies");

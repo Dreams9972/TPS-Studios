@@ -362,6 +362,10 @@ internal class FenJeux : Form
 			tSortie.Text = ((cur != null) ? V(cur, "sortie") : "");
 			tGenres.Text = ((cur != null) ? V(cur, "genres") : "");
 			tDescJ.Text = ((cur != null) ? V(cur, "description").Replace("\r\n", "\n").Replace("\n", "\r\n") : "");
+			if (cur != null)
+			{
+				RemplirAuto(cur);
+			}
 			bool flag = cur != null && V(cur, "id") == "omsi2";
 			tId.Enabled = cur != null && !flag;
 			tUrl.Enabled = cur != null && !flag;
@@ -379,6 +383,97 @@ internal class FenJeux : Form
 			sgStatut.Index = ((cur != null) ? Math.Max(0, Array.IndexOf(statutsId, (V(cur, "statut").Length > 0) ? V(cur, "statut") : "publie")) : 0);
 			cPlein.Checked = cur == null || V(cur, "plein_ecran") != "0";
 			charge = false;
+		}
+	}
+
+	/// <summary>
+	/// Champs vides : on y met les valeurs réellement affichées dans le lanceur (fiche Steam,
+	/// textes par défaut), pour que l'admin voie et puisse corriger ce que voient les joueurs.
+	/// Ce qui est saisi ici passe avant Steam.
+	/// </summary>
+	private void RemplirAuto(Dictionary<string, string> cur)
+	{
+		string id = V(cur, "id");
+		bool omsi = id == "omsi2";
+		string appid = V(cur, "steam").Trim();
+		if (appid.Length == 0 && omsi)
+		{
+			appid = "252530";
+		}
+		if (tSteam.Text.Length == 0 && omsi)
+		{
+			tSteam.Text = appid;
+		}
+		if (tSous.Text.Length == 0)
+		{
+			tSous.Text = (omsi ? "Simulateur de bus et de métro · cartes, rames et plugins de cabine" : "Jeu TPS Groupe");
+		}
+		if (tImage.Text.Length == 0 && omsi)
+		{
+			tImage.Indice = "image intégrée au lanceur";
+		}
+		else
+		{
+			tImage.Indice = "";
+		}
+		FicheSteam f = null;
+		if (appid.Length > 0)
+		{
+			f = Steam.Fiche(appid, delegate
+			{
+				try
+				{
+					BeginInvoke((MethodInvoker)delegate
+					{
+						if (!base.IsDisposed && Cur == cur)
+						{
+							Afficher();
+						}
+					});
+				}
+				catch
+				{
+				}
+			});
+		}
+		if (f != null)
+		{
+			if (tEditeur.Text.Length == 0)
+			{
+				tEditeur.Text = ((f.Editeurs.Length > 0) ? f.Editeurs : f.Developpeurs);
+			}
+			if (tSortie.Text.Length == 0)
+			{
+				tSortie.Text = f.Sortie;
+			}
+			if (tGenres.Text.Length == 0)
+			{
+				tGenres.Text = f.Genres;
+			}
+			if (tDescJ.Text.Length == 0)
+			{
+				tDescJ.Text = f.Description.Replace("\r\n", "\n").Replace("\n", "\r\n");
+			}
+			if (tPhotos.Text.Length == 0 && f.Captures.Count > 0)
+			{
+				List<string> l = new List<string>();
+				foreach (string[] c in f.Captures)
+				{
+					if (l.Count < 10)
+					{
+						l.Add(c[1]);
+					}
+				}
+				tPhotos.Text = string.Join("\r\n", l.ToArray());
+			}
+			if (tVideo.Text.Length == 0 && f.Video.Length > 0)
+			{
+				tVideo.Text = f.Video;
+			}
+		}
+		if (tDescJ.Text.Length == 0 && omsi)
+		{
+			tDescJ.Text = "Simulateur de bus et de métro. Installez cartes, bus, livrées et packs IA en un clic depuis l'onglet Mods, puis lancez le jeu avec openOMSI, ou directement sur une carte depuis « Mes mods ».";
 		}
 	}
 
