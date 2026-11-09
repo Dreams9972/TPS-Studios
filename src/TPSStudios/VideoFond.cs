@@ -55,6 +55,10 @@ internal class VideoFond : Panel
 		base.Visible = false;
 		try
 		{
+			if (!WmpDispo())
+			{
+				throw new NotSupportedException("lecteur Windows Media absent");
+			}
 			wmp = new LecteurWmp();
 			((ISupportInitialize)wmp).BeginInit();
 			wmp.Dock = DockStyle.Fill;
@@ -92,6 +96,36 @@ internal class VideoFond : Panel
 			Tic();
 		};
 		minuteur.Start();
+	}
+
+	private static int dispo = -1;
+
+	/// <summary>Le lecteur Windows Media est-il installé (absent des éditions N de Windows et hors Windows) ?</summary>
+	public static bool WmpDispo()
+	{
+		if (dispo < 0)
+		{
+			dispo = 0;
+			if (Type.GetType("Mono.Runtime") != null || Environment.OSVersion.Platform != PlatformID.Win32NT)
+			{
+				return false;
+			}
+			try
+			{
+				Type typeFromCLSID = Type.GetTypeFromCLSID(new Guid("6bf52a52-394a-11d3-b153-00c04f79faa6"), throwOnError: false);
+				if (typeFromCLSID != null)
+				{
+					object o = Activator.CreateInstance(typeFromCLSID);
+					System.Runtime.InteropServices.Marshal.ReleaseComObject(o);
+					dispo = 1;
+				}
+			}
+			catch
+			{
+				dispo = 0;
+			}
+		}
+		return dispo == 1;
 	}
 
 	protected override void OnResize(EventArgs e)

@@ -2422,14 +2422,8 @@ internal partial class Fenetre : Form
 		List<Image> list = DiapoPage();
 		int num7 = Math.Max(1, list.Count);
 		rMini.Clear();
-		int num8 = Math.Min(Zx.P(124), (num4 - (num7 - 1) * Zx.P(8)) / num7);
 		int num9 = num2 + num6 + Zx.P(12);
-		for (int i = 0; i < list.Count; i++)
-		{
-			rMini.Add(new Rectangle(num + i * (num8 + Zx.P(8)), num9, num8, num8 * 9 / 16));
-		}
-		int num10 = ((list.Count > 1) ? (num8 * 9 / 16) : 0);
-		int num11 = num9 + num10 + ((num10 > 0) ? 26 : 8);
+		int num11 = num9 + 8;
 		bOngDesc.Location = new Point(num, num11);
 		bOngNotes.Location = new Point(num + Zx.P(170), num11);
 		bOngGal.Visible = sel == null || sel.Commentaires;
@@ -2491,6 +2485,21 @@ internal partial class Fenetre : Form
 		num16 += Zx.P(46);
 		bDesinst.SetBounds(num13 + num14 + num17 + Zx.P(10), num16, num17, Zx.P(34));
 		rAchat = new Rectangle(num13, num2, num5, num16 + Zx.P(34) + Zx.P(20) - num2);
+		rPhotosP = Rectangle.Empty;
+		if (list.Count > 1)
+		{
+			int num30 = 3;
+			int num31 = Zx.P(8);
+			int num32 = (num5 - 2 * num14 - (num30 - 1) * num31) / num30;
+			int num33 = num32 * 9 / 16;
+			int num34 = (list.Count + num30 - 1) / num30;
+			rPhotosP = new Rectangle(num13, rAchat.Bottom + Zx.P(16), num5, Zx.P(50) + num34 * (num33 + num31) + Zx.P(12));
+			for (int i = 0; i < list.Count; i++)
+			{
+				rMini.Add(new Rectangle(num13 + num14 + i % num30 * (num32 + num31), rPhotosP.Y + Zx.P(50) + i / num30 * (num33 + num31), num32, num33));
+			}
+		}
+		PlacerVideoPage();
 		int num18 = ((sel != null) ? LignesInfo(sel).Count : 8);
 		int num19 = ((sel != null) ? sel.Liens.Count : 0);
 		int num20 = ((sel != null) ? sel.Dlc.Count : 0);
@@ -2506,7 +2515,7 @@ internal partial class Fenetre : Form
 			}
 		}
 		int num22 = num20 - num21;
-		rInfo = new Rectangle(num13, rAchat.Bottom + Zx.P(16), num5, Zx.P(54) + num18 * Zx.P(30) + Zx.P(10) + ((num19 > 0) ? (Zx.P(34) + num19 * Zx.P(36)) : 0) + ((num21 > 0) ? (Zx.P(34) + num21 * Zx.P(32)) : 0) + ((num22 > 0) ? (Zx.P(34) + num22 * Zx.P(32)) : 0));
+		rInfo = new Rectangle(num13, (rPhotosP.IsEmpty ? rAchat.Bottom : rPhotosP.Bottom) + Zx.P(16), num5, Zx.P(54) + num18 * Zx.P(30) + Zx.P(10) + ((num19 > 0) ? (Zx.P(34) + num19 * Zx.P(36)) : 0) + ((num21 > 0) ? (Zx.P(34) + num21 * Zx.P(32)) : 0) + ((num22 > 0) ? (Zx.P(34) + num22 * Zx.P(32)) : 0));
 		return Math.Max(val, rInfo.Bottom) + 40;
 	}
 
@@ -2720,6 +2729,11 @@ internal partial class Fenetre : Form
 				g.FillPath(brush6, path2);
 			}
 			Txt.Dessiner(g, t3, F.Etat, r, Color.White, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+			if (!rPhotosP.IsEmpty)
+			{
+				Carte(g, rPhotosP, Zx.P(14));
+				Txt.Dessiner(g, "PHOTOS", fCarteT, new Point(rPhotosP.X + Zx.P(20), rPhotosP.Y + Zx.P(18)), C.Gris);
+			}
 			for (int j = 0; j < list.Count && j < rMini.Count; j++)
 			{
 				Rectangle rectangle2 = rMini[j];
@@ -3161,6 +3175,14 @@ internal partial class Fenetre : Form
 						{
 							if (rMini[i].Contains(pt))
 							{
+								if (videoP != null && videoP.Visible)
+								{
+									using (FenVisionneuse f2 = new FenVisionneuse(list, Math.Min(i, list.Count - 1)))
+									{
+										f2.Afficher(this);
+									}
+									return;
+								}
 								vIdx = i;
 								page.Invalidate();
 								return;

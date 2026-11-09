@@ -387,4 +387,27 @@ internal partial class Fenetre
 			l.Add(new string[2] { k, v });
 		}
 	}
+
+	// ---------- Page d'un mod : bande-annonce en haut, photos sous JOUER ----------
+
+	private VideoFond videoP;
+
+	private Rectangle rPhotosP;
+
+	private void PlacerVideoPage()
+	{
+		if (videoP == null)
+		{
+			videoP = new VideoFond();
+			videoP.Actif = () => vue == Vue.Projet && base.WindowState != FormWindowState.Minimized && !enTransition;
+		}
+		if (videoP.Parent != page)
+		{
+			page.Controls.Add(videoP);
+		}
+		videoP.Charger((sel != null) ? sel.Video : "");
+		videoP.Bounds = rVue;
+		videoP.Afficher(sel != null);
+		videoP.BringToFront();
+	}
 }
