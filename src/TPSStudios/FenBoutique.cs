@@ -103,7 +103,7 @@ internal class FenBoutique : Form, IPage
 		lMsg.BackColor = C.Cote;
 		lMsg.Location = new Point(X0 + Zx.P(28), Zx.P(14));
 		lMsg.Size = new Size(CW - Zx.P(56), Zx.P(22));
-		lMsg.Text = "Les achats en euros se font sur la page de paiement TPS Studios ; les points VIP sont gérés par le serveur TPS.";
+		lMsg.Text = "Les achats en euros se font sur la page de paiement TPS Groupe ; les points VIP sont gérés par le serveur TPS.";
 		panel.Controls.Add(lMsg);
 		defil = new Panel();
 		defil.Dock = DockStyle.Fill;
@@ -237,7 +237,7 @@ internal class FenBoutique : Form, IPage
 			th.PeindreFond(g, w, h);
 		}
 		Lang.DrawText(g, "Boutique", fTitre, new Point(X0 + Zx.P(140), Zx.P(16)), C.Texte);
-		Lang.DrawText(g, "DLC et cosmétiques TPS Studios", fTxt, new Point(X0 + Zx.P(142), Zx.P(52)), C.Gris);
+		Lang.DrawText(g, "DLC et cosmétiques TPS Groupe", fTxt, new Point(X0 + Zx.P(142), Zx.P(52)), C.Gris);
 		string t = (Social.Vip ? ("★  " + Social.Points.ToString("N0", CultureInfo.GetCultureInfo("fr-FR")) + " points VIP") : "Pas encore VIP");
 		Size size = Lang.MeasureText(t, fBt);
 		Rectangle rectangle = new Rectangle(X0 + CW - Zx.P(24) - size.Width - Zx.P(36), Zx.P(26), size.Width + Zx.P(36), Zx.P(36));
@@ -400,7 +400,7 @@ internal class FenBoutique : Form, IPage
 			Lang.DrawText(g, "Badge VIP doré, rôle VIP sur le Discord, bannières exclusives, accès anticipé et versions de test,\npoints VIP chaque jour à dépenser ici (cosmétiques, DLC)… et +200 points de bienvenue.", fTxt, new Rectangle(rectangle.X + Zx.P(128), rectangle.Y + Zx.P(54), num2 - Zx.P(160) - Zx.P(220), Zx.P(44)), Color.FromArgb(240, 230, 210), TextFormatFlags.WordBreak | TextFormatFlags.NoPadding);
 			Bt(g, new Rectangle(rectangle.Right - Zx.P(24) - Zx.P(200), rectangle.Y + Zx.P(30), Zx.P(200), Zx.P(40)), "Devenir VIP · 5 €", C.Or, plein: true, delegate
 			{
-				Ouvrir(lienVip, "Le lien d'achat VIP n'est pas encore configuré par TPS Studios.");
+				Ouvrir(lienVip, "Le lien d'achat VIP n'est pas encore configuré par TPS Groupe.");
 			});
 			Bt(g, new Rectangle(rectangle.Right - Zx.P(24) - Zx.P(200), rectangle.Y + Zx.P(80), Zx.P(200), Zx.P(36)), "J'ai un code VIP", C.Or, plein: false, delegate
 			{

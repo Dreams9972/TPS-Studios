@@ -386,7 +386,7 @@ internal class FenPaquet : Form
 			throw new Exception("le paquet en ligne utilise déjà la release « " + tag + " » : choisissez un autre numéro de version");
 		}
 		Etat("Création de la release " + tag + " sur GitHub…", 0.0);
-		Dictionary<string, object> release = GitHub.ReleaseParTag(tag) ?? GitHub.CreerRelease(tag, nom + " " + version, (notes.Length > 0) ? notes : ("Paquet " + nom + " " + version + ", publié depuis le lanceur TPS Studios."));
+		Dictionary<string, object> release = GitHub.ReleaseParTag(tag) ?? GitHub.CreerRelease(tag, nom + " " + version, (notes.Length > 0) ? notes : ("Paquet " + nom + " " + version + ", publié depuis le lanceur TPS Groupe."));
 		bool unSeul = total <= Paquet.TAILLE_PARTIE;
 		string tmp = Path.Combine(Config.Cache, "publication", baseNom);
 		List<Dictionary<string, object>> parties = new List<Dictionary<string, object>>();

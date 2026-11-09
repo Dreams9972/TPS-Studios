@@ -106,7 +106,7 @@ internal class FenAmis : Form, IPage
 		panel2.Controls.Add(value);
 		Label value2 = new Label
 		{
-			Text = "Ajoute des joueurs TPS Studios et vois en direct quand ils sont en ligne ou en jeu.",
+			Text = "Ajoute des joueurs TPS Groupe et vois en direct quand ils sont en ligne ou en jeu.",
 			Font = new Font("Segoe UI", Zx.P(9.5f)),
 			ForeColor = C.Gris,
 			BackColor = C.Fond,
@@ -352,12 +352,12 @@ internal class FenAmis : Form, IPage
 	{
 		if (!Social.Actif)
 		{
-			Message("Le serveur TPS Studios n'est pas disponible pour le moment : les amis reviendront dès qu'il répondra.", C.Orange);
+			Message("Le serveur TPS Groupe n'est pas disponible pour le moment : les amis reviendront dès qu'il répondra.", C.Orange);
 			return;
 		}
 		if (premier)
 		{
-			Message("Connexion au serveur TPS Studios…", C.Gris);
+			Message("Connexion au serveur TPS Groupe…", C.Gris);
 		}
 		Fond(delegate
 		{
@@ -596,7 +596,7 @@ internal class FenAmis : Form, IPage
 				break;
 			}
 			Ami aa = re;
-			Ligne(g, re, num, w, (re.Lien == "ami") ? "Déjà ton ami" : ((re.Lien == "envoyee") ? "Demande envoyée" : ((re.Lien == "recue") ? "Il t'a demandé en ami" : "Joueur TPS Studios")), C.Gris, point: false, sourisR);
+			Ligne(g, re, num, w, (re.Lien == "ami") ? "Déjà ton ami" : ((re.Lien == "envoyee") ? "Demande envoyée" : ((re.Lien == "recue") ? "Il t'a demandé en ami" : "Joueur TPS Groupe")), C.Gris, point: false, sourisR);
 			if (re.Lien == "")
 			{
 				Bt(g, clicsR, sourisR, w - Zx.P(12), num + 11, "＋  Ajouter", C.Jade, plein: true, delegate

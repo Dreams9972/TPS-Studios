@@ -14,7 +14,7 @@ internal static class Notifs
 
 	public static readonly string[] Types = new string[5] { "lanceur", "maj", "sortie", "nouveau", "vip" };
 
-	public static readonly string[] TypesNoms = new string[5] { "Mises à jour du lanceur", "Mises à jour de mes mods", "Sorties des mods suivis", "Nouveaux mods TPS Studios", "Accès anticipé VIP" };
+	public static readonly string[] TypesNoms = new string[5] { "Mises à jour du lanceur", "Mises à jour de mes mods", "Sorties des mods suivis", "Nouveaux mods TPS Groupe", "Accès anticipé VIP" };
 
 	public static readonly string[] TypesAide = new string[5] { "Une nouvelle version du lanceur est prête.", "Un mod installé a une nouvelle version.", "Un mod suivi devient disponible (et rappel 24 h avant une sortie datée).", "Un nouveau contenu apparaît dans le catalogue.", "Un mod en accès anticipé est disponible pour les VIP." };
 

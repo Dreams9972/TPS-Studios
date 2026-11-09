@@ -770,7 +770,7 @@ internal partial class Fenetre : Form
 		{
 			base.Opacity = 0.0;
 		}
-		Text = "TPS Studios";
+		Text = "TPS Groupe";
 		Rectangle workingArea = Screen.PrimaryScreen.WorkingArea;
 		int val = 1280;
 		int val2 = 760;
@@ -829,7 +829,7 @@ internal partial class Fenetre : Form
 		{
 			icone = new NotifyIcon();
 			icone.Icon = base.Icon ?? SystemIcons.Application;
-			icone.Text = "TPS Studios";
+			icone.Text = "TPS Groupe";
 			icone.Visible = true;
 			EventHandler montrer = delegate
 			{
@@ -876,7 +876,7 @@ internal partial class Fenetre : Form
 				Items = 
 				{
 					{
-						"Ouvrir TPS Studios",
+						"Ouvrir TPS Groupe",
 						(Image)null,
 						montrer
 					},
@@ -907,7 +907,7 @@ internal partial class Fenetre : Form
 					},
 					(ToolStripItem)new ToolStripSeparator(),
 					{
-						"Quitter TPS Studios",
+						"Quitter TPS Groupe",
 						(Image)null,
 						(EventHandler)delegate
 						{
@@ -963,7 +963,7 @@ internal partial class Fenetre : Form
 				graphics.DrawImage(logo, Zx.P(20), Zx.P(20), Zx.P(52), Zx.P(52));
 				graphics.ResetClip();
 			}
-			Lang.DrawText(graphics, "TPS Studios", F.Logo, new Point(Zx.P(84), Zx.P(22)), C.Texte);
+			Lang.DrawText(graphics, "TPS Groupe", F.Logo, new Point(Zx.P(84), Zx.P(22)), C.Texte);
 			Lang.DrawText(graphics, "Lanceur", F.SousLogo, new Point(Zx.P(86), Zx.P(50)), C.Gris);
 			Lang.DrawText(graphics, "MES PROJETS", F.Rubrique, new Point(Zx.P(20), Zx.P(250)), C.Gris);
 			using Pen pen = new Pen(C.Ligne);
@@ -1997,7 +1997,7 @@ internal partial class Fenetre : Form
 			Champ champ = comSaisie;
 			bool enabled = (comPub.Enabled = actif);
 			champ.Enabled = enabled;
-			comInfo.Text = ((!actif) ? "Les commentaires seront disponibles dès que le serveur TPS Studios sera configuré." : (socEnLigne ? "●  En direct : les nouveaux messages apparaissent tout de suite" : "Connexion au serveur…"));
+			comInfo.Text = ((!actif) ? "Les commentaires seront disponibles dès que le serveur TPS Groupe sera configuré." : (socEnLigne ? "●  En direct : les nouveaux messages apparaissent tout de suite" : "Connexion au serveur…"));
 			comInfo.ForeColor = (socEnLigne ? C.Vert : C.Gris);
 			garderScroll = true;
 			Disposer();
@@ -2892,7 +2892,7 @@ internal partial class Fenetre : Form
 		list.Add(new string[2]
 		{
 			"Éditeur",
-			(p.Editeur.Length > 0) ? p.Editeur : "TPS Studios"
+			(p.Editeur.Length > 0) ? p.Editeur : "TPS Groupe"
 		});
 		if (p.Prerequis.Length > 0)
 		{
@@ -3896,7 +3896,7 @@ internal partial class Fenetre : Form
 			AlphaDraw(g, logoMarque, rectangle, (float)lg);
 			g.Restore(gstate);
 		}
-		string text = "TPS STUDIOS";
+		string text = "TPS GROUPE";
 		float num4 = 4f;
 		float num5 = 0f;
 		float[] array = new float[text.Length];
@@ -4496,7 +4496,7 @@ internal partial class Fenetre : Form
 		{
 			if (!(id == "omsi2"))
 			{
-				return "Jeu TPS Studios";
+				return "Jeu TPS Groupe";
 			}
 			return "Simulateur de bus et de métro · cartes, rames et plugins de cabine";
 		}
@@ -4929,8 +4929,8 @@ internal partial class Fenetre : Form
 		if (rProfil.Height >= 20)
 		{
 			int num = rProfil.Y - Zx.P(14) + dy;
-			Size size = Lang.MeasureText("TPS Studios", fTitreA);
-			Lang.DrawText(g, "TPS Studios", fTitreA, new Point((w - size.Width) / 2, num), C.Texte, TextFormatFlags.NoPadding);
+			Size size = Lang.MeasureText("TPS Groupe", fTitreA);
+			Lang.DrawText(g, "TPS Groupe", fTitreA, new Point((w - size.Width) / 2, num), C.Texte, TextFormatFlags.NoPadding);
 			Size size2 = Lang.MeasureText("LAUNCHER", fSousA);
 			int num2 = num + size.Height + Zx.P(2);
 			using (Pen pen = new Pen(Color.FromArgb(120, C.Orange), Zx.P(2f)))
@@ -5214,7 +5214,7 @@ internal partial class Fenetre : Form
 						amisCharges = true;
 						if (cad.Count > 0)
 						{
-							Toast("\ud83c\udf81  " + string.Join(", ", cad.ToArray()) + " t'a offert le VIP TPS Studios !  Profite de tes avantages.", C.Or, 10000);
+							Toast("\ud83c\udf81  " + string.Join(", ", cad.ToArray()) + " t'a offert le VIP TPS Groupe !  Profite de tes avantages.", C.Or, 10000);
 							if (cacheProfil != null)
 							{
 								cacheProfil.Dispose();
@@ -5319,7 +5319,7 @@ internal partial class Fenetre : Form
 		int num4 = (r.Bottom - 8 - num3) / 46;
 		if (list.Count == 0)
 		{
-			string t = ((!Social.Connecte) ? "Ajoute tes amis TPS Studios" : ((Social.Amis.Count == 0) ? "Pas encore d'amis" : "Aucun ami en ligne"));
+			string t = ((!Social.Connecte) ? "Ajoute tes amis TPS Groupe" : ((Social.Amis.Count == 0) ? "Pas encore d'amis" : "Aucun ami en ligne"));
 			string t2 = ((!Social.Connecte || Social.Amis.Count == 0) ? "Clique sur + pour en ajouter" : (Social.Amis.Count + ((Social.Amis.Count > 1) ? " amis hors ligne" : " ami hors ligne")));
 			Lang.DrawText(g, t, fAmN, new Rectangle(r.X + Zx.P(10), num3 + Zx.P(14), r.Width - Zx.P(20), Zx.P(20)), Color.FromArgb(200, 208, 228), TextFormatFlags.HorizontalCenter | TextFormatFlags.NoPadding);
 			Lang.DrawText(g, t2, fAmS, new Rectangle(r.X + Zx.P(10), num3 + Zx.P(36), r.Width - Zx.P(20), Zx.P(18)), C.Gris, TextFormatFlags.HorizontalCenter | TextFormatFlags.NoPadding);
@@ -6588,7 +6588,7 @@ internal partial class Fenetre : Form
 				Projet pp = item5;
 				images.TryGetValue(item5.Id, out var value5);
 				DateTime? dateSortie = item5.DateSortie;
-				list.Add(NouvelleDiapo("Bientôt", Color.FromArgb(130, 96, 235), item5.Nom, (item5.SousTitre.Length > 0) ? item5.SousTitre : "Annoncé par TPS Studios", dateSortie.HasValue ? ("Sortie prévue le " + dateSortie.Value.ToString("dd/MM/yyyy")) : "Date à venir", value5, "En savoir plus", delegate
+				list.Add(NouvelleDiapo("Bientôt", Color.FromArgb(130, 96, 235), item5.Nom, (item5.SousTitre.Length > 0) ? item5.SousTitre : "Annoncé par TPS Groupe", dateSortie.HasValue ? ("Sortie prévue le " + dateSortie.Value.ToString("dd/MM/yyyy")) : "Date à venir", value5, "En savoir plus", delegate
 				{
 					Choisir(pp);
 					ShowVue(Vue.Projet);
@@ -6597,7 +6597,7 @@ internal partial class Fenetre : Form
 			string inv = InviteDiscord();
 			if (inv.Length > 0)
 			{
-				list.Add(NouvelleDiapo("Communauté", Color.FromArgb(88, 101, 242), "Rejoignez TPS Studios sur Discord", "Annonces, aide et discussions avec les joueurs.", "", null, "Rejoindre", delegate
+				list.Add(NouvelleDiapo("Communauté", Color.FromArgb(88, 101, 242), "Rejoignez TPS Groupe sur Discord", "Annonces, aide et discussions avec les joueurs.", "", null, "Rejoindre", delegate
 				{
 					try
 					{
@@ -6611,7 +6611,7 @@ internal partial class Fenetre : Form
 		}
 		if (list.Count == 0)
 		{
-			list.Add(NouvelleDiapo("Bienvenue", C.Jade, "Bienvenue sur TPS Studios", "Tous nos projets, mods et jeux réunis dans un seul lanceur.", "", null, "Jouer", delegate
+			list.Add(NouvelleDiapo("Bienvenue", C.Jade, "Bienvenue sur TPS Groupe", "Tous nos projets, mods et jeux réunis dans un seul lanceur.", "", null, "Jouer", delegate
 			{
 				ShowVue(Vue.Jeux);
 			}));
@@ -7636,7 +7636,7 @@ internal partial class Fenetre : Form
 		}
 		LogoDiscord(g, new Rectangle(r.X + Zx.P(14), r.Y + (r.Height - Zx.P(18)) / 2, Zx.P(24), Zx.P(18)), Color.White, baseColor);
 		Lang.DrawText(g, "Rejoindre", fDisc1, new Rectangle(r.X + Zx.P(46), r.Y + Zx.P(6), discordCoupe - r.X - Zx.P(50), Zx.P(20)), Color.White, TextFormatFlags.NoPadding);
-		Lang.DrawText(g, "TPS Studios", fDisc2, new Rectangle(r.X + Zx.P(46), r.Y + Zx.P(26), discordCoupe - r.X - Zx.P(50), Zx.P(16)), Color.FromArgb(222, 226, 255), TextFormatFlags.NoPadding);
+		Lang.DrawText(g, "TPS Groupe", fDisc2, new Rectangle(r.X + Zx.P(46), r.Y + Zx.P(26), discordCoupe - r.X - Zx.P(50), Zx.P(16)), Color.FromArgb(222, 226, 255), TextFormatFlags.NoPadding);
 		Lang.DrawText(g, "Ouvrir", fDisc1, new Rectangle(discordCoupe + Zx.P(6), r.Y + Zx.P(6), r.Right - discordCoupe - Zx.P(12), Zx.P(20)), Color.White, TextFormatFlags.HorizontalCenter | TextFormatFlags.NoPadding);
 		Lang.DrawText(g, "Discord ↗", fDisc2, new Rectangle(discordCoupe + Zx.P(6), r.Y + Zx.P(26), r.Right - discordCoupe - Zx.P(12), Zx.P(16)), Color.FromArgb(222, 226, 255), TextFormatFlags.HorizontalCenter | TextFormatFlags.NoPadding);
 		if (graphicsState != null)
@@ -7750,7 +7750,7 @@ internal partial class Fenetre : Form
 		tuile.Choisie = true;
 		if (Opt("boutique") != "0")
 		{
-			Menu("\ue719", "Boutique", Social.Vip ? ("DLC et cosmétiques  ·  " + Social.Points + " points VIP") : "DLC et cosmétiques TPS Studios", delegate
+			Menu("\ue719", "Boutique", Social.Vip ? ("DLC et cosmétiques  ·  " + Social.Points + " points VIP") : "DLC et cosmétiques TPS Groupe", delegate
 			{
 				Boutique();
 			});
@@ -7835,7 +7835,7 @@ internal partial class Fenetre : Form
 			Config.Ecrire("zone_info_vue", "1");
 			try
 			{
-				icone.ShowBalloonTip(6000, Lang.T("TPS Studios reste ouvert"), Lang.T("Il continue dans la zone de notification, près de l'horloge : clique sur l'icône pour la musique et « Ouvrir le lanceur », ou « Quitter » pour le fermer."), ToolTipIcon.Info);
+				icone.ShowBalloonTip(6000, Lang.T("TPS Groupe reste ouvert"), Lang.T("Il continue dans la zone de notification, près de l'horloge : clique sur l'icône pour la musique et « Ouvrir le lanceur », ou « Quitter » pour le fermer."), ToolTipIcon.Info);
 			}
 			catch
 			{
@@ -8160,7 +8160,7 @@ internal partial class Fenetre : Form
 		}
 		Tuile tuile3 = new Tuile();
 		tuile3.Titre = "D'autres jeux bientôt";
-		tuile3.Sous = "Le lanceur accueillera les prochains jeux TPS Studios.";
+		tuile3.Sous = "Le lanceur accueillera les prochains jeux TPS Groupe.";
 		tuile3.Glyphe = "\ue710";
 		tuile3.Inactive = true;
 		tuile3.Cursor = Cursors.Default;
@@ -8895,14 +8895,14 @@ internal partial class Fenetre : Form
 			}
 			DiscordPresence.Demarrer(text, InviteDiscord());
 			Compte actif = Comptes.Actif;
-			string text2 = ((actif != null && actif.Statut.Length > 0) ? actif.Statut : "TPS Studios");
+			string text2 = ((actif != null && actif.Statut.Length > 0) ? actif.Statut : "TPS Groupe");
 			if (jeuEnCours != null)
 			{
 				DiscordPresence.Definir("Joue à " + jeuEnCours.Nom, text2, debutJeu);
 			}
 			else
 			{
-				DiscordPresence.Definir("Dans le lanceur TPS Studios", (vue == Vue.Projet && sel != null) ? ("Regarde " + sel.Nom) : text2, null);
+				DiscordPresence.Definir("Dans le lanceur TPS Groupe", (vue == Vue.Projet && sel != null) ? ("Regarde " + sel.Nom) : text2, null);
 			}
 		}
 		catch (Exception e)
@@ -9205,7 +9205,7 @@ internal partial class Fenetre : Form
 				}
 				if (err != null)
 				{
-					lAlerte.Text = "Hors ligne : impossible de joindre le catalogue TPS Studios (" + err + ").";
+					lAlerte.Text = "Hors ligne : impossible de joindre le catalogue TPS Groupe (" + err + ").";
 					lAlerte.Visible = true;
 				}
 				bool flag = VerifierLanceur(manuel || (Opt("version_min").Length > 0 && PlusRecent(Opt("version_min"), Config.VERSION) && !ModeCapture));
@@ -9366,7 +9366,7 @@ internal partial class Fenetre : Form
 		}
 		if (p == null)
 		{
-			lTitre.Text = "TPS Studios";
+			lTitre.Text = "TPS Groupe";
 			lSous.Text = "";
 			bAction.Visible = false;
 			return;

@@ -42,7 +42,7 @@ internal class FenSupport : Form
 		base.Controls.Add(value);
 		Label value2 = new Label
 		{
-			Text = "Décris ton souci : l'équipe TPS Studios reçoit un ticket sur son Discord et te répond au plus vite.",
+			Text = "Décris ton souci : l'équipe TPS Groupe reçoit un ticket sur son Discord et te répond au plus vite.",
 			Font = new Font("Segoe UI", Zx.P(9.5f)),
 			ForeColor = C.Gris,
 			BackColor = C.Fond,
@@ -180,7 +180,7 @@ internal class FenSupport : Form
 								if (e == null)
 								{
 									fenSupport.lErr.ForeColor = C.Vert;
-									fenSupport.lErr.Text = "✔  Ticket envoyé à l'équipe TPS Studios. Merci !";
+									fenSupport.lErr.Text = "✔  Ticket envoyé à l'équipe TPS Groupe. Merci !";
 									fenSupport.ok.Text = "Envoyé ✔";
 									System.Windows.Forms.Timer tf = new System.Windows.Forms.Timer();
 									tf.Interval = 1600;

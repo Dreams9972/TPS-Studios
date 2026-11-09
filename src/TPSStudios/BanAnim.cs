@@ -489,7 +489,7 @@ internal static class BanAnim
 		Maille(g, r, t, Color.FromArgb(6, 4, 22), new Color[3] { Indigo, Rose, Cyan }, new int[3] { 190, 150, 90 }, 0.4);
 		using (Font font = new Font("Segoe UI Black", Math.Max(Zx.P(9f), Math.Min((float)r.Height * 0.5f, (float)r.Width * 0.1f)), FontStyle.Regular, GraphicsUnit.Pixel))
 		{
-			string text = "TPS STUDIOS";
+			string text = "TPS GROUPE";
 			SizeF sizeF = g.MeasureString(text, font, 4000, StringFormat.GenericTypographic);
 			float num = (float)r.X + ((float)r.Width - sizeF.Width) / 2f;
 			float y = (float)r.Y + ((float)r.Height - sizeF.Height) / 2f;

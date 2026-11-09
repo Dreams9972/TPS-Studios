@@ -280,7 +280,7 @@ internal static class GitHub
 			dictionary2["name"] = "Médias des pages";
 			dictionary2["prerelease"] = true;
 			dictionary2["make_latest"] = "false";
-			dictionary2["body"] = "Bandes-annonces des pages du lanceur TPS Studios (envoyées depuis le mode administrateur).";
+			dictionary2["body"] = "Bandes-annonces des pages du lanceur TPS Groupe (envoyées depuis le mode administrateur).";
 			dictionary = javaScriptSerializer.Deserialize<Dictionary<string, object>>(Appel("POST", Api + "/repos/Dreams9972/TPS-Studios/releases", javaScriptSerializer.Serialize(dictionary2), text));
 		}
 		string text2 = dictionary["upload_url"] as string;

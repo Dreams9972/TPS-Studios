@@ -389,7 +389,7 @@ internal static class Progression
 		list.Add(D("anime", "En mouvement", "Choisir une bannière animée", "\ue790", 60, 1, (Compte c) => (c.BanType == "anim") ? 1 : 0));
 		list.Add(D("fete", "Esprit de fête", "Choisir une bannière des fêtes de l'année", "\ue7c1", 60, 1, (Compte c) => (c.BanType == "anim" && Array.IndexOf(BanAnim.Ids, c.BanMotif) >= 10) ? 1 : 0));
 		list.Add(D("bio", "Présentation", "Écrire une bio d'au moins 10 caractères", "\ue8bd", 30, 1, (Compte c) => ((c.Bio ?? "").Trim().Length >= 10) ? 1 : 0));
-		list.Add(D("discord", "Membre de la communauté", "Ouvrir l'invitation du Discord TPS Studios", "\ue8f2", 30, 1, (Compte c) => S(c, "discord")));
+		list.Add(D("discord", "Membre de la communauté", "Ouvrir l'invitation du Discord TPS Groupe", "\ue8f2", 30, 1, (Compte c) => S(c, "discord")));
 		List<DefSucces> list2 = list;
 		list2.AddRange(P("lanc", new string[5] { "l1", "l10", "l50", "l200", "l500" }, new string[5] { "Premier voyage", "Habitué", "Voyageur régulier", "Chauffeur de légende", "Pilier de la ligne" }, "Jouer {0} jour{1} à une carte lancée depuis le lanceur", "\ue768", new int[5] { 1, 10, 50, 200, 500 }, new int[5] { 50, 120, 300, 900, 2000 }, (Compte c) => S(c, "lanc_jours")));
 		list2.AddRange(P("cont", new string[4] { "c2", "c5", "c10", "c20" }, new string[4] { "Curieux", "Explorateur", "Globe-trotteur", "Encyclopédie vivante" }, "Jouer à {0} contenus différents", "\ue909", new int[4] { 2, 5, 10, 20 }, new int[4] { 80, 200, 500, 1200 }, (Compte c) => c.Lancements.Count));

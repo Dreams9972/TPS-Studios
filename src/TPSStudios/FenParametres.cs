@@ -119,7 +119,7 @@ internal class FenParametres : Form, IPage
 		base.Controls.Add(value);
 		Label value2 = new Label
 		{
-			Text = "Personnalisez le lanceur TPS Studios",
+			Text = "Personnalisez le lanceur TPS Groupe",
 			Font = new Font("Segoe UI", Zx.P(10f)),
 			ForeColor = C.Gris,
 			BackColor = C.Fond,
@@ -248,11 +248,11 @@ internal class FenParametres : Form, IPage
 		cFerme = Opt(c, 2, "Garder le lanceur ouvert quand on clique sur la croix", "Il reste dans la zone de notification (près de l'horloge) ; « Quitter » le ferme pour de bon.", Config.Oui("fermer_reduit", defaut: true));
 		cDem = Opt(c, 1, "Démarrer le lanceur avec Windows", "Ouvre le lanceur à chaque ouverture de session. Désactivable ici à tout moment.", Demarrage.Actif);
 		Cadre cadre3 = Section("Activité Discord", Zx.P(40) + Zx.P(62) + Zx.P(116));
-		cDisc = Opt(cadre3, 0, "Afficher mon activité sur Discord", "Vos amis Discord voient que vous utilisez TPS Studios et la carte à laquelle vous jouez.", Config.Oui("discord_presence", defaut: false));
+		cDisc = Opt(cadre3, 0, "Afficher mon activité sur Discord", "Vos amis Discord voient que vous utilisez TPS Groupe et la carte à laquelle vous jouez.", Config.Oui("discord_presence", defaut: false));
 		Etiquette(cadre3, "Statut : " + (Config.Oui("discord_presence", defaut: false) ? DiscordPresence.Statut : "désactivée") + "   ·   désactivé par défaut, aucune connexion à votre compte Discord", Zx.P(24), Zx.P(40) + Zx.P(62) + Zx.P(6));
 		if (appFournie)
 		{
-			Etiquette(cadre3, "Identifiant d'application Discord : fourni par TPS Studios ✔", Zx.P(24), Zx.P(40) + Zx.P(62) + Zx.P(40));
+			Etiquette(cadre3, "Identifiant d'application Discord : fourni par TPS Groupe ✔", Zx.P(24), Zx.P(40) + Zx.P(62) + Zx.P(40));
 		}
 		else
 		{
@@ -404,7 +404,7 @@ internal class FenParametres : Form, IPage
 		base.Controls.Add(panel);
 		Label value5 = new Label
 		{
-			Text = "TPS Studios Lanceur v" + Config.VERSION,
+			Text = "TPS Groupe Lanceur v" + Config.VERSION,
 			Font = new Font("Segoe UI", Zx.P(9f)),
 			ForeColor = C.Gris,
 			BackColor = C.Cote,

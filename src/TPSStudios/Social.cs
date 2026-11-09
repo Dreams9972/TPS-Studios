@@ -448,7 +448,7 @@ internal static class Social
 	{
 		if (!Actif)
 		{
-			return "le serveur TPS Studios n'est pas disponible";
+			return "le serveur TPS Groupe n'est pas disponible";
 		}
 		int statut;
 		Dictionary<string, object> r = Appel("POST", "/v1/support", t, Connecte, out statut);

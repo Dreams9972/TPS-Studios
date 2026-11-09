@@ -281,7 +281,7 @@ internal class FenAmiProfil : Form
 		}
 		if (pr.Mods.Count == 0)
 		{
-			Lang.DrawText(g, "Aucun mod TPS Studios installé (ou liste pas encore synchronisée).", fT, new Point(num3, num2), C.Gris);
+			Lang.DrawText(g, "Aucun mod TPS Groupe installé (ou liste pas encore synchronisée).", fT, new Point(num3, num2), C.Gris);
 			return;
 		}
 		string text = Omsi.DetecteOmsi();

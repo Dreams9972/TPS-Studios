@@ -10,7 +10,7 @@ using System.Threading;
 namespace TPSStudios;
 
 /// <summary>
-/// Bandes-annonces de la chaîne YouTube TPS Studios : le lanceur lit le flux public de la
+/// Bandes-annonces de la chaîne YouTube TPS Groupe : le lanceur lit le flux public de la
 /// chaîne (dernières vidéos) et associe une vidéo à un mod quand son titre contient le nom
 /// du mod (de préférence « trailer », « bande-annonce » ou « teaser »). Cache d'une journée.
 /// </summary>

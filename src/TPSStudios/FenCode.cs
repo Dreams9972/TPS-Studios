@@ -94,7 +94,7 @@ internal class FenCode : Form
 	{
 		if (!p.CodeValide(tCode.Text))
 		{
-			lErr.Text = ((p.AccesSha.Length == 0) ? "Aucun code n'est défini pour ce contenu : contactez TPS Studios." : "Code incorrect.");
+			lErr.Text = ((p.AccesSha.Length == 0) ? "Aucun code n'est défini pour ce contenu : contactez TPS Groupe." : "Code incorrect.");
 			return;
 		}
 		Config.Ecrire("acces_" + p.Id, "1");

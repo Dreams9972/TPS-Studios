@@ -232,7 +232,7 @@ internal class FenConnexionMusique : Form
 		{
 			Ouvrir(Musique.LienWeb(quoi));
 		});
-		Etape(g, 3, Zx.P(290), w, "Lance un titre", "Il s'affiche dans la pilule de l'accueil et dans le mini-lecteur de Windows (icône TPS Studios près de l'horloge).", null, null);
+		Etape(g, 3, Zx.P(290), w, "Lance un titre", "Il s'affiche dans la pilule de l'accueil et dans le mini-lecteur de Windows (icône TPS Groupe près de l'horloge).", null, null);
 		string text = Musique.EnCours();
 		string lecteur = Musique.Lecteur;
 		bool flag = lecteur == "Lecteur web" || (quoi == "apple" && lecteur.Length > 0 && lecteur != "Spotify") || (quoi == "spotify" && lecteur == "Spotify");

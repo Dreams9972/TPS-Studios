@@ -6,7 +6,7 @@ internal static class MessageBox
 {
 	public static DialogResult Show(string texte)
 	{
-		return Show(null, texte, "TPS Studios", MessageBoxButtons.OK, MessageBoxIcon.None);
+		return Show(null, texte, "TPS Groupe", MessageBoxButtons.OK, MessageBoxIcon.None);
 	}
 
 	public static DialogResult Show(string texte, string titre)
@@ -16,7 +16,7 @@ internal static class MessageBox
 
 	public static DialogResult Show(IWin32Window o, string texte)
 	{
-		return Show(o, texte, "TPS Studios", MessageBoxButtons.OK, MessageBoxIcon.None);
+		return Show(o, texte, "TPS Groupe", MessageBoxButtons.OK, MessageBoxIcon.None);
 	}
 
 	public static DialogResult Show(IWin32Window o, string texte, string titre)

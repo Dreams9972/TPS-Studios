@@ -1,11 +1,13 @@
-# TPS Studios
+# TPS Groupe
 
-**Le lanceur de TPS Studios : l'endroit où tous nos projets et leurs contenus sont réunis.**
+*Anciennement TPS Studios.*
+
+**Le lanceur de TPS Groupe : l'endroit où tous nos projets et leurs contenus sont réunis.**
 Cartes, livrées, bus, girouettes, packs IA… Un seul programme pour tout trouver, installer, mettre à jour et lancer.
 
-## ⬇️ [Télécharger le lanceur TPS Studios](https://raw.githubusercontent.com/Dreams9972/TPS-Studios/main/lanceur/TPS.Studios.exe)
+## ⬇️ [Télécharger le lanceur TPS Groupe](https://raw.githubusercontent.com/Dreams9972/TPS-Studios/main/lanceur/TPS.Studios.exe)
 
-1. Téléchargez **TPS.Studios.exe** et lancez-le. Il crée un raccourci « TPS Studios » sur le bureau.
+1. Téléchargez **TPS.Studios.exe** et lancez-le. Il crée un raccourci « TPS Groupe » sur le bureau.
 2. Choisissez votre jeu, ouvrez la bibliothèque, sélectionnez un projet puis cliquez sur **INSTALLER**.
 3. Les mises à jour arrivent toutes seules : le bouton devient **METTRE À JOUR**. Ensuite, cliquez sur **JOUER**.
 
@@ -13,7 +15,7 @@ Windows peut afficher « Windows a protégé votre ordinateur », car le lanceur
 
 ## Ce que fait le lanceur
 
-- **Une bibliothèque unique** pour tous les projets TPS Studios, classés par catégorie : cartes, livrées, bus, girouettes, packs IA et autres. Les nouveautés et les projets à venir y sont annoncés.
+- **Une bibliothèque unique** pour tous les projets TPS Groupe, classés par catégorie : cartes, livrées, bus, girouettes, packs IA et autres. Les nouveautés et les projets à venir y sont annoncés.
 - **Installation en un clic**, mise à jour et désinstallation propre (les fichiers partent à la corbeille).
 - **Mises à jour automatiques** des projets et du lanceur lui-même.
 - **Un profil personnalisable** : photo, pseudo, bio, couleurs et bannière, enregistrés sur votre PC.
