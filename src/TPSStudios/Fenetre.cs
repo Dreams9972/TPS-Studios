@@ -1808,13 +1808,29 @@ internal partial class Fenetre : Form
 		comListe = new ZoneDessin();
 		comListe.Dessiner = DessinerComs;
 		comListe.MouseClick += ClicComs;
+		comListe.MouseDown += delegate(object o, MouseEventArgs e)
+		{
+			if (e.Button != MouseButtons.Left)
+			{
+				return;
+			}
+			for (int j = 0; j < rLikeCom.Count; j++)
+			{
+				if (rLikeCom[j].Contains(e.Location))
+				{
+					Sons.Clic();
+					AimerCom(idLikeCom[j]);
+					return;
+				}
+			}
+		};
 		comP.Controls.Add(comListe);
 		comP.Resize += delegate
 		{
 			PlacerCom();
 		};
 		tTel = new System.Windows.Forms.Timer();
-		tTel.Interval = 120000;
+		tTel.Interval = 30000;
 		tTel.Tick += delegate
 		{
 			if (vue == Vue.Projet || vue == Vue.Accueil)
@@ -2005,12 +2021,27 @@ internal partial class Fenetre : Form
 
 	private readonly List<int> idLikeCom = new List<int>();
 
+	private readonly HashSet<int> likeEnCours = new HashSet<int>();
+
 	private void AimerCom(int id)
 	{
 		if (!Social.Actif || !Social.Connecte)
 		{
 			Toast("Connectez-vous à la communauté pour aimer un commentaire.", C.Orange, 4000);
 			return;
+		}
+		if (!likeEnCours.Add(id))
+		{
+			return;
+		}
+		ComSocial local = soc.Coms.Find((ComSocial x) => x.Id == id);
+		bool avant = local != null && local.Aime;
+		int likesAvant = ((local != null) ? local.Likes : 0);
+		if (local != null)
+		{
+			local.Aime = !avant;
+			local.Likes = Math.Max(0, likesAvant + (avant ? (-1) : 1));
+			comListe?.Invalidate();
 		}
 		Thread thread = new Thread((ThreadStart)delegate
 		{
@@ -2020,6 +2051,7 @@ internal partial class Fenetre : Form
 				int likes = Social.AimerCom(id, out aime);
 				Sur(delegate
 				{
+					likeEnCours.Remove(id);
 					ComSocial comSocial = soc.Coms.Find((ComSocial x) => x.Id == id);
 					if (comSocial != null)
 					{
@@ -2034,6 +2066,14 @@ internal partial class Fenetre : Form
 				Exception e = ex;
 				Sur(delegate
 				{
+					likeEnCours.Remove(id);
+					ComSocial c2 = soc.Coms.Find((ComSocial x) => x.Id == id);
+					if (c2 != null)
+					{
+						c2.Aime = avant;
+						c2.Likes = likesAvant;
+						comListe?.Invalidate();
+					}
 					Toast("J'aime impossible : " + e.Message, C.Rouge, 5000);
 				});
 			}
@@ -2048,7 +2088,6 @@ internal partial class Fenetre : Form
 		{
 			if (rLikeCom[j].Contains(e.Location))
 			{
-				AimerCom(idLikeCom[j]);
 				return;
 			}
 		}
@@ -2655,6 +2694,7 @@ internal partial class Fenetre : Form
 		bool avecComs = sel != null && sel.Commentaires;
 		comP.Visible = avecComs;
 		rEtoiles = new Rectangle(num + num4 - Zx.P(186), num11 + Zx.P(4), Zx.P(186), Zx.P(28));
+		rTelP = new Rectangle(bOngNotes.Right + Zx.P(14), num11, Math.Max(Zx.P(150), Math.Min(Zx.P(240), rEtoiles.X - Zx.P(14) - bOngNotes.Right - Zx.P(14))), Zx.P(36));
 		int largeurTexte = (avecComs ? ((num4 - Zx.P(28)) * 54 / 100) : num4);
 		int width = Math.Max(Zx.P(240), largeurTexte - Zx.P(44));
 		lDesc.MaximumSize = new Size(width, 0);
@@ -3010,6 +3050,7 @@ internal partial class Fenetre : Form
 		}
 		Txt.Dessiner(g, t, fCarteT, r2, (c == C.Gris) ? C.Texte : c, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
 		DessinerEtoiles(g, rEtoiles, Note(sel));
+		DessinerTelechargements(g);
 		Carte(g, rInfo, Zx.P(14));
 		Txt.Dessiner(g, "INFORMATIONS", fCarteT, new Point(rInfo.X + Zx.P(20), rInfo.Y + Zx.P(18)), C.Gris);
 		List<string[]> list2 = LignesInfo(sel);
@@ -3133,11 +3174,6 @@ internal partial class Fenetre : Form
 		{
 			"Tarif",
 			p.Payant ? p.PrixTexte : "Gratuit"
-		});
-		list.Add(new string[2]
-		{
-			"Téléchargements",
-			Telechargements(p).ToString("N0", cultureInfo)
 		});
 		return list;
 	}
@@ -4745,6 +4781,11 @@ internal partial class Fenetre : Form
 			return "";
 		}
 		return value2.Trim();
+	}
+
+	public static string NomJeuPublic(string id)
+	{
+		return NomJeu(id);
 	}
 
 	private static string NomJeu(string id)
@@ -6774,6 +6815,66 @@ internal partial class Fenetre : Form
 		ChargerPopularite(force: false);
 	}
 
+	/// <summary>ETag de la dernière liste des releases : une réponse « non modifiée » ne compte pas dans la limite de GitHub.</summary>
+	private string etagPop = "";
+
+	private Rectangle rTelP;
+
+	private double affTelP = -1.0;
+
+	private string affTelPour = "";
+
+	private System.Windows.Forms.Timer tTelAnim;
+
+	/// <summary>Compteur de téléchargements de la page (en direct, le chiffre défile jusqu'à sa nouvelle valeur).</summary>
+	private void DessinerTelechargements(Graphics g)
+	{
+		if (rTelP.IsEmpty || sel == null)
+		{
+			return;
+		}
+		int cible = Telechargements(sel);
+		if (affTelPour != sel.Id || affTelP < 0.0)
+		{
+			affTelPour = sel.Id;
+			affTelP = cible;
+		}
+		else if (Math.Abs(affTelP - cible) >= 0.5)
+		{
+			if (tTelAnim == null)
+			{
+				tTelAnim = new System.Windows.Forms.Timer();
+				tTelAnim.Interval = 16;
+				tTelAnim.Tick += delegate
+				{
+					int c2 = ((sel != null) ? Telechargements(sel) : 0);
+					double d = c2 - affTelP;
+					affTelP = ((Math.Abs(d) < 0.5) ? c2 : (affTelP + ((Math.Abs(d * 0.12) < 0.4) ? (Math.Sign(d) * 0.4) : (d * 0.12))));
+					if (Math.Abs(affTelP - c2) < 0.5)
+					{
+						affTelP = c2;
+						tTelAnim.Stop();
+					}
+					page.Invalidate(Rectangle.Inflate(rTelP, Zx.P(4), Zx.P(4)));
+				};
+			}
+			tTelAnim.Start();
+		}
+		int n = (int)Math.Round(affTelP);
+		string t = "↓  " + n.ToString("N0", CultureInfo.GetCultureInfo("fr-FR")) + ((n > 1) ? " téléchargements" : " téléchargement");
+		SmoothingMode sm = g.SmoothingMode;
+		g.SmoothingMode = SmoothingMode.AntiAlias;
+		using (GraphicsPath p = Bouton.Rond(rTelP, rTelP.Height / 2))
+		{
+			using SolidBrush b = new SolidBrush(Color.FromArgb(40, C.Jade));
+			g.FillPath(b, p);
+			using Pen pen = new Pen(Color.FromArgb(150, C.Jade));
+			g.DrawPath(pen, p);
+		}
+		Lang.DrawText(g, t, fNote, rTelP, C.Texte, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+		g.SmoothingMode = sm;
+	}
+
 	private void ChargerPopularite(bool force)
 	{
 		if ((popDemandee && !force) || cat == null || File.Exists(Config.Catalogue))
@@ -6788,7 +6889,19 @@ internal partial class Fenetre : Form
 				string input;
 				using (WebClient webClient = Web.Client())
 				{
-					input = webClient.DownloadString("https://api.github.com/repos/Dreams9972/TPS-Studios/releases?per_page=100");
+					if (etagPop.Length > 0)
+					{
+						webClient.Headers[HttpRequestHeader.IfNoneMatch] = etagPop;
+					}
+					try
+					{
+						input = webClient.DownloadString("https://api.github.com/repos/Dreams9972/TPS-Studios/releases?per_page=100");
+						etagPop = webClient.ResponseHeaders?[HttpResponseHeader.ETag] ?? "";
+					}
+					catch (WebException we) when (we.Response is HttpWebResponse hr && hr.StatusCode == HttpStatusCode.NotModified)
+					{
+						return;
+					}
 				}
 				IEnumerable enumerable = new JavaScriptSerializer().DeserializeObject(input) as object[];
 				Dictionary<string, int> i = new Dictionary<string, int>();
@@ -8291,6 +8404,13 @@ internal partial class Fenetre : Form
 			foreach (KeyValuePair<string, int> item in dictionary)
 			{
 				Progression.EnregistrerJeu(item.Key, NomJeu(item.Key), item.Value);
+			}
+			foreach (Projet pm in cat.Projets)
+			{
+				if (pm.Installable && pm.StatutEffectif != "masque")
+				{
+					Progression.EnregistrerMod(pm.Id, pm.Nom, pm.Categorie);
+				}
 			}
 		}
 		MajTheme();

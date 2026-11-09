@@ -373,6 +373,13 @@ internal class FenAmis : Form, IPage
 			{
 				tCode.Text = Social.CodeAmi(Social.MonId);
 			}
+			Compte ca = Comptes.Actif;
+			if (ca != null && Social.Amis.Count > Progression.S(ca, "amis_max"))
+			{
+				ca.Stats["amis_max"] = Social.Amis.Count;
+				Progression.Verifier(ca);
+				Comptes.Sauvegarder();
+			}
 			if (premier && lMsg.ForeColor != C.Rouge)
 			{
 				Message("Votre pseudo TPS : " + Social.Pseudo + "  ·  vos amis voient votre statut et vos mods, personne d'autre.", C.Gris);

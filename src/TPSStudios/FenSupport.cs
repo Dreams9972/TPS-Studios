@@ -28,7 +28,7 @@ internal class FenSupport : Form
 		BackColor = C.Fond;
 		ForeColor = C.Texte;
 		Font = new Font("Segoe UI", Zx.P(10f));
-		base.ClientSize = new Size(Zx.P(640), Zx.P(560));
+		base.ClientSize = new Size(Zx.P(640), Zx.P(510));
 		Label value = new Label
 		{
 			Text = "Support  ·  " + p.Nom,
@@ -49,58 +49,59 @@ internal class FenSupport : Form
 			Location = new Point(Zx.P(28), Zx.P(58)),
 			Size = new Size(Zx.P(584), Zx.P(22))
 		};
-		base.Controls.Add(value2);
+		value2.Visible = false;
 		Label value3 = new Label
 		{
 			Text = "Quel est le problème ?",
 			Font = new Font("Segoe UI Semibold", Zx.P(9.5f)),
 			ForeColor = C.Gris,
 			BackColor = C.Fond,
-			Location = new Point(Zx.P(28), Zx.P(92)),
+			Location = new Point(Zx.P(28), Zx.P(66)),
 			AutoSize = true
 		};
 		base.Controls.Add(value3);
 		sg = new Segments();
 		sg.Items = Sujets;
 		sg.Etire = true;
-		sg.Location = new Point(Zx.P(28), Zx.P(116));
+		sg.Location = new Point(Zx.P(28), Zx.P(90));
 		sg.Width = Zx.P(584);
 		sg.Index = 1;
 		base.Controls.Add(sg);
 		Label value4 = new Label
 		{
-			Text = "Expliquez ce qui se passe (quand, quel message, ce que vous avez déjà essayé)",
+			Text = "Expliquez ce qui se passe",
 			Font = new Font("Segoe UI Semibold", Zx.P(9.5f)),
 			ForeColor = C.Gris,
 			BackColor = C.Fond,
-			Location = new Point(Zx.P(28), Zx.P(166)),
+			Location = new Point(Zx.P(28), Zx.P(140)),
 			AutoSize = true
 		};
 		base.Controls.Add(value4);
 		tMsg = new Champ(multi: true, Zx.P(150));
-		tMsg.Location = new Point(Zx.P(28), Zx.P(190));
+		tMsg.Location = new Point(Zx.P(28), Zx.P(164));
 		tMsg.Width = Zx.P(584);
 		tMsg.MaxLength = 1000;
 		base.Controls.Add(tMsg);
 		Label value5 = new Label
 		{
-			Text = "Votre pseudo Discord (facultatif, pour vous répondre)",
+			Text = "Votre pseudo Discord",
 			Font = new Font("Segoe UI Semibold", Zx.P(9.5f)),
 			ForeColor = C.Gris,
 			BackColor = C.Fond,
-			Location = new Point(Zx.P(28), Zx.P(354)),
+			Location = new Point(Zx.P(28), Zx.P(328)),
 			AutoSize = true
 		};
 		base.Controls.Add(value5);
 		tContact = new Champ(multi: false, Zx.P(38));
-		tContact.Location = new Point(Zx.P(28), Zx.P(378));
+		tContact.Location = new Point(Zx.P(28), Zx.P(352));
 		tContact.Width = Zx.P(300);
 		tContact.MaxLength = 40;
-		tContact.Indice = "ex. evens_tps";
+		tContact.Indice = "ex. pseudo_discord";
 		base.Controls.Add(tContact);
 		Label value6 = new Label
 		{
-			Text = "Joint automatiquement : " + infos,
+			Text = "",
+			Visible = false,
 			UseMnemonic = false,
 			Font = new Font("Segoe UI", Zx.P(8.5f)),
 			ForeColor = C.Gris,
@@ -113,7 +114,7 @@ internal class FenSupport : Form
 		lErr.Font = new Font("Segoe UI", Zx.P(9.5f));
 		lErr.ForeColor = C.Rouge;
 		lErr.BackColor = C.Fond;
-		lErr.Location = new Point(Zx.P(28), Zx.P(462));
+		lErr.Location = new Point(Zx.P(28), Zx.P(404));
 		lErr.Size = new Size(Zx.P(584), Zx.P(22));
 		lErr.UseMnemonic = false;
 		base.Controls.Add(lErr);

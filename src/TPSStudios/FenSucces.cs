@@ -25,6 +25,21 @@ internal class FenSucces : Form, IPage
 
 	private int cols = 3;
 
+	private readonly List<string[]> groupes = new List<string[]>();
+
+	private Segments filtre;
+
+	private List<DefSucces> Liste()
+	{
+		List<DefSucces> l = Progression.Vitrine(c);
+		string g = ((filtre != null && filtre.Index > 0) ? groupes[filtre.Index][0] : "");
+		if (g.Length > 0)
+		{
+			l = l.FindAll((DefSucces d) => d.Groupe == g);
+		}
+		return l;
+	}
+
 	private static readonly Font fTitreS = new Font("Segoe UI Semibold", Zx.P(22f));
 
 	private static readonly Font fNomS = new Font("Segoe UI Semibold", Zx.P(11f));
@@ -47,11 +62,11 @@ internal class FenSucces : Form, IPage
 		ForeColor = C.Texte;
 		Font = new Font("Segoe UI", Zx.P(10f));
 		Size size = (base.ClientSize = Integre.Hote);
-		CW = Math.Min(size.Width, Zx.P(1240));
+		CW = Math.Max(Math.Min(size.Width, Zx.P(900)), Math.Min(size.Width - Zx.P(48), Zx.P(2400)));
 		X0 = (size.Width - CW) / 2;
 		haut = new ZoneDessin();
 		haut.Dock = DockStyle.Top;
-		haut.Height = Zx.P(214);
+		haut.Height = Zx.P(262);
 		haut.Dessiner = DessinerHaut;
 		base.Controls.Add(haut);
 		Control.ControlCollection controls = haut.Controls;
@@ -60,6 +75,34 @@ internal class FenSucces : Form, IPage
 			base.DialogResult = DialogResult.OK;
 		};
 		controls.Add(Integre.Retour(h, X0 + Zx.P(24), Zx.P(20)));
+		groupes.Add(new string[2] { "", "Tous" });
+		groupes.Add(new string[2] { "lanceur", "Lanceur" });
+		HashSet<string> vus = new HashSet<string>();
+		foreach (DefSucces d in Progression.Defs)
+		{
+			if (d.Groupe != "lanceur" && d.Groupe != "mods" && vus.Add(d.Groupe))
+			{
+				groupes.Add(new string[2] { d.Groupe, Fenetre.NomJeuPublic(d.Groupe) });
+			}
+		}
+		groupes.Add(new string[2] { "mods", "Mods" });
+		filtre = new Segments();
+		string[] noms = new string[groupes.Count];
+		for (int i = 0; i < groupes.Count; i++)
+		{
+			noms[i] = groupes[i][1];
+		}
+		filtre.Items = noms;
+		filtre.MinW = Zx.P(110);
+		filtre.Location = new Point(X0 + Zx.P(24), Zx.P(212));
+		filtre.Width = Math.Min(CW - Zx.P(48), noms.Length * Zx.P(150));
+		filtre.Etire = true;
+		filtre.Changed += delegate
+		{
+			Dispose_Layout();
+			cartes.Invalidate();
+		};
+		haut.Controls.Add(filtre);
 		defil = new Panel();
 		defil.Dock = DockStyle.Fill;
 		defil.AutoScroll = true;
@@ -92,8 +135,8 @@ internal class FenSucces : Form, IPage
 
 	private void Dispose_Layout()
 	{
-		cols = ((CW >= 960) ? 3 : 2);
-		int num = (Progression.Defs.Count + cols - 1) / cols;
+		cols = Math.Max(2, Math.Min(5, (CW - Zx.P(48)) / Zx.P(420)));
+		int num = (Liste().Count + cols - 1) / cols;
 		cartes.Width = CW - SystemInformation.VerticalScrollBarWidth;
 		cartes.Height = Zx.P(16) + num * Zx.P(124) + Zx.P(24);
 	}
@@ -160,7 +203,7 @@ internal class FenSucces : Form, IPage
 		g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
 		g.Clear(C.Fond);
 		int num = (CW - Zx.P(48) - SystemInformation.VerticalScrollBarWidth - (cols - 1) * Zx.P(16)) / cols;
-		List<DefSucces> list = Progression.Vitrine(c);
+		List<DefSucces> list = Liste();
 		for (int i = 0; i < list.Count; i++)
 		{
 			DefSucces defSucces = list[i];
