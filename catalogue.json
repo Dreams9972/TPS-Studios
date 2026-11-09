@@ -27,7 +27,8 @@
       "taille": 163483238,
       "image": "https://raw.githubusercontent.com/Dreams9972/TPS-Studios/main/images/parisview.jpg",
       "notes": "Correctif lumières et textures.\r\n•  Les lumières sortent enfin de leurs luminaires, partout sur la carte (halos et éclairage posés sur les tubes, même dans les stations en courbe).\r\n•  MF 67 et MF 88 : les rampes du plafond brillent et éclairent la salle ; le plafonnier de cabine éclaire vraiment ; noir quand c'est éteint.\r\n•  Louis Blanc, Place des Fêtes et couloirs : vrais plafonniers.\r\n•  Textures corrigées : inox, barrières, mains courantes, signaux et nez des rames ne sont plus étirés.",
-      "categorie": "cartes"
+      "categorie": "cartes",
+      "editeur": "· TPS Groupe"
     },
     {
       "nom": "Paris 25",
@@ -56,7 +57,7 @@
       "ordre": 1,
       "nouveautes": true,
       "tags": "Paris",
-      "editeur": "annamathys/TPS Groupe"
+      "editeur": "annamathys · TPS Groupe"
     },
     {
       "id": "strasbourg",
@@ -65,7 +66,8 @@
       "categorie": "cartes",
       "statut": "bientot",
       "sous_titre": "A la découverte de la ligne G de Strasbourg",
-      "image": "https://raw.githubusercontent.com/Dreams9972/TPS-Studios/main/images/strasbourg.jpg?v=639297114777263819"
+      "image": "https://raw.githubusercontent.com/Dreams9972/TPS-Studios/main/images/strasbourg.jpg?v=639297114777263819",
+      "editeur": "Wissem · TPS Groupe"
     },
     {
       "id": "saint-vausonne",
@@ -82,7 +84,7 @@
       "hof_defaut": "",
       "consigne": "Choisissez votre bus et la ligne, puis lancez.",
       "description": "Lignes de la Region:\n1802 Belmont Gare RER <-> Belmont Gare RER\n1822 Mairie de Saint-François <-> Belmont Gare RER\n1803 Saint-François Gare RER <-> C.C Cap Nord\n1804 Saint-François Gare RER <-> La Source\n1820 Saint-François Gare RER <-> Belmont Gare RER\n\nCarte réalisée par TPS Groupe.",
-      "editeur": "TPS Groupe",
+      "editeur": "· TPS Groupe",
       "version": "V2.1",
       "date": "08/11/2026 12:21",
       "md5": "f949fe1f289d80abf63b34b74b4642c8",
@@ -135,7 +137,7 @@
       "hof_defaut": "",
       "consigne": "Choisissez votre bus et la ligne, puis lancez.",
       "description": "Lignes de Paris:\n23 Gare de Lyon <-> Gare de l'Est\n34 Gare de Lyon <-> Chatelet\n36 Republique <-> Nation\n41 Opera <-> Chatelet\n50 Gare de Lyon <-> Porte de la Muette\n65 Chatelet <-> Gare de l'Est/Bastille\n78 Bastille <-> Porte de la Muette\n79 Clemenceau <-> Nation\n81 Etoile <-> Denfert-Rochereau\n90 Gare de Lyon <-> Charles de Gaulle Etoile\n149 Etoile <-> Bercy\n\nCarte réalisée par TPS Groupe.",
-      "editeur": "TPS Groupe",
+      "editeur": "· TPS Groupe",
       "version": "V1.1",
       "date": "08/11/2026 12:22",
       "md5": "6d379ddf0a2e58a62e695e537ab37639",
