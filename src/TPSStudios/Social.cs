@@ -879,7 +879,7 @@ internal static class Social
 	/// <summary>Pseudo accepté par le serveur : 2 à 20 lettres, chiffres, espaces, _ ( ) . -</summary>
 	public static string PseudoServeur(string p)
 	{
-		string s = Regex.Replace((p ?? "").Trim(), "[^\\p{L}\\p{N} _().\\-]", "");
+		string s = Regex.Replace((p ?? "").Trim(), "[^\\p{L}\\p{N} _().\\[\\]\\-]", "");
 		s = Regex.Replace(s, "\\s+", " ").Trim();
 		if (s.Length > 20)
 		{
@@ -915,39 +915,59 @@ internal static class Social
 		catch
 		{
 		}
-		if (pseudo == Pseudo && pseudo == pseudoEnvoye && niveau == niveauEnvoye)
+		string avert = null;
+		if (!(pseudo == Pseudo && pseudo == pseudoEnvoye && niveau == niveauEnvoye))
 		{
-			EnvoyerApparence(c);
-			return null;
-		}
-		int st;
-		Dictionary<string, object> r = AppelAuth("PUT", "/v1/moi", new Dictionary<string, object>
-		{
-			{ "pseudo", pseudo },
-			{ "niveau", niveau }
-		}, out st);
-		if (st == 409 && pseudo != Pseudo)
-		{
-			r = AppelAuth("PUT", "/v1/moi", new Dictionary<string, object> { { "niveau", niveau } }, out st);
-			if (st == 200)
+			int st;
+			Dictionary<string, object> r = AppelAuth("PUT", "/v1/moi", new Dictionary<string, object>
 			{
+				{ "pseudo", pseudo },
+				{ "niveau", niveau }
+			}, out st);
+			if (st == 403 && pseudo != Pseudo)
+			{
+				string sans = SansMotsReserves(pseudo);
+				avert = "« " + pseudo + " » contient un mot réservé à l'équipe";
+				if (sans.Length >= 2 && sans != pseudo)
+				{
+					r = AppelAuth("PUT", "/v1/moi", new Dictionary<string, object>
+					{
+						{ "pseudo", sans },
+						{ "niveau", niveau }
+					}, out st);
+				}
+			}
+			if ((st == 409 || st == 403 || st == 400) && pseudo != Pseudo)
+			{
+				avert = avert ?? ("le pseudo « " + pseudo + " » n'a pas été accepté par le serveur");
+				r = AppelAuth("PUT", "/v1/moi", new Dictionary<string, object> { { "niveau", niveau } }, out st);
+			}
+			if (st == 200 && r != null)
+			{
+				if (r.TryGetValue("pseudo", out var v))
+				{
+					Pseudo = Convert.ToString(v);
+					Ecrire();
+				}
+				pseudoEnvoye = pseudo;
 				niveauEnvoye = niveau;
 			}
-			return "le pseudo « " + pseudo + " » est déjà pris sur le serveur : vos amis voient « " + Pseudo + " »";
+			else if (avert == null)
+			{
+				avert = Msg(r, "profil non synchronisé");
+			}
 		}
-		if (st != 200 || r == null)
-		{
-			return Msg(r, "profil non synchronisé");
-		}
-		if (r.TryGetValue("pseudo", out var v))
-		{
-			Pseudo = Convert.ToString(v);
-			Ecrire();
-		}
-		pseudoEnvoye = pseudo;
-		niveauEnvoye = niveau;
 		EnvoyerApparence(c);
-		return null;
+		return avert;
+	}
+
+	/// <summary>Retire les mots réservés à l'équipe (admin, modo, staff, TPS) et les crochets vides qui restent.</summary>
+	public static string SansMotsReserves(string p)
+	{
+		string s = Regex.Replace(p ?? "", "(admin|modo|staff|\\btps\\b)", "", RegexOptions.IgnoreCase);
+		s = Regex.Replace(s, "[\\[(]\\s*[\\])]", "");
+		s = Regex.Replace(s, "\\s+", " ").Trim(' ', '_', '-', '.');
+		return s;
 	}
 
 	private static string apparenceEnvoyee = "";

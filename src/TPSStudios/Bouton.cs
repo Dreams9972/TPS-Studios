@@ -115,6 +115,7 @@ internal class Bouton : Control, ILisse
 		Font = new Font("Segoe UI Semibold", Zx.P(10f));
 		base.TabStop = true;
 		SetStyle(ControlStyles.UserPaint | ControlStyles.ResizeRedraw | ControlStyles.Selectable | ControlStyles.SupportsTransparentBackColor | ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer, value: true);
+		SetStyle(ControlStyles.StandardDoubleClick, value: false);
 		BackColor = Color.Transparent;
 	}
 

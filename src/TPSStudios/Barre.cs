@@ -12,6 +12,7 @@ internal class Barre : Control
 	public Barre()
 	{
 		SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer, value: true);
+		SetStyle(ControlStyles.StandardDoubleClick, value: false);
 		base.Height = 8;
 	}
 

@@ -25,6 +25,7 @@ internal class NavItem : Control
 		base.Size = new Size(Zx.P(260), Zx.P(42));
 		Cursor = Cursors.Hand;
 		SetStyle(ControlStyles.UserPaint | ControlStyles.ResizeRedraw | ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer, value: true);
+		SetStyle(ControlStyles.StandardDoubleClick, value: false);
 	}
 
 	protected override void OnMouseEnter(EventArgs e)

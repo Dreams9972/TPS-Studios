@@ -24,6 +24,7 @@ internal class Entree : Control
 		base.Height = Zx.P(64);
 		Cursor = Cursors.Hand;
 		SetStyle(ControlStyles.UserPaint | ControlStyles.ResizeRedraw | ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer, value: true);
+		SetStyle(ControlStyles.StandardDoubleClick, value: false);
 	}
 
 	protected override void OnMouseEnter(EventArgs e)

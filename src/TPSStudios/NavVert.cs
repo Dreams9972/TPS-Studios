@@ -48,6 +48,7 @@ internal class NavVert : Control
 	public NavVert()
 	{
 		SetStyle(ControlStyles.UserPaint | ControlStyles.ResizeRedraw | ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer, value: true);
+		SetStyle(ControlStyles.StandardDoubleClick, value: false);
 		Cursor = Cursors.Hand;
 		BackColor = C.Fond;
 	}

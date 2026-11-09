@@ -4,7 +4,7 @@
 // modération par clé administrateur (secret Cloudflare ADMIN_KEY, jamais dans le code), aucune donnée personnelle (pas d'e-mail, pas d'adresse IP stockée en clair).
 
 const MOD = /^[a-z0-9][a-z0-9_-]{1,39}$/;
-const PSEUDO = /^[\p{L}\p{N} _().\-]{2,20}$/u;
+const PSEUDO = /^[\p{L}\p{N} _().\[\]\-]{2,20}$/u;
 const RESERVE = /(admin|modo|staff|\btps\b)/i;      // pseudos réservés à l'équipe (inscription avec la clé administrateur)
 const COMMENTAIRE_MAX = 500, CORPS_MAX = 4096, HISTORIQUE = 100;
 const ENTETES = { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', 'x-content-type-options': 'nosniff', 'referrer-policy': 'no-referrer' };
@@ -315,7 +315,8 @@ async function route(request, env) {
     const q = propre(url.searchParams.get('q'), 24).toLowerCase(); if (q.length < 2) return rep({ joueurs: [] });
     const code = q.replace(/[^0-9a-f]/g, '');
     const parCode = /^[0-9a-f-\s]{16,24}$/.test(q) && code.length === 16;
-    const motif = parCode ? code : ('%' + q.replace(/[\\%_]/g, (c) => '\\' + c) + '%');
+    const jeton = q.split(/[^\p{L}\p{N}_]+/u).filter((t) => t.length >= 2).sort((x, y) => y.length - x.length)[0] || q;   // « Zumba_Cafeew [TPS] » → « zumba_cafeew »
+    const motif = parCode ? code : ('%' + jeton.replace(/[\\%_]/g, (c) => '\\' + c) + '%');
     await assureApparence(env);
     const l = await env.DB.prepare(MES_AMIS + "SELECT j.id, j.pseudo, j.niveau, (SELECT 1 FROM vip v WHERE v.joueur_id = j.id) AS vip, (SELECT a.etat || ':' || a.de FROM amis a WHERE (a.a = j.id AND a.b = ?) OR (a.b = j.id AND a.a = ?)) AS lien, (SELECT COUNT(*) FROM amis k WHERE k.etat = 'ami' AND ((k.a = j.id AND k.b IN (SELECT id FROM mes)) OR (k.b = j.id AND k.a IN (SELECT id FROM mes)))) AS communs FROM joueurs j WHERE " + (parCode ? "j.id = ?" : "j.pseudo_min LIKE ? ESCAPE '\\'") + " AND j.id <> ? AND j.banni = 0 ORDER BY (j.pseudo_min LIKE ? ESCAPE '\\') DESC, length(j.pseudo_min), j.pseudo_min LIMIT 20").bind(moi.id, moi.id, moi.id, moi.id, moi.id, motif, moi.id, q.replace(/[\\%_]/g, (c) => '\\' + c) + '%').all();
     const apps = {};
