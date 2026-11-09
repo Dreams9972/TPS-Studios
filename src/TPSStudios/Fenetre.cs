@@ -308,6 +308,9 @@ internal partial class Fenetre : Form
 
 	private Rectangle rEtoiles;
 
+	/// <summary>La barre de téléchargement / le message d'alerte occupent-ils une ligne dans la case d'achat ?</summary>
+	private bool zoneProgP;
+
 	/// <summary>Note sur 5 : 60 % selon les téléchargements (1 000 = plein), 40 % selon les J'aime (100 = plein).</summary>
 	private double Note(Projet p)
 	{
@@ -1192,7 +1195,7 @@ internal partial class Fenetre : Form
 		{
 			OuvrirLies();
 		});
-		bLies.Font = new Font("Segoe UI Semibold", Zx.P(10.5f));
+		bLies.Font = new Font("Segoe UI Semibold", Zx.P(9.5f));
 		bCode = Petit("J'ai un code d'accès", delegate
 		{
 			SaisirCode();
@@ -2697,22 +2700,26 @@ internal partial class Fenetre : Form
 		{
 			num16 += Zx.P(46);
 		}
-		barre.Location = new Point(num13 + num14, num16 + Zx.P(6));
-		barre.Width = num15;
-		lProg.Location = new Point(num13 + num14, num16 + Zx.P(18));
-		lProg.Size = new Size(num15, Zx.P(20));
-		lAlerte.Location = new Point(num13 + num14, num16 + Zx.P(2));
-		lAlerte.Size = new Size(num15, Zx.P(40));
-		num16 += Zx.P(48);
-		int num17 = (num15 - Zx.P(10)) / 2;
-		bLies.SetBounds(num13 + num14, num16, num17, Zx.P(80));
+		int num17 = (num15 - 2 * Zx.P(10)) / 3;
+		bLies.SetBounds(num13 + num14, num16, num17, Zx.P(38));
 		rSocial = Rectangle.Empty;
-		bDossier.SetBounds(num13 + num14 + num17 + Zx.P(10), num16, num17, Zx.P(34));
+		bDossier.SetBounds(num13 + num14 + num17 + Zx.P(10), num16, num17, Zx.P(38));
+		bDesinst.SetBounds(num13 + num14 + 2 * (num17 + Zx.P(10)), num16, num15 - 2 * (num17 + Zx.P(10)), Zx.P(38));
 		MajSuivi();
 		MajLies();
-		num16 += Zx.P(46);
-		bDesinst.SetBounds(num13 + num14 + num17 + Zx.P(10), num16, num17, Zx.P(34));
-		rAchat = new Rectangle(num13, num2, num5, num16 + Zx.P(34) + Zx.P(20) - num2);
+		num16 += Zx.P(38);
+		zoneProgP = barre.Visible || lProg.Visible || lAlerte.Visible;
+		if (zoneProgP)
+		{
+			barre.Location = new Point(num13 + num14, num16 + Zx.P(14));
+			barre.Width = num15;
+			lProg.Location = new Point(num13 + num14, num16 + Zx.P(26));
+			lProg.Size = new Size(num15, Zx.P(20));
+			lAlerte.Location = new Point(num13 + num14, num16 + Zx.P(10));
+			lAlerte.Size = new Size(num15, Zx.P(40));
+			num16 += Zx.P(50);
+		}
+		rAchat = new Rectangle(num13, num2, num5, num16 + Zx.P(20) - num2);
 		rPhotosP = Rectangle.Empty;
 		if (list.Count > 1)
 		{
@@ -9914,17 +9921,26 @@ internal partial class Fenetre : Form
 		if (occupe)
 		{
 			bDesinst.Text = "Annuler";
-			bDesinst.Visible = dlEnCours != null;
+			bDesinst.Visible = true;
 			bDesinst.Enabled = dlEnCours != null && !dlAnnule;
 		}
 		else
 		{
 			bDesinst.Text = "Désinstaller";
-			bDesinst.Visible = flag3;
+			bDesinst.Visible = true;
 			bDesinst.Enabled = flag3 && etat != E.Lance;
 		}
 		bDesinst.Invalidate();
-		bDossier.Enabled = text != null;
+		bDossier.Enabled = text != null && flag3;
+		if ((barre.Visible || lProg.Visible || lAlerte.Visible) != zoneProgP && vue == Vue.Projet && !relayoutPage)
+		{
+			relayoutPage = true;
+			BeginInvoke((MethodInvoker)delegate
+			{
+				relayoutPage = false;
+				Disposer();
+			});
+		}
 		foreach (Entree entree in entrees)
 		{
 			entree.Etat = LibelleEtat(entree.P, text, out var couleur, out var _);
