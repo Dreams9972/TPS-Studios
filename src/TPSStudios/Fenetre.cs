@@ -589,7 +589,7 @@ internal partial class Fenetre : Form
 
 	private List<KeyValuePair<Rectangle, Annonce>> rAnnonces = new List<KeyValuePair<Rectangle, Annonce>>();
 
-	private static readonly string[] NouveautesLanceur = new string[4] { "TPS Studios devient TPS Groupe", "Alerte de mise à jour sur l'accueil", "Bandes-annonces YouTube dans les pages", "Lanceur plus fluide et page du jeu sans défilement" };
+	private static readonly string[] NouveautesLanceur = new string[4] { "Transitions sans clignotement", "Réglages et Boutique en plein écran", "J'aime sur les commentaires", "Textes revus et traduits dans toutes les langues" };
 
 	private static readonly Font fAnT2 = new Font("Segoe UI Semibold", Zx.P(11f));
 
