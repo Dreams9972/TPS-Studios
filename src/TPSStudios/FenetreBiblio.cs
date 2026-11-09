@@ -31,7 +31,7 @@ internal partial class Fenetre
 
 	private int triB;
 
-	private Segments ongletsB;
+	private Bouton bFlecheMods;
 
 	private Segments sgTri;
 
@@ -77,16 +77,13 @@ internal partial class Fenetre
 
 	private void ConstruireOngletsBiblio()
 	{
-		ongletsB = new Segments();
-		ongletsB.Items = new string[2] { "Bibliothèque", "Mods" };
-		ongletsB.MinW = Zx.P(130);
-		ongletsB.Etire = true;
-		ongletsB.Index = ongletB;
-		ongletsB.Size = new Size(Zx.P(264), Zx.P(38));
-		ongletsB.Changed += delegate
+		bFlecheMods = new Bouton("›");
+		bFlecheMods.Plein = false;
+		bFlecheMods.Font = new Font("Segoe UI Semibold", Zx.P(20f));
+		bFlecheMods.Size = new Size(Zx.P(30), Zx.P(110));
+		bFlecheMods.Click += delegate
 		{
-			ongletB = ongletsB.Index;
-			DisposerBiblio();
+			BasculerMods(ongletB == 0);
 		};
 		sgTri = new Segments();
 		sgTri.Items = TrisB;
@@ -108,7 +105,7 @@ internal partial class Fenetre
 		{
 			JouerJeuCourant();
 		};
-		pBiblio.Controls.Add(ongletsB);
+		pBiblio.Controls.Add(bFlecheMods);
 		pBiblio.Controls.Add(sgTri);
 		pBiblio.Controls.Add(bJouerJeu);
 		if (!biblioSouris)
@@ -124,6 +121,18 @@ internal partial class Fenetre
 					bulle.SetToolTip(pBiblio, (zoneB != null && zoneB.Bulle != null) ? zoneB.Bulle : null);
 					pBiblio.Invalidate();
 				}
+			};
+			pBiblio.Scroll += delegate
+			{
+				PlacerFleche();
+			};
+			pBiblio.ClientSizeChanged += delegate
+			{
+				PlacerFleche();
+			};
+			pBiblio.MouseWheel += delegate
+			{
+				PlacerFleche();
 			};
 			pBiblio.MouseLeave += delegate
 			{
@@ -163,6 +172,43 @@ internal partial class Fenetre
 			}
 		}
 		return null;
+	}
+
+	/// <summary>Bibliothèque ⇄ tous les mods, avec un glissement horizontal.</summary>
+	private void BasculerMods(bool versMods)
+	{
+		if ((ongletB == 1) == versMods)
+		{
+			return;
+		}
+		Bitmap bitmap = null;
+		if (couches.Count == 0 && !enTransition && Animer())
+		{
+			try
+			{
+				bitmap = Snap(zone);
+			}
+			catch
+			{
+				bitmap = null;
+			}
+		}
+		ongletB = (versMods ? 1 : 0);
+		RemplirBiblio();
+		if (bitmap != null)
+		{
+			Transition(bitmap, versMods ? StyleTrans.Pousse : StyleTrans.Retour);
+		}
+	}
+
+	private void PlacerFleche()
+	{
+		if (bFlecheMods != null)
+		{
+			int x = ((ongletB == 0) ? (pBiblio.ClientSize.Width - bFlecheMods.Width - Zx.P(6)) : Zx.P(5));
+			bFlecheMods.Location = new Point(x, Math.Max(Zx.P(132), (pBiblio.ClientSize.Height - bFlecheMods.Height) / 2));
+			bFlecheMods.BringToFront();
+		}
 	}
 
 	private void JouerJeuCourant()
@@ -219,16 +265,14 @@ internal partial class Fenetre
 	/// <summary>Appelé à la fin de DisposerBiblio : montre / cache les éléments de chaque onglet.</summary>
 	private void DisposerOngletsBiblio(int yFiltres, int xDroite)
 	{
-		if (ongletsB == null)
+		if (bFlecheMods == null)
 		{
 			return;
 		}
 		bool page = ongletB == 0;
-		ongletsB.Location = new Point(Zx.P(430), Zx.P(34));
-		if (ongletsB.Index != ongletB)
-		{
-			ongletsB.Index = ongletB;
-		}
+		bFlecheMods.Text = (page ? "›" : "‹");
+		bulle.SetToolTip(bFlecheMods, page ? "Tous les mods du jeu" : "Retour à la bibliothèque");
+		PlacerFleche();
 		Control[] array = new Control[5] { tRecherche, fTous, fInst, fMaj, sgTri };
 		foreach (Control control in array)
 		{
@@ -258,6 +302,7 @@ internal partial class Fenetre
 		{
 			sgTri.Location = new Point(Math.Max(fMaj.Right + Zx.P(20), xDroite - sgTri.Width), yFiltres);
 			pBiblio.AutoScrollMinSize = Size.Empty;
+			PlacerVideoJeu(page: false);
 			pBiblio.Invalidate();
 			return;
 		}
@@ -284,6 +329,8 @@ internal partial class Fenetre
 				num6 -= Zx.P(54);
 			}
 		}
+		PlacerVideoJeu(page: true);
+		PlacerFleche();
 		pBiblio.Invalidate();
 	}
 
@@ -521,60 +568,15 @@ internal partial class Fenetre
 					Rectangle rectangle3 = new Rectangle(num12 - Zx.P(6), num6, num11, Zx.P(54));
 					Zone(rectangle3, delegate
 					{
-						ongletB = 1;
 						filtre = 2;
-						RemplirBiblio();
+						BasculerMods(versMods: true);
 					}, "Voir les mises à jour");
 				}
 			}
 		}
-		int num13 = num6 + Zx.P(82);
-		string text2 = ValJeu(jeuId, "description");
-		if (text2.Length == 0)
-		{
-			text2 = ((jeuId == "omsi2") ? "Simulateur de bus et de métro. Installez cartes, bus, livrées et packs IA en un clic depuis l'onglet Mods, puis lancez le jeu avec openOMSI, ou directement sur une carte depuis « Mes mods »." : "Jeu en ligne gratuit : il s'ouvre dans sa propre fenêtre, avec ou sans mod.");
-		}
-		Lang.DrawText(g, "À PROPOS", fSecT, new Point(rPageG.X, num13), C.Gris, TextFormatFlags.NoPadding);
-		num13 += Zx.P(24);
-		Size size = Lang.MeasureText(text2, fCorps, new Size(rPageG.Width, Zx.P(120)), TextFormatFlags.WordBreak | TextFormatFlags.NoPadding);
-		int num14 = Math.Min(Zx.P(120), size.Height + Zx.P(4));
-		Lang.DrawText(g, text2, fCorps, new Rectangle(rPageG.X, num13, rPageG.Width, num14), Color.FromArgb(200, 208, 230), TextFormatFlags.EndEllipsis | TextFormatFlags.WordBreak | TextFormatFlags.NoPadding);
-		num13 += num14 + Zx.P(26);
-		List<Projet> list2 = tous.FindAll((Projet p) => DateMod(p) > DateTime.MinValue);
-		list2.Sort((Projet a, Projet b) => DateMod(b).CompareTo(DateMod(a)));
-		if (list2.Count > 0)
-		{
-			Lang.DrawText(g, "ACTUALITÉS DES MODS", fSecT, new Point(rPageG.X, num13), C.Gris, TextFormatFlags.NoPadding);
-			num13 += Zx.P(26);
-			for (int j = 0; j < Math.Min(5, list2.Count); j++)
-			{
-				Projet p2 = list2[j];
-				Rectangle rectangle4 = new Rectangle(rPageG.X, num13, rPageG.Width, Zx.P(88));
-				Zone(rectangle4, delegate
-				{
-					Choisir(p2);
-					ShowVue(Vue.Projet);
-				});
-				using (GraphicsPath path2 = Bouton.Rond(rectangle4, Zx.P(10)))
-				{
-					using SolidBrush brush4 = new SolidBrush(Survol(rectangle4) ? C.CarteSurvol : Color.FromArgb(150, C.Carte));
-					g.FillPath(brush4, path2);
-				}
-				Rectangle r = new Rectangle(rectangle4.X + Zx.P(10), rectangle4.Y + Zx.P(10), Zx.P(120), Zx.P(68));
-				Vignette(g, p2, r);
-				int num15 = r.Right + Zx.P(16);
-				int width = rectangle4.Right - num15 - Zx.P(16);
-				Lang.DrawText(g, p2.Nom + "  ·  " + p2.Version, fModNom, new Rectangle(num15, rectangle4.Y + Zx.P(10), width - Zx.P(120), Zx.P(24)), C.Texte, TextFormatFlags.EndEllipsis | TextFormatFlags.NoPadding);
-				Lang.DrawText(g, DateMod(p2).ToString("dd/MM/yyyy"), fModInfo, new Rectangle(rectangle4.Right - Zx.P(136), rectangle4.Y + Zx.P(13), Zx.P(120), Zx.P(18)), C.Gris, TextFormatFlags.Right | TextFormatFlags.NoPadding);
-				string text3 = (p2.Notes ?? "").Replace("\r", "").Replace("\n", "  ").Trim();
-				if (text3.Length == 0)
-				{
-					text3 = p2.SousTitre;
-				}
-				Lang.DrawText(g, text3, fModInfo, new Rectangle(num15, rectangle4.Y + Zx.P(38), width, Zx.P(38)), Color.FromArgb(185, 194, 220), TextFormatFlags.EndEllipsis | TextFormatFlags.WordBreak | TextFormatFlags.NoPadding);
-				num13 += Zx.P(98);
-			}
-		}
+		int num13 = num6 + Zx.P(78);
+		num13 = PeindrePhotosJeu(g, num13);
+		num13 = PeindreAPropos(g, num13);
 		return num13 - dy;
 	}
 
@@ -643,8 +645,7 @@ internal partial class Fenetre
 		Rectangle rectangle2 = Pilule(g, "Tous les mods  →", rectangle.Right - Zx.P(18), num2 + Zx.P(14), C.Jade, plein: false);
 		Zone(rectangle2, delegate
 		{
-			ongletB = 1;
-			RemplirBiblio();
+			BasculerMods(versMods: true);
 		}, "Ouvrir l'onglet Mods");
 		int num6 = num2 + Zx.P(66);
 		using (Pen pen2 = new Pen(C.Ligne))
@@ -658,8 +659,7 @@ internal partial class Fenetre
 			Rectangle rectangle3 = Pilule(g, "Parcourir les mods", num + Zx.P(22) + Zx.P(180), num6 + Zx.P(74), C.Jade, plein: true);
 			Zone(rectangle3, delegate
 			{
-				ongletB = 1;
-				RemplirBiblio();
+				BasculerMods(versMods: true);
 			});
 			return rectangle.Bottom - dy;
 		}
