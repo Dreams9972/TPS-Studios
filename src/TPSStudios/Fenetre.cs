@@ -306,6 +306,81 @@ internal partial class Fenetre : Form
 
 	private Rectangle rSocial;
 
+	private Rectangle rEtoiles;
+
+	/// <summary>Note sur 5 : 60 % selon les téléchargements (1 000 = plein), 40 % selon les J'aime (100 = plein).</summary>
+	private double Note(Projet p)
+	{
+		if (p == null)
+		{
+			return 0.0;
+		}
+		int dl = Telechargements(p);
+		int likes = Math.Max(0, soc.Likes);
+		double a = Math.Min(1.0, Math.Log10(1.0 + dl) / 3.0);
+		double b = Math.Min(1.0, Math.Log10(1.0 + likes) / 2.0);
+		return Math.Round(5.0 * (0.6 * a + 0.4 * b) * 2.0) / 2.0;
+	}
+
+	private static readonly Font fNote = new Font("Segoe UI Semibold", Zx.P(10f));
+
+	/// <summary>Cinq étoiles remplies selon la note (demi-étoiles comprises), avec la note à droite.</summary>
+	private void DessinerEtoiles(Graphics g, Rectangle r, double note)
+	{
+		if (r.IsEmpty)
+		{
+			return;
+		}
+		SmoothingMode sm = g.SmoothingMode;
+		g.SmoothingMode = SmoothingMode.AntiAlias;
+		string t = note.ToString("0.0", CultureInfo.GetCultureInfo("fr-FR")) + " / 5";
+		Size st = Lang.MeasureText(t, fNote);
+		int d = Math.Min(r.Height, Zx.P(24));
+		int pas = d + Zx.P(4);
+		int x0 = r.Right - st.Width - Zx.P(8) - 5 * pas;
+		Color or = Color.FromArgb(255, 196, 64);
+		for (int i = 0; i < 5; i++)
+		{
+			RectangleF e = new RectangleF(x0 + i * pas, r.Y + (r.Height - d) / 2f, d, d);
+			using GraphicsPath etoile = Etoile(e);
+			using (SolidBrush fond = new SolidBrush(Color.FromArgb(55, 255, 255, 255)))
+			{
+				g.FillPath(fond, etoile);
+			}
+			double part = Math.Max(0.0, Math.Min(1.0, note - i));
+			if (part > 0.0)
+			{
+				GraphicsState gs = g.Save();
+				g.SetClip(new RectangleF(e.X, e.Y, e.Width * (float)part, e.Height), CombineMode.Intersect);
+				using (SolidBrush plein = new SolidBrush(or))
+				{
+					g.FillPath(plein, etoile);
+				}
+				g.Restore(gs);
+			}
+		}
+		Lang.DrawText(g, t, fNote, new Point(r.Right - st.Width, r.Y + (r.Height - st.Height) / 2), C.Texte);
+		g.SmoothingMode = sm;
+	}
+
+	private static GraphicsPath Etoile(RectangleF r)
+	{
+		PointF[] pts = new PointF[10];
+		float cx = r.X + r.Width / 2f;
+		float cy = r.Y + r.Height / 2f + r.Height * 0.04f;
+		float ro = r.Width / 2f;
+		float ri = ro * 0.45f;
+		for (int i = 0; i < 10; i++)
+		{
+			double a = -Math.PI / 2.0 + (double)i * Math.PI / 5.0;
+			float rr = ((i % 2 == 0) ? ro : ri);
+			pts[i] = new PointF(cx + (float)(Math.Cos(a) * (double)rr), cy + (float)(Math.Sin(a) * (double)rr));
+		}
+		GraphicsPath gp = new GraphicsPath();
+		gp.AddPolygon(pts);
+		return gp;
+	}
+
 	private List<Rectangle> rSuppr = new List<Rectangle>();
 
 	private List<int> idSuppr = new List<int>();
@@ -1165,7 +1240,7 @@ internal partial class Fenetre : Form
 		bRetour.Font = Integre.fNav;
 		bRetour.Size = new Size(Zx.P(48), Zx.P(48));
 		bAccueilP = Integre.Accueil(0, 0);
-		bOngDesc = Onglet("À propos", delegate
+		bOngDesc = Onglet("Description du mod", delegate
 		{
 			ChoisirOnglet(0);
 		});
@@ -1657,9 +1732,12 @@ internal partial class Fenetre : Form
 
 	private void ChoisirOnglet(int i)
 	{
+		if (i != 1)
+		{
+			i = 0;
+		}
 		descP.Visible = i == 0;
 		notesP.Visible = i == 1;
-		comP.Visible = i == 2;
 		galP.Visible = false;
 		Bouton[] array = new Bouton[3] { bOngDesc, bOngNotes, bOngGal };
 		for (int j = 0; j < array.Length; j++)
@@ -1696,6 +1774,13 @@ internal partial class Fenetre : Form
 		comP = new Panel();
 		comP.BackColor = C.Fond;
 		comP.Visible = false;
+		comTitre = new Label();
+		comTitre.Font = new Font("Segoe UI Semibold", Zx.P(11f));
+		comTitre.ForeColor = C.Texte;
+		comTitre.BackColor = C.Fond;
+		comTitre.AutoSize = false;
+		comTitre.Text = "Commentaires";
+		comP.Controls.Add(comTitre);
 		comSaisie = new Champ(multi: true, Zx.P(76));
 		comSaisie.Indice = "Écrire un commentaire…";
 		comSaisie.MaxLength = 500;
@@ -1744,13 +1829,21 @@ internal partial class Fenetre : Form
 		tHeure.Start();
 	}
 
+	private Label comTitre;
+
+	/// <summary>Haut de la zone des commentaires (titre au-dessus du champ de saisie).</summary>
+	private static int HautCom => Zx.P(34);
+
 	private void PlacerCom()
 	{
 		int width = comP.Width;
+		int h0 = HautCom;
+		comTitre.SetBounds(0, 0, width, Zx.P(26));
+		comSaisie.Location = new Point(0, h0);
 		comSaisie.Width = width;
-		comInfo.SetBounds(0, Zx.P(90), Math.Max(Zx.P(100), width - Zx.P(160)), Zx.P(22));
-		comPub.Location = new Point(width - Zx.P(140), Zx.P(86));
-		comListe.SetBounds(0, Zx.P(134), width, comH);
+		comInfo.SetBounds(0, h0 + Zx.P(90), Math.Max(Zx.P(100), width - Zx.P(160)), Zx.P(22));
+		comPub.Location = new Point(width - Zx.P(140), h0 + Zx.P(86));
+		comListe.SetBounds(0, h0 + Zx.P(134), width, comH);
 	}
 
 	private int Telechargements(Projet p)
@@ -2124,7 +2217,7 @@ internal partial class Fenetre : Form
 			bAime.Couleur = C.Orange;
 			bAime.Invalidate();
 			bOngGal.Text = "Commentaires" + (actif ? ("  ·  " + soc.Coms.Count) : "");
-			bOngGal.Invalidate();
+			comTitre.Text = "Commentaires" + (actif ? ("  ·  " + soc.Coms.Count) : "");
 			Champ champ = comSaisie;
 			bool enabled = (comPub.Enabled = actif);
 			champ.Enabled = enabled;
@@ -2554,35 +2647,38 @@ internal partial class Fenetre : Form
 		int num7 = Math.Max(1, list.Count);
 		rMini.Clear();
 		int num9 = num2 + num6 + Zx.P(12);
-		int num11 = num9 + 8;
-		bOngDesc.Location = new Point(num, num11);
-		bOngNotes.Location = new Point(num + Zx.P(170), num11);
-		bOngGal.Visible = sel == null || sel.Commentaires;
-		bOngGal.Location = new Point(num + Zx.P(340), num11);
+		int num11 = num9 + Zx.P(8);
+		bOngDesc.SetBounds(num, num11, Zx.P(190), Zx.P(36));
+		bOngNotes.SetBounds(num + Zx.P(200), num11, Zx.P(230), Zx.P(36));
+		bOngGal.Visible = false;
 		galP.Visible = false;
-		if (!bOngGal.Visible && comP.Visible)
-		{
-			comP.Visible = false;
-			descP.Visible = true;
-			bOngDesc.Plein = true;
-			bOngGal.Plein = false;
-			bOngDesc.Invalidate();
-		}
-		bDossier.SetBounds(num + (bOngGal.Visible ? Zx.P(510) : Zx.P(340)), num11, Zx.P(170), Zx.P(34));
-		int width = Math.Max(Zx.P(240), num4 - Zx.P(44));
+		bool avecComs = sel != null && sel.Commentaires;
+		comP.Visible = avecComs;
+		rEtoiles = new Rectangle(num + num4 - Zx.P(186), num11 + Zx.P(4), Zx.P(186), Zx.P(28));
+		int largeurTexte = (avecComs ? ((num4 - Zx.P(28)) * 54 / 100) : num4);
+		int width = Math.Max(Zx.P(240), largeurTexte - Zx.P(44));
 		lDesc.MaximumSize = new Size(width, 0);
 		lDesc.AutoSize = true;
 		lNotes.MaximumSize = new Size(width, 0);
 		lNotes.AutoSize = true;
 		descP.AutoScroll = false;
 		notesP.AutoScroll = false;
-		int num12 = num11 + 46;
-		descP.SetBounds(num, num12, num4, Math.Max(Zx.P(140), lDesc.Height + Zx.P(44)));
-		notesP.SetBounds(num, num12, num4, Math.Max(Zx.P(140), lNotes.Height + Zx.P(44)));
-		RecalcCom(num4);
-		comP.SetBounds(num, num12, num4, Zx.P(140) + comH);
+		int num12 = num11 + Zx.P(36) + Zx.P(18);
+		int hDesc = Math.Max(lDesc.Height, Lang.MeasureText(lDesc.Text, lDesc.Font, new Size(width, 0), TextFormatFlags.WordBreak).Height);
+		int hNotes = Math.Max(lNotes.Height, Lang.MeasureText(lNotes.Text, lNotes.Font, new Size(width, 0), TextFormatFlags.WordBreak).Height);
+		lDesc.AutoSize = false;
+		lNotes.AutoSize = false;
+		lDesc.MaximumSize = Size.Empty;
+		lNotes.MaximumSize = Size.Empty;
+		lDesc.Size = new Size(width, hDesc + Zx.P(4));
+		lNotes.Size = new Size(width, hNotes + Zx.P(4));
+		descP.SetBounds(num, num12, largeurTexte, Math.Max(Zx.P(140), hDesc + Zx.P(44)));
+		notesP.SetBounds(num, num12, largeurTexte, Math.Max(Zx.P(140), hNotes + Zx.P(44)));
+		int largeurComs = num4 - largeurTexte - Zx.P(28);
+		RecalcCom(largeurComs);
+		comP.SetBounds(num + largeurTexte + Zx.P(28), num12, Math.Max(Zx.P(200), largeurComs), HautCom + Zx.P(140) + comH);
 		PlacerCom();
-		int val = num12 + (comP.Visible ? comP.Height : (notesP.Visible ? notesP.Height : descP.Height));
+		int val = num12 + Math.Max(comP.Visible ? comP.Height : 0, notesP.Visible ? notesP.Height : descP.Height);
 		int num13 = num + num4 + num3;
 		int num14 = Zx.P(20);
 		int num15 = num5 - 2 * num14;
@@ -2610,7 +2706,8 @@ internal partial class Fenetre : Form
 		num16 += Zx.P(48);
 		int num17 = (num15 - Zx.P(10)) / 2;
 		bLies.SetBounds(num13 + num14, num16, num17, Zx.P(80));
-		rSocial = new Rectangle(num13 + num14 + num17 + Zx.P(14), num16, num17 - Zx.P(14), Zx.P(34));
+		rSocial = Rectangle.Empty;
+		bDossier.SetBounds(num13 + num14 + num17 + Zx.P(10), num16, num17, Zx.P(34));
 		MajSuivi();
 		MajLies();
 		num16 += Zx.P(46);
@@ -2908,8 +3005,7 @@ internal partial class Fenetre : Form
 			g.DrawPath(pen3, path4);
 		}
 		Txt.Dessiner(g, t, fCarteT, r2, (c == C.Gris) ? C.Texte : c, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
-		int num7 = Telechargements(sel);
-		Txt.Dessiner(g, "↓  " + num7.ToString("N0", CultureInfo.GetCultureInfo("fr-FR")) + ((num7 > 1) ? " téléchargements" : " téléchargement"), fLigne, rSocial, C.Gris, TextFormatFlags.EndEllipsis | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+		DessinerEtoiles(g, rEtoiles, Note(sel));
 		Carte(g, rInfo, Zx.P(14));
 		Txt.Dessiner(g, "INFORMATIONS", fCarteT, new Point(rInfo.X + Zx.P(20), rInfo.Y + Zx.P(18)), C.Gris);
 		List<string[]> list2 = LignesInfo(sel);
@@ -9734,7 +9830,7 @@ internal partial class Fenetre : Form
 		lTitre.Text = p.Nom;
 		lSous.Text = p.SousTitre;
 		lDesc.Text = p.Description.Replace("\\n", "\n");
-		bOngNotes.Text = "Notes · " + p.Version;
+		bOngNotes.Text = "Notes de version" + ((p.Version.Length > 0) ? ("  ·  " + p.Version) : "");
 		bOngNotes.Invalidate();
 		vIdx = 0;
 		vueSrc = null;
