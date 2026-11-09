@@ -53,7 +53,9 @@
       "notes": "Première version de Paris 25 dans le lanceur TPS Groupe (archive officielle 1.0 d'annamathys).",
       "categorie": "cartes",
       "a_la_une": true,
-      "ordre": 1
+      "ordre": 1,
+      "nouveautes": true,
+      "tags": "Paris"
     },
     {
       "id": "strasbourg",
