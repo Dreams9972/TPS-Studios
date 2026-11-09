@@ -743,7 +743,8 @@ internal partial class Fenetre : Form
 			return;
 		}
 		avis.Poser(t, c);
-		avis.Location = new Point(Math.Max(0, (base.ClientSize.Width - avis.Width) / 2), base.ClientSize.Height - avis.Height - Zx.P(40));
+		int lv = Lang.MeasureText("Lanceur v" + Config.VERSION, fVersion).Width;
+		avis.Location = new Point(Math.Max(0, base.ClientSize.Width - Zx.P(20) - lv - Zx.P(14) - avis.Width), base.ClientSize.Height - avis.Height - Zx.P(6));
 		avis.Visible = true;
 		avis.BringToFront();
 		if (tAvis == null)
@@ -11351,6 +11352,13 @@ internal partial class Fenetre : Form
 				Parametres();
 			});
 			break;
+		case "admin":
+			BeginInvoke((MethodInvoker)delegate
+			{
+				using FenAdmin f = new FenAdmin();
+				f.Afficher(this);
+			});
+			break;
 		case "boutique":
 			BeginInvoke((MethodInvoker)delegate
 			{
@@ -11364,6 +11372,10 @@ internal partial class Fenetre : Form
 				Profil(nouveau: false, result);
 			});
 			break;
+		}
+		if (Environment.GetEnvironmentVariable("TPS_DEMO_TOAST") == "1")
+		{
+			Toast("Le lanceur est à jour (v" + Config.VERSION + ").", C.Vert, 60000);
 		}
 		if (Environment.GetEnvironmentVariable("TPS_DEMO_DISCORD") == "1")
 		{
