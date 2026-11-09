@@ -19,4 +19,8 @@ internal class ComSocial
 	public long Cree;
 
 	public string Statut = "";
+
+	public int Likes;
+
+	public bool Aime;
 }

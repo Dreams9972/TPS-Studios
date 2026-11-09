@@ -1742,7 +1742,7 @@ internal partial class Fenetre : Form
 
 	private static int HauteurCom(ComSocial c, int w)
 	{
-		return Math.Max(78, 44 + Lang.MeasureText(c.Texte, fComTxt, new Size(Math.Max(Zx.P(100), w - Zx.P(96)), Zx.P(4000)), TextFormatFlags.WordBreak | TextFormatFlags.NoPadding).Height + 16);
+		return Math.Max(Zx.P(84), Zx.P(40) + Lang.MeasureText(c.Texte, fComTxt, new Size(Math.Max(Zx.P(100), w - Zx.P(96) - Zx.P(24)), Zx.P(4000)), TextFormatFlags.WordBreak | TextFormatFlags.NoPadding).Height + Zx.P(44));
 	}
 
 	private void RecalcCom(int largeur)
@@ -1762,6 +1762,8 @@ internal partial class Fenetre : Form
 		g.Clear(C.Fond);
 		rSuppr.Clear();
 		idSuppr.Clear();
+		rLikeCom.Clear();
+		idLikeCom.Clear();
 		if (soc.Coms.Count == 0)
 		{
 			Lang.DrawText(g, Social.Actif ? "Aucun commentaire pour l'instant. Soyez le premier !" : "", fLigne, new Rectangle(0, Zx.P(24), w, Zx.P(30)), C.Gris, TextFormatFlags.HorizontalCenter);
@@ -1790,10 +1792,10 @@ internal partial class Fenetre : Form
 			}
 			Lang.DrawText(g, (comSocial.Auteur.Length > 0) ? comSocial.Auteur.Substring(0, 1).ToUpperInvariant() : "?", new Font("Segoe UI Semibold", Zx.P(15f)), rectangle, Color.White, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
 			Badge.Dessiner(g, new Rectangle(rectangle.Right - Zx.P(24), rectangle.Bottom - Zx.P(22), Zx.P(30), Zx.P(30)), comSocial.Niveau, 0.0);
-			int num4 = 72;
+			int num4 = rectangle.Right + Zx.P(24);
 			Size size = Lang.MeasureText(comSocial.Auteur, fComNom, new Size(Zx.P(400), Zx.P(24)), TextFormatFlags.NoPadding);
 			Lang.DrawText(g, comSocial.Auteur, fComNom, new Point(num4, num + Zx.P(12)), C.Texte);
-			int num5 = num4 + size.Width + 8;
+			int num5 = num4 + size.Width + Zx.P(10);
 			if (comSocial.Admin)
 			{
 				Rectangle r2 = new Rectangle(num5, num + Zx.P(13), Zx.P(52), Zx.P(18));
@@ -1803,12 +1805,12 @@ internal partial class Fenetre : Form
 					g.FillPath(brush3, path2);
 				}
 				Lang.DrawText(g, "ÉQUIPE", fPetit, r2, Color.White, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
-				num5 += 60;
+				num5 += Zx.P(60);
 			}
 			if (comSocial.Vip)
 			{
 				Badge.PilleVip(g, new Rectangle(num5, num + Zx.P(13), Zx.P(38), Zx.P(18)));
-				num5 += 46;
+				num5 += Zx.P(46);
 			}
 			if (comSocial.Statut.Length > 0)
 			{
@@ -1816,7 +1818,7 @@ internal partial class Fenetre : Form
 				string t = "●  " + comSocial.Statut;
 				Size size2 = Lang.MeasureText(t, fPetit);
 				Lang.DrawText(g, t, fPetit, new Point(num5, num + Zx.P(15)), color2);
-				num5 += size2.Width + 10;
+				num5 += size2.Width + Zx.P(10);
 				using (SolidBrush brush4 = new SolidBrush(C.Carte))
 				{
 					g.FillEllipse(brush4, rectangle.Right - Zx.P(14), rectangle.Y - 1, Zx.P(15), Zx.P(15));
@@ -1825,7 +1827,22 @@ internal partial class Fenetre : Form
 				g.FillEllipse(brush5, rectangle.Right - Zx.P(12), rectangle.Y + 1, Zx.P(11), Zx.P(11));
 			}
 			Lang.DrawText(g, Depuis(comSocial.Cree), fPetit, new Point(num5, num + Zx.P(15)), C.Gris);
-			Lang.DrawText(g, comSocial.Texte, fComTxt, new Rectangle(num4, num + Zx.P(38), w - Zx.P(96), num3 - Zx.P(44)), Color.FromArgb(205, 214, 228), TextFormatFlags.WordBreak | TextFormatFlags.NoPadding);
+			Lang.DrawText(g, comSocial.Texte, fComTxt, new Rectangle(num4, num + Zx.P(40), w - num4 - Zx.P(24), num3 - Zx.P(40) - Zx.P(40)), Color.FromArgb(205, 214, 228), TextFormatFlags.WordBreak | TextFormatFlags.NoPadding);
+			string text9 = (comSocial.Aime ? "♥" : "♡") + "  " + comSocial.Likes;
+			Size size9 = Lang.MeasureText(text9, fPetit);
+			Rectangle rectangle9 = new Rectangle(num4 - Zx.P(4), num + num3 - Zx.P(34), size9.Width + Zx.P(22), Zx.P(24));
+			using (GraphicsPath path9 = Bouton.Rond(rectangle9, Zx.P(12)))
+			{
+				using (SolidBrush brush9 = new SolidBrush(comSocial.Aime ? Color.FromArgb(60, C.Orange) : Color.FromArgb(40, 255, 255, 255)))
+				{
+					g.FillPath(brush9, path9);
+				}
+				using Pen pen9 = new Pen(comSocial.Aime ? Color.FromArgb(170, C.Orange) : Color.FromArgb(60, 255, 255, 255));
+				g.DrawPath(pen9, path9);
+			}
+			Lang.DrawText(g, text9, fPetit, rectangle9, comSocial.Aime ? C.Orange : Color.FromArgb(200, 208, 228), TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+			rLikeCom.Add(Rectangle.Inflate(rectangle9, Zx.P(4), Zx.P(4)));
+			idLikeCom.Add(comSocial.Id);
 			if (comSocial.Moi || Social.EstAdmin)
 			{
 				Size size3 = Lang.MeasureText("Supprimer", fPetit);
@@ -1838,8 +1855,57 @@ internal partial class Fenetre : Form
 		}
 	}
 
+	private readonly List<Rectangle> rLikeCom = new List<Rectangle>();
+
+	private readonly List<int> idLikeCom = new List<int>();
+
+	private void AimerCom(int id)
+	{
+		if (!Social.Actif || !Social.Connecte)
+		{
+			Toast("Connectez-vous à la communauté pour aimer un commentaire.", C.Orange, 4000);
+			return;
+		}
+		Thread thread = new Thread((ThreadStart)delegate
+		{
+			try
+			{
+				bool aime;
+				int likes = Social.AimerCom(id, out aime);
+				Sur(delegate
+				{
+					ComSocial comSocial = soc.Coms.Find((ComSocial x) => x.Id == id);
+					if (comSocial != null)
+					{
+						comSocial.Likes = likes;
+						comSocial.Aime = aime;
+					}
+					MajSocialUI();
+				});
+			}
+			catch (Exception ex)
+			{
+				Exception e = ex;
+				Sur(delegate
+				{
+					Toast("J'aime impossible : " + e.Message, C.Rouge, 5000);
+				});
+			}
+		});
+		thread.IsBackground = true;
+		thread.Start();
+	}
+
 	private void ClicComs(object o, MouseEventArgs e)
 	{
+		for (int j = 0; j < rLikeCom.Count; j++)
+		{
+			if (rLikeCom[j].Contains(e.Location))
+			{
+				AimerCom(idLikeCom[j]);
+				return;
+			}
+		}
 		for (int i = 0; i < rSuppr.Count; i++)
 		{
 			if (rSuppr[i].Contains(e.Location))
@@ -1971,6 +2037,16 @@ internal partial class Fenetre : Form
 			if (c != null && soc.Coms.Find((ComSocial x) => x.Id == c.Id) == null)
 			{
 				soc.Coms.Add(c);
+			}
+			break;
+		}
+		case "likecom":
+		{
+			int idc = Convert.ToInt32(d["id"]);
+			ComSocial comSocial = soc.Coms.Find((ComSocial x) => x.Id == idc);
+			if (comSocial != null)
+			{
+				comSocial.Likes = Convert.ToInt32(d["likes"]);
 			}
 			break;
 		}
@@ -11106,6 +11182,22 @@ internal partial class Fenetre : Form
 				Choisir(projet);
 			}
 			ShowVue(Vue.Projet);
+			if (Environment.GetEnvironmentVariable("TPS_DEMO_COMS") == "1")
+			{
+				System.Windows.Forms.Timer timer0 = new System.Windows.Forms.Timer();
+				timer0.Interval = 3000;
+				timer0.Tick += delegate
+				{
+					timer0.Stop();
+					soc.Coms.Clear();
+					soc.Coms.Add(new ComSocial { Id = 1, Auteur = "S2FX_94", Niveau = 7, Texte = "Ajoutez la 132 et le dépôt de Vitry ! Sinon belle map", Cree = DateTimeOffset.UtcNow.ToUnixTimeSeconds() - 86400, Likes = 3 });
+					soc.Coms.Add(new ComSocial { Id = 2, Auteur = "Evens (TPS)", Niveau = 12, Admin = true, Moi = true, Aime = true, Likes = 1, Texte = "Merci ! La 132 arrive dans la prochaine mise à jour, le dépôt de Vitry est en cours de modélisation. Pensez à signaler les bugs ici ou sur le Discord.", Cree = DateTimeOffset.UtcNow.ToUnixTimeSeconds() - 3600 });
+					ChoisirOnglet(2);
+					MajSocialUI();
+					Disposer();
+				};
+				timer0.Start();
+			}
 			break;
 		}
 		case "biblio":
