@@ -641,7 +641,7 @@ internal partial class Fenetre : Form
 
 	private List<KeyValuePair<Rectangle, Annonce>> rAnnonces = new List<KeyValuePair<Rectangle, Annonce>>();
 
-	private static readonly string[] NouveautesLanceur = new string[4] { "Pause sur les bandes-annonces", "Boutons plus soignés", "Retour sur la même page après un changement de langue", "« Les Mods » et « Mes Cartes » dans la bibliothèque" };
+	private static readonly string[] NouveautesLanceur = new string[4] { "Animations fluides à 60 images/s et plus", "Grande case « Actualités » reliée au site", "Statut Discord avec le jeu et la carte", "Admin des mods rangé en onglets, sans défilement" };
 
 	private static readonly Font fAnT2 = new Font("Segoe UI Semibold", Zx.P(11f));
 
@@ -1399,7 +1399,7 @@ internal partial class Fenetre : Form
 		bulle.SetToolTip(nJeux, "Choisir un jeu (Ctrl+2)");
 		bulle.SetToolTip(nBiblio, "Bibliothèque (Ctrl+3) · recherche : Ctrl+F");
 		animation = new System.Windows.Forms.Timer();
-		animation.Interval = 16;
+		animation.Interval = Math.Max(8, Math.Min(16, PasImage()));
 		animation.Tick += delegate
 		{
 			try
@@ -3438,7 +3438,7 @@ internal partial class Fenetre : Form
 			{
 				num = 60;
 			}
-			pasImage = Math.Max(6, (int)Math.Round(1000.0 / (double)Math.Min(num, 144)));
+			pasImage = Math.Max(6, (int)Math.Floor(1000.0 / (double)Math.Min(num, 144)));
 		}
 		return pasImage;
 	}
@@ -4851,12 +4851,13 @@ internal partial class Fenetre : Form
 		dernierTick = elapsedMilliseconds;
 		PanelFond panelFond = PanelVisible();
 		bool flag = (panelFond == pAccueil || (panelFond == pJeux && themeJeux != null)) && couches.Count == 0 && !enTransition && fond.Pret && !ModeCapture && base.Visible && base.WindowState != FormWindowState.Minimized && (Form.ActiveForm == this || themeNoel) && (AnimationActive() || themeNoel);
-		if (flag != periodeHaute)
+		bool haute = !ModeCapture && base.Visible && base.WindowState != FormWindowState.Minimized;
+		if (haute != periodeHaute)
 		{
-			periodeHaute = flag;
+			periodeHaute = haute;
 			try
 			{
-				if (flag)
+				if (haute)
 				{
 					Winmm.timeBeginPeriod(1u);
 				}

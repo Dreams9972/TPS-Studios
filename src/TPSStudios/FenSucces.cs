@@ -77,7 +77,7 @@ internal class FenSucces : Form, IPage
 			Dispose_Layout();
 		};
 		anim = new Timer();
-		anim.Interval = 40;
+		anim.Interval = 16;
 		anim.Tick += delegate
 		{
 			haut.Invalidate();

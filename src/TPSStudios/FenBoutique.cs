@@ -154,17 +154,22 @@ internal class FenBoutique : Form, IPage
 				}
 			}
 		};
+		System.Diagnostics.Stopwatch chronoAnim = System.Diagnostics.Stopwatch.StartNew();
+		long derAnim = 0L;
 		anim = new System.Windows.Forms.Timer();
-		anim.Interval = 40;
+		anim.Interval = 16;
 		anim.Tick += delegate
 		{
+			long ms = chronoAnim.ElapsedMilliseconds;
+			double dt = Math.Min(0.1, (double)(ms - derAnim) / 1000.0);
+			derAnim = ms;
 			if (!rCosm.IsEmpty)
 			{
 				z.Invalidate(rCosm);
 			}
 			if (th != null)
 			{
-				th.Avancer(0.04, haut.Width, haut.Height);
+				th.Avancer(dt, haut.Width, haut.Height);
 			}
 			haut.Invalidate();
 		};

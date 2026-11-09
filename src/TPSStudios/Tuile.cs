@@ -214,7 +214,7 @@ internal class Tuile : Control, ILisse
 			attente = true;
 			Stopwatch sw = Stopwatch.StartNew();
 			Timer tm = new Timer();
-			tm.Interval = 30;
+			tm.Interval = 16;
 			tm.Tick += delegate
 			{
 				long elapsedMilliseconds = sw.ElapsedMilliseconds;

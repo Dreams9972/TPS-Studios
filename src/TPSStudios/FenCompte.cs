@@ -148,7 +148,7 @@ internal class FenCompte : Form, IPage
 			};
 		}
 		System.Windows.Forms.Timer ta = new System.Windows.Forms.Timer();
-		ta.Interval = 40;
+		ta.Interval = 16;
 		ta.Tick += delegate
 		{
 			Compte actif = Comptes.Actif;
