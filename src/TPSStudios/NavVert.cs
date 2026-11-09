@@ -7,7 +7,9 @@ namespace TPSStudios;
 
 internal class NavVert : Control
 {
-	private const int HL = 44;
+	private static readonly int HL = Zx.P(44);
+
+	private static readonly int Pas = Zx.P(48);
 
 	public string[] Items = new string[0];
 
@@ -52,8 +54,8 @@ internal class NavVert : Control
 
 	private int Sous(int y)
 	{
-		int num = y / 48;
-		if (num < 0 || num >= Items.Length || y % 48 >= 44)
+		int num = y / Pas;
+		if (y < 0 || num < 0 || num >= Items.Length || y % Pas >= HL)
 		{
 			return -1;
 		}
@@ -99,7 +101,7 @@ internal class NavVert : Control
 		graphics.Clear(BackColor);
 		for (int i = 0; i < Items.Length; i++)
 		{
-			Rectangle r = new Rectangle(0, i * (44 + Zx.P(4)), base.Width - 1, 44);
+			Rectangle r = new Rectangle(0, i * Pas, base.Width - 1, HL);
 			bool flag = i == idx;
 			if (flag || i == survol)
 			{
@@ -109,15 +111,15 @@ internal class NavVert : Control
 			}
 			if (flag)
 			{
-				using GraphicsPath path2 = Bouton.Rond(new Rectangle(0, r.Y + Zx.P(11), Zx.P(4), 44 - Zx.P(22)), Zx.P(2));
+				using GraphicsPath path2 = Bouton.Rond(new Rectangle(0, r.Y + Zx.P(11), Zx.P(4), HL - Zx.P(22)), Zx.P(2));
 				using SolidBrush brush2 = new SolidBrush(C.Orange);
 				graphics.FillPath(brush2, path2);
 			}
 			if (i < Glyphes.Length)
 			{
-				Lang.DrawText(graphics, Glyphes[i], fG, new Rectangle(Zx.P(14), r.Y, Zx.P(26), 44), flag ? C.Texte : C.Gris, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+				Lang.DrawText(graphics, Glyphes[i], fG, new Rectangle(Zx.P(14), r.Y, Zx.P(26), HL), flag ? C.Texte : C.Gris, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
 			}
-			Lang.DrawText(graphics, Items[i], fN, new Rectangle(Zx.P(50), r.Y, base.Width - Zx.P(58), 44), flag ? C.Texte : Color.FromArgb(176, 190, 210), TextFormatFlags.EndEllipsis | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+			Lang.DrawText(graphics, Items[i], fN, new Rectangle(Zx.P(50), r.Y, base.Width - Zx.P(58), HL), flag ? C.Texte : Color.FromArgb(176, 190, 210), TextFormatFlags.EndEllipsis | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
 		}
 	}
 }

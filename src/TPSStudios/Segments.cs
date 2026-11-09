@@ -236,7 +236,7 @@ internal class Segments : Control, ILisse
 		if (idx >= 0 && idx < array.Length && pw.V > 4f)
 		{
 			RectangleF r2 = new RectangleF(px.V, Zx.P(3), pw.V, base.Height - Zx.P(7));
-			using GraphicsPath path2 = Bouton.RondF(r2, 7f);
+			using GraphicsPath path2 = Bouton.RondF(r2, Zx.P(7f));
 			using LinearGradientBrush brush2 = new LinearGradientBrush(new RectangleF(r2.X, r2.Y, r2.Width, r2.Height + 1f), ControlPaint.Light(C.JadeFonce, 0.1f), C.JadeFonce, 90f);
 			graphics.FillPath(brush2, path2);
 		}
