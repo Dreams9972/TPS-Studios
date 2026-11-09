@@ -253,6 +253,7 @@ internal class VideoFond : Panel
 			int num = Convert.ToInt32(LecteurWmp.Lire(obj, "playState"));
 			if (num != 3 && joue && (DateTime.Now - debut).TotalSeconds > 20.0 && num != 2)
 			{
+				Journal.Ecrire("video-fond", new Exception("la vidéo ne démarre pas (état " + num + ") : " + url));
 				Abandonner();
 				return;
 			}

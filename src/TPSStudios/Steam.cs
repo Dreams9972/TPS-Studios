@@ -34,6 +34,11 @@ internal class FicheSteam
 
 	public string Video = "";
 
+	/// <summary>Adresses MP4 à essayer si Steam ne donne pas de MP4 direct (nouveaux formats HLS / DASH).</summary>
+	public List<string> VideosPossibles = new List<string>();
+
+	public string DiagVideo = "";
+
 	public string Page = "";
 }
 
@@ -120,7 +125,43 @@ internal static class Steam
 				}
 			}
 		}
-		return Lire(text, appid);
+		FicheSteam ficheSteam = Lire(text, appid);
+		if (ficheSteam != null && ficheSteam.Video.Length == 0)
+		{
+			HashSet<string> vus = new HashSet<string>();
+			foreach (string item in ficheSteam.VideosPossibles)
+			{
+				if (vus.Add(item) && Existe(item))
+				{
+					ficheSteam.Video = item;
+					break;
+				}
+			}
+			if (ficheSteam.Video.Length == 0)
+			{
+				Journal.Ecrire("steam-video", new Exception("aucune bande-annonce MP4 lisible pour " + appid + " : " + ficheSteam.DiagVideo));
+			}
+		}
+		return ficheSteam;
+	}
+
+	/// <summary>Le fichier existe-t-il (requête HEAD, 6 s max) ?</summary>
+	private static bool Existe(string url)
+	{
+		try
+		{
+			ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls13;
+			HttpWebRequest httpWebRequest = (HttpWebRequest)WebRequest.Create(url);
+			httpWebRequest.Method = "HEAD";
+			httpWebRequest.Timeout = 6000;
+			httpWebRequest.UserAgent = "TPS-Studios-Lanceur/" + Config.VERSION;
+			using HttpWebResponse httpWebResponse = (HttpWebResponse)httpWebRequest.GetResponse();
+			return httpWebResponse.StatusCode == HttpStatusCode.OK && (httpWebResponse.ContentType ?? "").IndexOf("html", StringComparison.OrdinalIgnoreCase) < 0;
+		}
+		catch
+		{
+			return false;
+		}
 	}
 
 	public static FicheSteam Lire(string json, string appid)
@@ -186,6 +227,28 @@ internal static class Steam
 				if (!(item3 is Dictionary<string, object> dictionary3))
 				{
 					continue;
+				}
+				string text4 = S(dictionary3, "id");
+				ficheSteam.DiagVideo = ficheSteam.DiagVideo + "[film " + text4 + " : " + string.Join(", ", new List<string>(dictionary3.Keys).ToArray()) + "] ";
+				if (text4.Length > 0)
+				{
+					string[] array = new string[3] { "https://cdn.akamai.steamstatic.com/steam/apps/", "https://cdn.cloudflare.steamstatic.com/steam/apps/", "https://video.akamai.steamstatic.com/steam/apps/" };
+					foreach (string text5 in array)
+					{
+						ficheSteam.VideosPossibles.Add(text5 + text4 + "/movie_max.mp4");
+						ficheSteam.VideosPossibles.Add(text5 + text4 + "/movie480.mp4");
+					}
+				}
+				foreach (object value9 in dictionary3.Values)
+				{
+					string text6 = (value9 as string) ?? "";
+					int num = text6.LastIndexOf('/');
+					if ((text6.IndexOf(".m3u8", StringComparison.OrdinalIgnoreCase) > 0 || text6.IndexOf(".mpd", StringComparison.OrdinalIgnoreCase) > 0) && num > 8)
+					{
+						string text7 = text6.Substring(0, num + 1);
+						ficheSteam.VideosPossibles.Insert(0, text7 + "movie_max.mp4");
+						ficheSteam.VideosPossibles.Insert(1, text7 + "movie480.mp4");
+					}
 				}
 				if (dictionary3.TryGetValue("mp4", out var value7) && value7 is Dictionary<string, object> d5)
 				{

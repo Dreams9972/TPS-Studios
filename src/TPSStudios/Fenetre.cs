@@ -440,13 +440,13 @@ internal partial class Fenetre : Form
 
 	private Rectangle rHorloge;
 
-	private static readonly Font fHeure = new Font("Segoe UI Semibold", Zx.P(16f));
+	private static readonly Font fHeure = new Font("Segoe UI Semibold", Zx.P(22f));
 
-	private static readonly Font fDate = new Font("Segoe UI", Zx.P(13f));
+	private static readonly Font fDate = new Font("Segoe UI", Zx.P(17f));
 
-	private static readonly Font fTitreA = new Font("Segoe UI Semibold", Zx.P(42f));
+	private static readonly Font fTitreA = new Font("Segoe UI Semibold", Zx.P(58f));
 
-	private static readonly Font fSousA = new Font("Segoe UI Semibold", Zx.P(12.5f));
+	private static readonly Font fSousA = new Font("Segoe UI Semibold", Zx.P(16f));
 
 	private Bitmap cacheProfil;
 
@@ -5374,8 +5374,12 @@ internal partial class Fenetre : Form
 		{
 			return;
 		}
-		int width = rProfil.Width;
+		int width = Math.Max(rProfil.Width, Zx.P(360));
 		int num = Math.Min(Zx.P(452), pAccueil.ClientSize.Height - rProfil.Y - Zx.P(84));
+		if (!rAmisA.IsEmpty && rAmisA.Height > 0)
+		{
+			num = Math.Min(num, rAmisA.Y - rProfil.Y - Zx.P(14));
+		}
 		if (num < Zx.P(260))
 		{
 			return;
@@ -7869,10 +7873,10 @@ internal partial class Fenetre : Form
 		int width = pAccueil.ClientSize.Width;
 		int height = pAccueil.ClientSize.Height;
 		int num = Marge(width);
-		int width2 = Math.Max(Zx.P(280), Math.Min(Zx.P(340), (int)((double)width * 0.18)));
-		int num2 = Math.Max(Zx.P(84), Math.Min(Zx.P(104), (int)((double)height * 0.09)));
+		int width2 = Math.Max(Zx.P(230), Math.Min(Zx.P(270), (int)((double)width * 0.14)));
+		int num2 = Math.Max(Zx.P(64), Math.Min(Zx.P(78), (int)((double)height * 0.07)));
 		rProfil = new Rectangle(num, num, width2, num2);
-		int num3 = num + Math.Max(num2, Zx.P(150)) + Zx.P(30);
+		int num3 = num + Zx.P(200);
 		int num4 = height - num - Zx.P(14);
 		int num5 = Math.Max(Zx.P(220), num4 - num3);
 		int count = tuilesA.Count;
@@ -7920,8 +7924,12 @@ internal partial class Fenetre : Form
 		rBandeau = new Rectangle(num9, rProfil.Bottom + Zx.P(4), num7, Zx.P(30));
 		ThemeBase.Cartes = (rInfos.IsEmpty ? new Rectangle[2] { rProfil, rCarte } : new Rectangle[3] { rProfil, rCarte, rInfos });
 		rDiscord = new Rectangle(Zx.P(24), height - Zx.P(24) - Zx.P(48), Zx.P(250), Zx.P(48));
-		int num16 = Math.Max(rProfil.Bottom + Zx.P(70), (int)((double)height * 0.37));
-		rAmisA = new Rectangle(num, num16, Math.Min(Zx.P(300), rProfil.Width), Math.Max(0, Math.Min(Zx.P(560), rDiscord.Y - Zx.P(44) - num16)));
+		int num16 = Math.Max((int)((double)height * 0.37), rProfil.Y + Zx.P(452) + Zx.P(20));
+		if (rDiscord.Y - Zx.P(44) - num16 < Zx.P(220))
+		{
+			num16 = Math.Max(rProfil.Bottom + Zx.P(70), rDiscord.Y - Zx.P(44) - Zx.P(220));
+		}
+		rAmisA = new Rectangle(num, num16, Zx.P(300), Math.Max(0, Math.Min(Zx.P(560), rDiscord.Y - Zx.P(44) - num16)));
 		rCloche = new Rectangle(width - num - Zx.P(44), num + Zx.P(6), Zx.P(44), Zx.P(44));
 		rMusique = Rectangle.Empty;
 		ThemeBase.ZoneLibre = new Rectangle(num, rProfil.Bottom + Zx.P(16), Math.Max(Zx.P(200), rAmisA.Width), Math.Max(0, rAmisA.Y - rProfil.Bottom - Zx.P(32)));
