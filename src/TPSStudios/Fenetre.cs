@@ -638,7 +638,7 @@ internal partial class Fenetre : Form
 
 	private List<KeyValuePair<Rectangle, Annonce>> rAnnonces = new List<KeyValuePair<Rectangle, Annonce>>();
 
-	private static readonly string[] NouveautesLanceur = new string[4] { "Transitions sans clignotement", "Réglages et Boutique en plein écran", "J'aime sur les commentaires", "Textes revus et traduits dans toutes les langues" };
+	private static readonly string[] NouveautesLanceur = new string[4] { "Pause sur les bandes-annonces", "Boutons plus soignés", "Retour sur la même page après un changement de langue", "« Les Mods » et « Mes Cartes » dans la bibliothèque" };
 
 	private static readonly Font fAnT2 = new Font("Segoe UI Semibold", Zx.P(11f));
 
