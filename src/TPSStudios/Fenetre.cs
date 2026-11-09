@@ -5045,7 +5045,7 @@ internal partial class Fenetre : Form
 			if (c != null)
 			{
 				Comptes.Avatar(graphics, c, rectangle, (float)num * 0.34f);
-				Ombre(graphics, st, fStat, new Rectangle(num2, height - Zx.P(34), width2, Zx.P(20)), cs, TextFormatFlags.Right | TextFormatFlags.NoPadding);
+				Ombre(graphics, st, fStat, new Rectangle(num2, (height < Zx.P(90)) ? Math.Max(Zx.P(42), height - Zx.P(24)) : (height - Zx.P(34)), width2, Zx.P(20)), cs, TextFormatFlags.Right | TextFormatFlags.NoPadding);
 			}
 			else
 			{
@@ -5675,7 +5675,7 @@ internal partial class Fenetre : Form
 				int y = (rectangle.Height - num4) / 2;
 				Badge.Anneau(graphics, new Rectangle(Zx.P(18), y, num4, num4), niv, temps);
 				Deco.Dessiner(graphics, new Rectangle(Zx.P(18), y, num4, num4), actif.Deco, temps);
-				Badge.Dessiner(graphics, new Rectangle(rectangle.Width - Zx.P(12) - Zx.P(34), Zx.P(10), Zx.P(34), Zx.P(34)), niv, temps);
+				Badge.Dessiner(graphics, (rectangle.Height < Zx.P(90)) ? new Rectangle(rectangle.Width - Zx.P(10) - Zx.P(30), Zx.P(7), Zx.P(30), Zx.P(30)) : new Rectangle(rectangle.Width - Zx.P(12) - Zx.P(34), Zx.P(10), Zx.P(34), Zx.P(34)), niv, temps);
 				if (Social.Vip)
 				{
 					Badge.PilleVip(graphics, new Rectangle(rectangle.Width - Zx.P(12) - Zx.P(34) - Zx.P(8) - Zx.P(38), Zx.P(18), Zx.P(38), Zx.P(18)));
@@ -8517,9 +8517,15 @@ internal partial class Fenetre : Form
 		}
 		chips.Clear();
 		chips.Add(Chip("Tout", ""));
-		for (int j = 0; j < Categories.Ids.Length; j++)
+		string[] idsCat = Categories.IdsDe(jeuId);
+		string[] nomsCat = Categories.NomsDe(jeuId);
+		if (categorie.Length > 0 && Array.IndexOf(idsCat, categorie) < 0)
 		{
-			chips.Add(Chip(Categories.Noms[j], Categories.Ids[j]));
+			categorie = "";
+		}
+		for (int j = 0; j < idsCat.Length; j++)
+		{
+			chips.Add(Chip(nomsCat[j], idsCat[j]));
 		}
 		foreach (Bouton chip in chips)
 		{
@@ -11090,6 +11096,10 @@ internal partial class Fenetre : Form
 			break;
 		}
 		case "biblio":
+			if (!string.IsNullOrEmpty(arg))
+			{
+				jeuId = arg;
+			}
 			ShowVue(Vue.Biblio);
 			break;
 		case "profil":

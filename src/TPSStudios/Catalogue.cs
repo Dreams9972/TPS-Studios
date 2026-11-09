@@ -132,6 +132,11 @@ internal class Catalogue
 				}
 				string value4;
 				Uri result;
+				if (dictionary4.TryGetValue("id", out var value0))
+				{
+					dictionary4.TryGetValue("categories", out var value5);
+					Categories.Definir(value0, value5);
+				}
 				if (dictionary4.TryGetValue("id", out var value3) && value3 == "omsi2")
 				{
 					catalogue.JeuOmsi = dictionary4;

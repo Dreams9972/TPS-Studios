@@ -34,6 +34,8 @@ internal class FenJeux : Form
 
 	private Champ tVideo;
 
+	private Champ tCats;
+
 	private Segments sgStatut;
 
 	private Option cPlein;
@@ -80,7 +82,7 @@ internal class FenJeux : Form
 			});
 		}
 		Text = "Jeux du lanceur";
-		base.ClientSize = new Size(Zx.P(860), Zx.P(900));
+		base.ClientSize = new Size(Zx.P(1200), Zx.P(900));
 		base.FormBorderStyle = FormBorderStyle.FixedDialog;
 		base.MaximizeBox = false;
 		base.MinimizeBox = false;
@@ -194,7 +196,14 @@ internal class FenJeux : Form
 		};
 		base.Controls.Add(cPlein);
 		boutonsMedias = new Bouton[3] { bouton3, bouton4, bouton5 };
-		Champ[] array = new Champ[7] { tId, tNom, tSous, tUrl, tImage, tPhotos, tVideo };
+		Lb("Catégories de tri des mods", Zx.P(870), Zx.P(90), Zx.P(300), Zx.P(20), new Font("Segoe UI Semibold", Zx.P(9.5f)), C.Texte);
+		Lb("Une catégorie par ligne (12 au plus). Elles servent de filtres dans « Mods » et de choix dans les pages de ce jeu.", Zx.P(870), Zx.P(112), Zx.P(300), Zx.P(54), new Font("Segoe UI", Zx.P(9f)), C.Gris);
+		tCats = new Champ(multi: true, Zx.P(300));
+		tCats.Location = new Point(Zx.P(870), Zx.P(170));
+		tCats.Width = Zx.P(300);
+		tCats.MaxLength = 1000;
+		base.Controls.Add(tCats);
+		Champ[] array = new Champ[8] { tId, tNom, tSous, tUrl, tImage, tPhotos, tVideo, tCats };
 		foreach (Champ champ in array)
 		{
 			champ.TextChanged += delegate
@@ -315,6 +324,8 @@ internal class FenJeux : Form
 			tUrl.Text = ((cur != null) ? V(cur, "url") : "");
 			tImage.Text = ((cur != null) ? V(cur, "image") : "");
 			tPhotos.Text = ((cur != null) ? V(cur, "galerie").Replace("\r\n", "\n").Replace("\n", "\r\n") : "");
+			tCats.Enabled = cur != null;
+			tCats.Text = ((cur == null) ? "" : ((V(cur, "categories").Trim().Length > 0) ? V(cur, "categories").Replace("\r\n", "\n").Replace("\n", "\r\n") : Categories.Texte(V(cur, "id"))));
 			tVideo.Text = ((cur != null) ? V(cur, "video") : "");
 			bool flag = cur != null && V(cur, "id") == "omsi2";
 			tId.Enabled = cur != null && !flag;
@@ -352,6 +363,8 @@ internal class FenJeux : Form
 			cur["image"] = tImage.Text.Trim();
 			cur["galerie"] = tPhotos.Text.Replace("\r\n", "\n").Trim();
 			cur["video"] = tVideo.Text.Trim();
+			cur["categories"] = tCats.Text.Replace("\r\n", "\n").Trim();
+			Categories.Definir(cur["id"], cur["categories"]);
 			cur["statut"] = ((sgStatut.Index > 0) ? statutsId[sgStatut.Index] : "");
 			cur["plein_ecran"] = (cPlein.Checked ? "" : "0");
 			if (cur["id"] == "omsi2")
