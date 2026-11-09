@@ -55,7 +55,8 @@
       "a_la_une": true,
       "ordre": 1,
       "nouveautes": true,
-      "tags": "Paris"
+      "tags": "Paris",
+      "editeur": "annamathys/TPS Groupe"
     },
     {
       "id": "strasbourg",
