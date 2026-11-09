@@ -14,6 +14,11 @@ internal class VideoFond : Panel
 {
 	private LecteurWmp wmp;
 
+	/// <summary>LecteurWeb (WebView2), typé Control : WebView2 n'est chargé que si on s'en sert.</summary>
+	private Control web;
+
+	private bool modeWeb;
+
 	private string url = "";
 
 	private readonly Timer minuteur;
@@ -81,7 +86,14 @@ internal class VideoFond : Panel
 			bSon.Text = (muet ? "" : "");
 			try
 			{
-				LecteurWmp.Fixer(LecteurWmp.Lire(wmp.Ocx, "settings"), "mute", muet);
+				if (modeWeb)
+				{
+					WebMuet(muet);
+				}
+				else
+				{
+					LecteurWmp.Fixer(LecteurWmp.Lire(wmp.Ocx, "settings"), "mute", muet);
+				}
 			}
 			catch
 			{
@@ -164,23 +176,110 @@ internal class VideoFond : Panel
 		catch
 		{
 		}
-		base.Visible = montre && url.Length > 0 && wmp != null;
+		string text = YouTube.Id(url);
+		modeWeb = text != null;
+		if (modeWeb)
+		{
+			try
+			{
+				if (web == null)
+				{
+					CreerWeb();
+				}
+				web.Visible = true;
+				WebMuet(muet);
+				WebCharger(text);
+			}
+			catch (Exception e)
+			{
+				Journal.Une("video-youtube", e);
+				abandon = true;
+			}
+			if (wmp != null)
+			{
+				wmp.Visible = false;
+			}
+		}
+		else
+		{
+			if (web != null)
+			{
+				web.Visible = false;
+				try
+				{
+					WebCharger("");
+				}
+				catch
+				{
+				}
+			}
+			if (wmp != null)
+			{
+				wmp.Visible = true;
+			}
+		}
+		Afficher(montre);
+	}
+
+	[System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+	private void CreerWeb()
+	{
+		LecteurWeb lecteurWeb = new LecteurWeb();
+		lecteurWeb.Dock = DockStyle.Fill;
+		lecteurWeb.Echec += delegate
+		{
+			Abandonner();
+		};
+		web = lecteurWeb;
+		base.Controls.Add(web);
+		bSon.BringToFront();
+	}
+
+	[System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+	private void WebCharger(string id)
+	{
+		((LecteurWeb)web).Charger(id);
+	}
+
+	[System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+	private void WebMuet(bool m)
+	{
+		((LecteurWeb)web).Muet = m;
+	}
+
+	[System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+	private void WebLecture(bool lire)
+	{
+		((LecteurWeb)web).Lecture(lire);
+	}
+
+	private bool suspendue;
+
+	/// <summary>Cache la vidéo le temps d'une transition (l'image peinte dessous la remplace).</summary>
+	public void Suspendre(bool s)
+	{
+		suspendue = s;
+		Afficher(montre);
 	}
 
 	/// <summary>Montre ou cache la vidéo sans l'oublier (onglet changé, page masquée…).</summary>
 	public void Afficher(bool m)
 	{
 		montre = m;
-		bool flag = m && url.Length > 0 && wmp != null && !abandon;
+		bool flag = m && !suspendue && url.Length > 0 && (modeWeb || wmp != null) && !abandon;
 		if (base.Visible != flag)
 		{
 			base.Visible = flag;
 		}
 	}
 
-	/// <summary>Le lecteur Windows Media lit les fichiers vidéo directs (mp4…), pas YouTube.</summary>
+	/// <summary>Vidéos lisibles : fichiers directs (mp4… via Windows Media) et YouTube (via WebView2).</summary>
 	public static bool Lisible(string u)
 	{
+		if (YouTube.Id(u) != null)
+		{
+			return WebView2Embarque.Possible;
+		}
 		if (!Uri.TryCreate(u ?? "", UriKind.Absolute, out var result) || (result.Scheme != Uri.UriSchemeHttps && result.Scheme != Uri.UriSchemeHttp))
 		{
 			return false;
@@ -195,11 +294,29 @@ internal class VideoFond : Panel
 
 	private void Tic()
 	{
-		if (wmp == null || url.Length == 0 || abandon || base.IsDisposed)
+		if (url.Length == 0 || abandon || base.IsDisposed)
 		{
 			return;
 		}
 		bool flag = base.Visible && base.Parent != null && base.Parent.Visible && (Actif == null || Actif());
+		if (modeWeb)
+		{
+			if (web != null)
+			{
+				try
+				{
+					WebLecture(flag);
+				}
+				catch
+				{
+				}
+			}
+			return;
+		}
+		if (wmp == null)
+		{
+			return;
+		}
 		object obj = null;
 		try
 		{
@@ -253,6 +370,7 @@ internal class VideoFond : Panel
 			int num = Convert.ToInt32(LecteurWmp.Lire(obj, "playState"));
 			if (num != 3 && joue && (DateTime.Now - debut).TotalSeconds > 20.0 && num != 2)
 			{
+				Journal.Ecrire("video-fond", new Exception("la vidéo ne démarre pas (état " + num + ") : " + url));
 				Abandonner();
 				return;
 			}

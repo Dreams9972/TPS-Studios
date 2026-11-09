@@ -211,26 +211,6 @@ internal partial class Fenetre
 		thread.Start();
 	}
 
-	private static void DessinerCouverture(Graphics g, Image im, Rectangle r, int rayon)
-	{
-		using GraphicsPath graphicsPath = Bouton.Rond(r, rayon);
-		GraphicsState gstate = g.Save();
-		g.SetClip(graphicsPath);
-		if (im != null)
-		{
-			double num = Math.Max((double)r.Width / (double)im.Width, (double)r.Height / (double)im.Height);
-			int num2 = (int)((double)im.Width * num);
-			int num3 = (int)((double)im.Height * num);
-			g.DrawImage(im, r.X + (r.Width - num2) / 2, r.Y + (r.Height - num3) / 2, num2, num3);
-		}
-		else
-		{
-			using LinearGradientBrush brush = new LinearGradientBrush(r, C.Ligne, C.Carte, 45f);
-			g.FillRectangle(brush, r);
-		}
-		g.Restore(gstate);
-	}
-
 	/// <summary>Bande de photos sous le bouton JOUER (clic : visionneuse).</summary>
 	private int PeindrePhotosJeu(Graphics g, int y)
 	{
@@ -256,7 +236,7 @@ internal partial class Fenetre
 			{
 				OuvrirPhotos(pleines, idx);
 			}, "Voir les photos");
-			DessinerCouverture(g, ImageWeb(list[i][0], pBiblio), rectangle, Zx.P(8));
+			DessinerArrondi(g, ImageWeb(list[i][0], pBiblio), rectangle, Zx.P(8));
 			bool flag = i == num - 1 && list.Count > num;
 			if (flag || Survol(rectangle))
 			{
@@ -272,17 +252,11 @@ internal partial class Fenetre
 			using GraphicsPath path2 = Bouton.Rond(rectangle, Zx.P(8));
 			g.DrawPath(pen, path2);
 		}
-		return y + num4 + Zx.P(28);
+		return y + num4 + Zx.P(22);
 	}
 
-	/// <summary>Bloc « À propos » : comme sur Steam (description, développeur, éditeur, date de sortie, genres…).</summary>
-	private int PeindreAPropos(Graphics g, int y)
+	private string DescriptionJeu(FicheSteam fiche)
 	{
-		FicheSteam fiche = FicheJeu();
-		int x = rPageG.X;
-		int width = rPageG.Width;
-		Lang.DrawText(g, "À PROPOS DE CE JEU", fSecT, new Point(x, y), C.Gris, TextFormatFlags.NoPadding);
-		y += Zx.P(26);
 		string text = ValJeu(jeuId, "description");
 		if (fiche != null && fiche.Description.Length > 0)
 		{
@@ -292,10 +266,11 @@ internal partial class Fenetre
 		{
 			text = ((jeuId == "omsi2") ? "Simulateur de bus et de métro. Installez cartes, bus, livrées et packs IA en un clic depuis l'onglet Mods, puis lancez le jeu avec openOMSI, ou directement sur une carte depuis « Mes mods »." : "Jeu en ligne gratuit : il s'ouvre dans sa propre fenêtre, avec ou sans mod.");
 		}
-		Size size = Lang.MeasureText(text, fCorps, new Size(width, Zx.P(200)), TextFormatFlags.WordBreak | TextFormatFlags.NoPadding);
-		int num = Math.Min(Zx.P(200), size.Height + Zx.P(4));
-		Lang.DrawText(g, text, fCorps, new Rectangle(x, y, width, num), Color.FromArgb(205, 212, 232), TextFormatFlags.EndEllipsis | TextFormatFlags.WordBreak | TextFormatFlags.NoPadding);
-		y += num + Zx.P(20);
+		return text;
+	}
+
+	private List<string[]> InfosJeu(FicheSteam fiche)
+	{
 		List<string[]> list = new List<string[]>();
 		if (fiche != null)
 		{
@@ -305,6 +280,13 @@ internal partial class Fenetre
 			Ajout(list, "Genres", fiche.Genres);
 			Ajout(list, "Fonctionnalités", fiche.Fonctionnalites);
 			Ajout(list, "Langues", fiche.Langues);
+			List<string> list2 = new List<string>();
+			foreach (string item in fiche.ConfigMin)
+			{
+				int num = item.IndexOf(':');
+				list2.Add(((num > 0 && num < 40) ? item.Substring(num + 1) : item).Trim());
+			}
+			Ajout(list, "Configuration", string.Join("  ·  ", list2.ToArray()));
 		}
 		else
 		{
@@ -312,58 +294,37 @@ internal partial class Fenetre
 			Ajout(list, "Date de sortie", ValJeu(jeuId, "sortie"));
 			Ajout(list, "Genres", ValJeu(jeuId, "genres"));
 		}
-		if (list.Count > 0)
+		return list;
+	}
+
+	private int HauteurAPropos()
+	{
+		int num = (InfosJeu(FicheJeu()).Count + 1) / 2;
+		return Zx.P(26) + Zx.P(44) + Zx.P(16) + ((num > 0) ? (num * Zx.P(34) + Zx.P(16)) : 0);
+	}
+
+	private int HauteurPhotos()
+	{
+		if (PhotosDuJeu().Count == 0)
 		{
-			int num2 = Zx.P(16);
-			int num3 = Zx.P(150);
-			List<int> list2 = new List<int>();
-			int num4 = num2;
-			foreach (string[] item in list)
-			{
-				int num5 = Math.Min(Zx.P(60), Lang.MeasureText(item[1], fInfoV, new Size(width - num3 - 2 * num2, Zx.P(60)), TextFormatFlags.WordBreak | TextFormatFlags.NoPadding).Height) + Zx.P(14);
-				list2.Add(num5);
-				num4 += num5;
-			}
-			num4 += num2 - Zx.P(6);
-			Rectangle r = new Rectangle(x, y, width, num4);
-			using (GraphicsPath path = Bouton.Rond(r, Zx.P(12)))
-			{
-				using SolidBrush brush = new SolidBrush(Color.FromArgb(130, C.Carte));
-				g.FillPath(brush, path);
-			}
-			int num6 = y + num2;
-			for (int i = 0; i < list.Count; i++)
-			{
-				if (i > 0)
-				{
-					using Pen pen = new Pen(Color.FromArgb(70, C.Ligne));
-					g.DrawLine(pen, x + num2, num6 - Zx.P(7), r.Right - num2, num6 - Zx.P(7));
-				}
-				Lang.DrawText(g, list[i][0].ToUpperInvariant(), fStatL, new Rectangle(x + num2, num6 + Zx.P(2), num3 - Zx.P(10), Zx.P(18)), C.Gris, TextFormatFlags.NoPadding);
-				Lang.DrawText(g, list[i][1], fInfoV, new Rectangle(x + num2 + num3, num6, width - num3 - 2 * num2, list2[i] - Zx.P(10)), C.Texte, TextFormatFlags.EndEllipsis | TextFormatFlags.WordBreak | TextFormatFlags.NoPadding);
-				num6 += list2[i];
-			}
-			y = r.Bottom + Zx.P(22);
+			return 0;
 		}
-		if (fiche != null && fiche.ConfigMin.Count > 0)
-		{
-			Lang.DrawText(g, "CONFIGURATION MINIMALE", fSecT, new Point(x, y), C.Gris, TextFormatFlags.NoPadding);
-			y += Zx.P(24);
-			foreach (string item2 in fiche.ConfigMin)
-			{
-				int num7 = Math.Min(Zx.P(40), Lang.MeasureText(item2, fInfoL, new Size(width - Zx.P(16), Zx.P(40)), TextFormatFlags.WordBreak | TextFormatFlags.NoPadding).Height) + Zx.P(4);
-				using (SolidBrush brush2 = new SolidBrush(C.Jade))
-				{
-					g.FillEllipse(brush2, x + Zx.P(2), y + Zx.P(7), Zx.P(5), Zx.P(5));
-				}
-				Lang.DrawText(g, item2, fInfoL, new Rectangle(x + Zx.P(16), y, width - Zx.P(16), num7), Color.FromArgb(195, 203, 225), TextFormatFlags.EndEllipsis | TextFormatFlags.WordBreak | TextFormatFlags.NoPadding);
-				y += num7 + Zx.P(2);
-			}
-			y += Zx.P(14);
-		}
+		return (rPageG.Width - 4 * Zx.P(10)) / 5 * 9 / 16 + Zx.P(22);
+	}
+
+	/// <summary>Bloc « À propos » compact, comme sur Steam : tient dans la fenêtre sans défiler.</summary>
+	private int PeindreAPropos(Graphics g, int y)
+	{
+		FicheSteam fiche = FicheJeu();
+		int x = rPageG.X;
+		int width = rPageG.Width;
+		Lang.DrawText(g, "À PROPOS DE CE JEU", fSecT, new Point(x, y), C.Gris, TextFormatFlags.NoPadding);
 		if (fiche != null && fiche.Page.Length > 0)
 		{
-			Rectangle rectangle = Pilule(g, "Voir la page Steam  ↗", x + Lang.MeasureText("Voir la page Steam  ↗", fPilule).Width + Zx.P(28), y, C.Bleu, plein: false);
+			string text = "Voir la page Steam  ↗";
+			Size size = Lang.MeasureText(text, fLien);
+			Rectangle rectangle = new Rectangle(rPageG.Right - size.Width, y - Zx.P(2), size.Width, size.Height + Zx.P(4));
+			Lang.DrawText(g, text, fLien, new Point(rectangle.X, y), Survol(rectangle) ? C.Texte : C.Bleu, TextFormatFlags.NoPadding);
 			Zone(rectangle, delegate
 			{
 				try
@@ -374,7 +335,37 @@ internal partial class Fenetre
 				{
 				}
 			}, fiche.Page);
-			y = rectangle.Bottom + Zx.P(10);
+		}
+		y += Zx.P(26);
+		Lang.DrawText(g, DescriptionJeu(fiche), fCorps, new Rectangle(x, y, width, Zx.P(42)), Color.FromArgb(205, 212, 232), TextFormatFlags.EndEllipsis | TextFormatFlags.WordBreak | TextFormatFlags.NoPadding);
+		y += Zx.P(44) + Zx.P(16);
+		List<string[]> list = InfosJeu(fiche);
+		if (list.Count > 0)
+		{
+			int num = (list.Count + 1) / 2;
+			int num2 = Zx.P(34);
+			Rectangle r = new Rectangle(x, y, width, num * num2 + Zx.P(16));
+			using (GraphicsPath path = Bouton.Rond(r, Zx.P(12)))
+			{
+				using SolidBrush brush = new SolidBrush(Color.FromArgb(130, C.Carte));
+				g.FillPath(brush, path);
+			}
+			int num3 = (width - Zx.P(16) * 3) / 2;
+			int num4 = Math.Min(Zx.P(128), num3 / 3);
+			for (int i = 0; i < list.Count; i++)
+			{
+				int num5 = i / 2;
+				int num6 = x + Zx.P(16) + i % 2 * (num3 + Zx.P(16));
+				int num7 = y + Zx.P(8) + num5 * num2;
+				if (num5 > 0 && i % 2 == 0)
+				{
+					using Pen pen = new Pen(Color.FromArgb(60, C.Ligne));
+					g.DrawLine(pen, x + Zx.P(16), num7, r.Right - Zx.P(16), num7);
+				}
+				Lang.DrawText(g, list[i][0].ToUpperInvariant(), fStatL, new Rectangle(num6, num7, num4 - Zx.P(6), num2), C.Gris, TextFormatFlags.SingleLine | TextFormatFlags.EndEllipsis | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+				Lang.DrawText(g, list[i][1], fInfoV, new Rectangle(num6 + num4, num7, num3 - num4, num2), C.Texte, TextFormatFlags.SingleLine | TextFormatFlags.EndEllipsis | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+			}
+			y = r.Bottom + Zx.P(10);
 		}
 		return y;
 	}
@@ -405,9 +396,34 @@ internal partial class Fenetre
 		{
 			page.Controls.Add(videoP);
 		}
-		videoP.Charger((sel != null) ? sel.Video : "");
+		string text = ((sel != null) ? sel.Video : "");
+		if (sel != null && !VideoFond.Lisible(text))
+		{
+			Projet p = sel;
+			text = YouTube.TrailerPour(sel, ChaineYouTube(), delegate
+			{
+				Sur(delegate
+				{
+					if (vue == Vue.Projet && sel == p)
+					{
+						PlacerVideoPage();
+					}
+				});
+			}) ?? "";
+		}
+		videoP.Charger(text);
 		videoP.Bounds = rVue;
 		videoP.Afficher(sel != null);
 		videoP.BringToFront();
+	}
+
+	/// <summary>Chaîne YouTube où chercher les bandes-annonces des mods (catalogue › communaute › youtube).</summary>
+	private string ChaineYouTube()
+	{
+		if (cat != null && cat.Communaute.TryGetValue("youtube", out var value) && !string.IsNullOrEmpty(value))
+		{
+			return value;
+		}
+		return YouTube.ChaineParDefaut;
 	}
 }

@@ -348,7 +348,7 @@ internal static class DiscordPresence
 						if (text4.StartsWith("https://") && text2.Length > 0)
 						{
 							Dictionary<string, object> dictionary6 = new Dictionary<string, object>();
-							dictionary6["label"] = "Rejoindre TPS Studios";
+							dictionary6["label"] = "Rejoindre TPS Groupe";
 							dictionary6["url"] = text4;
 							dictionary4["buttons"] = new object[1] { dictionary6 };
 						}

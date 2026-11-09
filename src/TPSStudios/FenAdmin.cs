@@ -225,7 +225,7 @@ internal class FenAdmin : Form, IPage
 			Graphics graphics = e.Graphics;
 			graphics.SmoothingMode = SmoothingMode.AntiAlias;
 			Lang.DrawText(graphics, "Administration", new Font("Segoe UI Semibold", Zx.P(18f)), new Point(Zx.P(140), Zx.P(10)), C.Texte);
-			Lang.DrawText(graphics, "Catalogue TPS Studios  ·  github.com/Dreams9972/TPS-Studios", new Font("Segoe UI", Zx.P(9.5f)), new Point(Zx.P(142), Zx.P(49)), C.Gris);
+			Lang.DrawText(graphics, "Catalogue TPS Groupe  ·  github.com/Dreams9972/TPS-Studios", new Font("Segoe UI", Zx.P(9.5f)), new Point(Zx.P(142), Zx.P(49)), C.Gris);
 			int num5 = entete.Width - Zx.P(24);
 			string[] array = new string[2]
 			{
@@ -545,7 +545,7 @@ internal class FenAdmin : Form, IPage
 		cdOpt = Bloc("Options de la page", ref num2, num, Zx.P(600));
 		int num3 = (num - Zx.P(72)) / 2;
 		int x = Zx.P(24) + num3 + Zx.P(24);
-		Etiq(cdOpt, "Éditeur / auteurs (vide = TPS Studios)", Zx.P(24), Zx.P(44));
+		Etiq(cdOpt, "Éditeur / auteurs (vide = TPS Groupe)", Zx.P(24), Zx.P(44));
 		tEditeur = new Champ(multi: false, Zx.P(36));
 		tEditeur.Location = new Point(Zx.P(24), Zx.P(66));
 		tEditeur.Width = num3;

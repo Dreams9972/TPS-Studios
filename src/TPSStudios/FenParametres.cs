@@ -119,7 +119,7 @@ internal class FenParametres : Form, IPage
 		base.Controls.Add(value);
 		Label value2 = new Label
 		{
-			Text = "Personnalisez le lanceur TPS Studios",
+			Text = "Personnalisez le lanceur TPS Groupe",
 			Font = new Font("Segoe UI", Zx.P(10f)),
 			ForeColor = C.Gris,
 			BackColor = C.Fond,
@@ -241,18 +241,18 @@ internal class FenParametres : Form, IPage
 		};
 		cadre2.Controls.Add(bouton);
 		Etiquette(cadre2, (versionDispo != null) ? ("Nouvelle version du lanceur : v" + versionDispo + "   (installée : v" + Config.VERSION + ")") : ("Lanceur v" + Config.VERSION + "  ·  à jour"), Zx.P(312), Zx.P(55)).ForeColor = ((versionDispo != null) ? C.Bleu : C.Gris);
-		cMajL = Opt(cadre2, 1, "Mettre à jour le lanceur automatiquement", "Installe les nouvelles versions au démarrage. Désactivé : une alerte vous prévient.", Config.Oui("maj_lanceur", defaut: true), Zx.P(40) + Zx.P(62) - Zx.P(4));
+		cMajL = Opt(cadre2, 1, "Mettre à jour le lanceur automatiquement", "Installe les nouvelles versions au démarrage. Désactivé : un bandeau sur l'accueil vous prévient.", Config.Oui("maj_lanceur", defaut: false), Zx.P(40) + Zx.P(62) - Zx.P(4));
 		cMajP = Opt(cadre2, 2, "Mettre à jour mes projets installés automatiquement", "Au démarrage, un projet à la fois, jamais jeu ouvert.", Config.Oui("maj_auto_projets", defaut: false), Zx.P(40) + Zx.P(62) - Zx.P(4));
 		Cadre c = Section("Démarrage et jeu", Zx.P(40) + 3 * Zx.P(62) + Zx.P(6));
 		cRed = Opt(c, 0, "Réduire le lanceur quand le jeu démarre", "Le lanceur se met dans la barre des tâches dès que vous cliquez sur JOUER.", Config.Oui("reduire", defaut: false));
 		cFerme = Opt(c, 2, "Garder le lanceur ouvert quand on clique sur la croix", "Il reste dans la zone de notification (près de l'horloge) ; « Quitter » le ferme pour de bon.", Config.Oui("fermer_reduit", defaut: true));
 		cDem = Opt(c, 1, "Démarrer le lanceur avec Windows", "Ouvre le lanceur à chaque ouverture de session. Désactivable ici à tout moment.", Demarrage.Actif);
 		Cadre cadre3 = Section("Activité Discord", Zx.P(40) + Zx.P(62) + Zx.P(116));
-		cDisc = Opt(cadre3, 0, "Afficher mon activité sur Discord", "Vos amis Discord voient que vous utilisez TPS Studios et la carte à laquelle vous jouez.", Config.Oui("discord_presence", defaut: false));
+		cDisc = Opt(cadre3, 0, "Afficher mon activité sur Discord", "Vos amis Discord voient que vous utilisez TPS Groupe et la carte à laquelle vous jouez.", Config.Oui("discord_presence", defaut: false));
 		Etiquette(cadre3, "Statut : " + (Config.Oui("discord_presence", defaut: false) ? DiscordPresence.Statut : "désactivée") + "   ·   désactivé par défaut, aucune connexion à votre compte Discord", Zx.P(24), Zx.P(40) + Zx.P(62) + Zx.P(6));
 		if (appFournie)
 		{
-			Etiquette(cadre3, "Identifiant d'application Discord : fourni par TPS Studios ✔", Zx.P(24), Zx.P(40) + Zx.P(62) + Zx.P(40));
+			Etiquette(cadre3, "Identifiant d'application Discord : fourni par TPS Groupe ✔", Zx.P(24), Zx.P(40) + Zx.P(62) + Zx.P(40));
 		}
 		else
 		{
@@ -404,7 +404,7 @@ internal class FenParametres : Form, IPage
 		base.Controls.Add(panel);
 		Label value5 = new Label
 		{
-			Text = "TPS Studios Lanceur v" + Config.VERSION,
+			Text = "TPS Groupe Lanceur v" + Config.VERSION,
 			Font = new Font("Segoe UI", Zx.P(9f)),
 			ForeColor = C.Gris,
 			BackColor = C.Cote,

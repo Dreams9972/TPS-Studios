@@ -63,10 +63,54 @@ internal static class Programme
 			}
 		}
 		File.Copy(Application.ExecutablePath, text, overwrite: true);
-		Raccourci(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory), "TPS Studios.lnk"), text);
-		Raccourci(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Programs), "TPS Studios.lnk"), text);
+		Raccourci(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory), "TPS Groupe.lnk"), text);
+		Raccourci(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Programs), "TPS Groupe.lnk"), text);
 		Process.Start(text, "/portable");
 		return true;
+	}
+
+	/// <summary>Nouveau nom (TPS Groupe) : renomme une fois les raccourcis « TPS Studios » existants.</summary>
+	private static void MigrerRaccourcis()
+	{
+		if (Config.Lire("raccourcis_groupe") == "1")
+		{
+			return;
+		}
+		try
+		{
+			string text = Path.Combine(Config.Dossier, "TPS Studios.exe");
+			if (!File.Exists(text))
+			{
+				text = Application.ExecutablePath;
+			}
+			Environment.SpecialFolder[] array = new Environment.SpecialFolder[2]
+			{
+				Environment.SpecialFolder.DesktopDirectory,
+				Environment.SpecialFolder.Programs
+			};
+			foreach (Environment.SpecialFolder folder in array)
+			{
+				string folderPath = Environment.GetFolderPath(folder);
+				string path = Path.Combine(folderPath, "TPS Studios.lnk");
+				string text2 = Path.Combine(folderPath, "TPS Groupe.lnk");
+				if (File.Exists(path))
+				{
+					if (!File.Exists(text2))
+					{
+						File.Move(path, text2);
+					}
+					else
+					{
+						File.Delete(path);
+					}
+					Raccourci(text2, text);
+				}
+			}
+			Config.Ecrire("raccourcis_groupe", "1");
+		}
+		catch
+		{
+		}
 	}
 
 	private static void Raccourci(string lnkF, string cible)
@@ -79,7 +123,7 @@ internal static class Programme
 			Type type = obj.GetType();
 			type.InvokeMember("TargetPath", BindingFlags.SetProperty, null, obj, new object[1] { cible });
 			type.InvokeMember("WorkingDirectory", BindingFlags.SetProperty, null, obj, new object[1] { Path.GetDirectoryName(cible) });
-			type.InvokeMember("Description", BindingFlags.SetProperty, null, obj, new object[1] { "TPS Studios : projets, mises à jour et lancement" });
+			type.InvokeMember("Description", BindingFlags.SetProperty, null, obj, new object[1] { "TPS Groupe : projets, mises à jour et lancement" });
 			type.InvokeMember("IconLocation", BindingFlags.SetProperty, null, obj, new object[1] { cible + ",0" });
 			type.InvokeMember("Save", BindingFlags.InvokeMethod, null, obj, null);
 		}
@@ -91,6 +135,7 @@ internal static class Programme
 	[STAThread]
 	private static int Main(string[] args)
 	{
+		WebView2Embarque.Init();
 		Application.EnableVisualStyles();
 		Application.SetCompatibleTextRenderingDefault(defaultValue: false);
 		Zx.Init();
@@ -102,7 +147,7 @@ internal static class Programme
 			if (!prevenu && !Fenetre.ModeCapture)
 			{
 				prevenu = true;
-				MessageBox.Show("Une erreur inattendue s'est produite. Le lanceur continue de fonctionner.\n\nLe détail est enregistré dans :\n" + Path.Combine(Config.Dossier, "erreurs.log"), "TPS Studios");
+				MessageBox.Show("Une erreur inattendue s'est produite. Le lanceur continue de fonctionner.\n\nLe détail est enregistré dans :\n" + Path.Combine(Config.Dossier, "erreurs.log"), "TPS Groupe");
 			}
 		};
 		AppDomain.CurrentDomain.UnhandledException += delegate(object o, UnhandledExceptionEventArgs e)
@@ -511,6 +556,10 @@ internal static class Programme
 			catch
 			{
 			}
+		}
+		if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+		{
+			MigrerRaccourcis();
 		}
 		string text3 = Environment.GetEnvironmentVariable("TPS_MUTEX");
 		if (string.IsNullOrEmpty(text3))

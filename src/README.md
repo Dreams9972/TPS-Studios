@@ -1,4 +1,4 @@
-# Code source du lanceur TPS Studios
+# Code source du lanceur TPS Groupe
 
 Projet C# WinForms (.NET Framework 4.8) du lanceur `TPS.Studios.exe`.
 
@@ -56,3 +56,22 @@ Code dans `TPSStudios/FenetreBiblio.cs` (partie de la classe `Fenetre`). Deux on
 
 `TPS.Studios.exe /apercu biblio` (ou `/apercu projet <id>`, `/apercu jeux`) ouvre directement
 une page, sans les fenêtres de démarrage. Option : `/taille 1280x720`.
+
+## Bandes-annonces (v2.8.2)
+
+- Fichier vidéo direct (mp4…) : lecteur Windows Media intégré.
+- YouTube : WebView2 (moteur d'Edge), embarqué dans l'exe (`WebView2Embarque.cs`,
+  `LecteurWeb.cs`). WebView2Loader.dll est déposé dans `%LocalAppData%\TPS Studios\webview2`.
+- Mods sans vidéo : le lanceur cherche sur la chaîne YouTube TPS Groupe (flux public des
+  dernières vidéos, `YouTube.cs`) une vidéo dont le titre contient le nom du mod, de
+  préférence « trailer », « bande-annonce » ou « teaser ». Chaîne modifiable dans le
+  catalogue : `communaute.youtube`.
+
+## Nom : TPS Groupe (anciennement TPS Studios)
+
+Tous les textes visibles disent « TPS Groupe ». Restent volontairement « TPS Studios » :
+le dossier des données (`%LocalAppData%\TPS Studios`), le fichier installé `TPS Studios.exe`,
+le dossier `_TPS Studios - mods désactivés`, le dépôt GitHub, le nom `TPS.Studios.exe`
+du téléchargement, le verrou `TPSStudiosLanceur` et la clé de démarrage `TPSStudios`.
+Les changer ferait perdre leurs réglages aux joueurs ou casserait la mise à jour automatique.
+Les raccourcis « TPS Studios » sont renommés « TPS Groupe » au premier lancement.

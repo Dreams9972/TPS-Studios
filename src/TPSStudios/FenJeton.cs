@@ -45,7 +45,7 @@ internal class FenJeton : Form
 			Font = new Font("Segoe UI", Zx.P(9.5f)),
 			Location = new Point(Zx.P(20), Zx.P(44)),
 			Size = new Size(Zx.P(564), Zx.P(138)),
-			Text = "Ce mode permet de modifier les pages du catalogue TPS Studios, publiées ou à venir. Il demande un jeton d'accès GitHub autorisé à écrire sur le dépôt Dreams9972/TPS-Studios (permission « Contents : Read and write »).\n\nLe jeton est vérifié auprès de GitHub puis chiffré pour votre session Windows : il n'est jamais affiché ni envoyé ailleurs."
+			Text = "Ce mode permet de modifier les pages du catalogue TPS Groupe, publiées ou à venir. Il demande un jeton d'accès GitHub autorisé à écrire sur le dépôt Dreams9972/TPS-Studios (permission « Contents : Read and write »).\n\nLe jeton est vérifié auprès de GitHub puis chiffré pour votre session Windows : il n'est jamais affiché ni envoyé ailleurs."
 		};
 		cadre.Controls.Add(value);
 		Lb("Jeton d'accès GitHub", Zx.P(30), Zx.P(284), Zx.P(600), Zx.P(22), new Font("Segoe UI Semibold", Zx.P(10.5f)), C.Texte);

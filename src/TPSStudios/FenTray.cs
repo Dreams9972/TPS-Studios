@@ -171,7 +171,7 @@ internal class FenTray : Form
 			using GraphicsPath path = Bouton.Rond(new Rectangle(0, 0, w - 1, h - 1), Zx.P(14));
 			g.DrawPath(pen, path);
 		}
-		Lang.DrawText(g, "TPS Studios", fT, new Point(Zx.P(16), Zx.P(13)), C.Texte);
+		Lang.DrawText(g, "TPS Groupe", fT, new Point(Zx.P(16), Zx.P(13)), C.Texte);
 		int num = Lang.MeasureText("Ouvrir le lanceur", fB).Width + Zx.P(24);
 		Rectangle rectangle = new Rectangle(w - Zx.P(14) - num, Zx.P(9), num, Zx.P(28));
 		bool flag = rectangle.Contains(souris);
