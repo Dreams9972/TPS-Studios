@@ -91,6 +91,7 @@ internal static class Programme
 	[STAThread]
 	private static int Main(string[] args)
 	{
+		WebView2Embarque.Init();
 		Application.EnableVisualStyles();
 		Application.SetCompatibleTextRenderingDefault(defaultValue: false);
 		Zx.Init();

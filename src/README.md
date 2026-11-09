@@ -56,3 +56,13 @@ Code dans `TPSStudios/FenetreBiblio.cs` (partie de la classe `Fenetre`). Deux on
 
 `TPS.Studios.exe /apercu biblio` (ou `/apercu projet <id>`, `/apercu jeux`) ouvre directement
 une page, sans les fenêtres de démarrage. Option : `/taille 1280x720`.
+
+## Bandes-annonces (v2.8.2)
+
+- Fichier vidéo direct (mp4…) : lecteur Windows Media intégré.
+- YouTube : WebView2 (moteur d'Edge), embarqué dans l'exe (`WebView2Embarque.cs`,
+  `LecteurWeb.cs`). WebView2Loader.dll est déposé dans `%LocalAppData%\TPS Studios\webview2`.
+- Mods sans vidéo : le lanceur cherche sur la chaîne YouTube TPS Studios (flux public des
+  dernières vidéos, `YouTube.cs`) une vidéo dont le titre contient le nom du mod, de
+  préférence « trailer », « bande-annonce » ou « teaser ». Chaîne modifiable dans le
+  catalogue : `communaute.youtube`.

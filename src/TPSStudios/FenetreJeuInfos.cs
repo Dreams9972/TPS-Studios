@@ -396,9 +396,34 @@ internal partial class Fenetre
 		{
 			page.Controls.Add(videoP);
 		}
-		videoP.Charger((sel != null) ? sel.Video : "");
+		string text = ((sel != null) ? sel.Video : "");
+		if (sel != null && !VideoFond.Lisible(text))
+		{
+			Projet p = sel;
+			text = YouTube.TrailerPour(sel, ChaineYouTube(), delegate
+			{
+				Sur(delegate
+				{
+					if (vue == Vue.Projet && sel == p)
+					{
+						PlacerVideoPage();
+					}
+				});
+			}) ?? "";
+		}
+		videoP.Charger(text);
 		videoP.Bounds = rVue;
 		videoP.Afficher(sel != null);
 		videoP.BringToFront();
+	}
+
+	/// <summary>Chaîne YouTube où chercher les bandes-annonces des mods (catalogue › communaute › youtube).</summary>
+	private string ChaineYouTube()
+	{
+		if (cat != null && cat.Communaute.TryGetValue("youtube", out var value) && !string.IsNullOrEmpty(value))
+		{
+			return value;
+		}
+		return YouTube.ChaineParDefaut;
 	}
 }

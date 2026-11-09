@@ -2663,7 +2663,7 @@ internal partial class Fenetre : Form
 		{
 			vIdx = 0;
 		}
-		if (rMini.Count != list.Count && !relayoutPage)
+		if (rMini.Count != ((list.Count > 1) ? list.Count : 0) && !relayoutPage)
 		{
 			relayoutPage = true;
 			BeginInvoke((MethodInvoker)delegate

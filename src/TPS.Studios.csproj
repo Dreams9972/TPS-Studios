@@ -15,6 +15,12 @@
     <EmbeddedResource Include="logo_tps.jpg" LogicalName="logo_tps.jpg" />
     <EmbeddedResource Include="banniere_parisview.jpg" LogicalName="banniere_parisview.jpg" />
     <EmbeddedResource Include="langues.json" LogicalName="langues.json" />
+    <!-- WebView2 (bandes-annonces YouTube) embarqué dans l'exe : chargé depuis la mémoire au besoin -->
+    <EmbeddedResource Include="$(NuGetPackageRoot)microsoft.web.webview2/1.0.4022.49/lib/net462/Microsoft.Web.WebView2.Core.dll" LogicalName="wv2/Microsoft.Web.WebView2.Core.dll" />
+    <EmbeddedResource Include="$(NuGetPackageRoot)microsoft.web.webview2/1.0.4022.49/lib/net462/Microsoft.Web.WebView2.WinForms.dll" LogicalName="wv2/Microsoft.Web.WebView2.WinForms.dll" />
+    <EmbeddedResource Include="$(NuGetPackageRoot)microsoft.web.webview2/1.0.4022.49/runtimes/win-x86/native/WebView2Loader.dll" LogicalName="wv2/x86/WebView2Loader.dll" />
+    <EmbeddedResource Include="$(NuGetPackageRoot)microsoft.web.webview2/1.0.4022.49/runtimes/win-x64/native/WebView2Loader.dll" LogicalName="wv2/x64/WebView2Loader.dll" />
+    <EmbeddedResource Include="$(NuGetPackageRoot)microsoft.web.webview2/1.0.4022.49/runtimes/win-arm64/native/WebView2Loader.dll" LogicalName="wv2/arm64/WebView2Loader.dll" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Windows.Forms" />
@@ -30,5 +36,6 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
     <PackageReference Include="Microsoft.Windows.SDK.Contracts" Version="10.0.19041.1" />
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4022.49" />
   </ItemGroup>
 </Project>
