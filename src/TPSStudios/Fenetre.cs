@@ -685,7 +685,7 @@ internal partial class Fenetre : Form
 
 	private bool themeNoel => noel != null;
 
-	private int DiscordCoupe => rDiscord.X + 150;
+	private int DiscordCoupe => rDiscord.X + Zx.P(160);
 
 	public void Toast(string t, Color c, int ms)
 	{
@@ -7750,9 +7750,28 @@ internal partial class Fenetre : Form
 		}
 		LogoDiscord(g, new Rectangle(r.X + Zx.P(14), r.Y + (r.Height - Zx.P(18)) / 2, Zx.P(24), Zx.P(18)), Color.White, baseColor);
 		Lang.DrawText(g, "Rejoindre", fDisc1, new Rectangle(r.X + Zx.P(46), r.Y + Zx.P(6), discordCoupe - r.X - Zx.P(50), Zx.P(20)), Color.White, TextFormatFlags.NoPadding);
-		Lang.DrawText(g, "TPS Groupe", fDisc2, new Rectangle(r.X + Zx.P(46), r.Y + Zx.P(26), discordCoupe - r.X - Zx.P(50), Zx.P(16)), Color.FromArgb(222, 226, 255), TextFormatFlags.NoPadding);
+		if (dcMembres >= 0)
+		{
+			DessinerCompte(g, new Rectangle(r.X + Zx.P(46), r.Y + Zx.P(26), discordCoupe - r.X - Zx.P(50), Zx.P(16)), affMembres, " membres", sensMembres, quandMembres, fDisc2, Color.FromArgb(222, 226, 255), centre: false);
+		}
+		else
+		{
+			Lang.DrawText(g, "TPS Groupe", fDisc2, new Rectangle(r.X + Zx.P(46), r.Y + Zx.P(26), discordCoupe - r.X - Zx.P(50), Zx.P(16)), Color.FromArgb(222, 226, 255), TextFormatFlags.NoPadding);
+		}
 		Lang.DrawText(g, "Ouvrir", fDisc1, new Rectangle(discordCoupe + Zx.P(6), r.Y + Zx.P(6), r.Right - discordCoupe - Zx.P(12), Zx.P(20)), Color.White, TextFormatFlags.HorizontalCenter | TextFormatFlags.NoPadding);
-		Lang.DrawText(g, "Discord ↗", fDisc2, new Rectangle(discordCoupe + Zx.P(6), r.Y + Zx.P(26), r.Right - discordCoupe - Zx.P(12), Zx.P(16)), Color.FromArgb(222, 226, 255), TextFormatFlags.HorizontalCenter | TextFormatFlags.NoPadding);
+		if (dcEnLigne >= 0)
+		{
+			Rectangle rectangle0 = new Rectangle(discordCoupe + Zx.P(14), r.Y + Zx.P(26), r.Right - discordCoupe - Zx.P(20), Zx.P(16));
+			using (SolidBrush brush0 = new SolidBrush(Color.FromArgb(87, 242, 135)))
+			{
+				g.FillEllipse(brush0, rectangle0.X - Zx.P(2), rectangle0.Y + Zx.P(5), Zx.P(7), Zx.P(7));
+			}
+			DessinerCompte(g, new Rectangle(rectangle0.X + Zx.P(10), rectangle0.Y, rectangle0.Width - Zx.P(10), rectangle0.Height), affEnLigne, " en ligne", sensEnLigne, quandEnLigne, fDisc2, Color.FromArgb(222, 226, 255), centre: false);
+		}
+		else
+		{
+			Lang.DrawText(g, "Discord ↗", fDisc2, new Rectangle(discordCoupe + Zx.P(6), r.Y + Zx.P(26), r.Right - discordCoupe - Zx.P(12), Zx.P(16)), Color.FromArgb(222, 226, 255), TextFormatFlags.HorizontalCenter | TextFormatFlags.NoPadding);
+		}
 		if (graphicsState != null)
 		{
 			g.Restore(graphicsState);
@@ -7850,6 +7869,7 @@ internal partial class Fenetre : Form
 
 	private void ConstruireAccueil()
 	{
+		DemarrerCompteDiscord();
 		pAccueil.Controls.Clear();
 		tuilesA.Clear();
 		if (cacheProfil != null)
@@ -8045,7 +8065,7 @@ internal partial class Fenetre : Form
 		rBandeau = new Rectangle(num9, num + Zx.P(202), num7, Zx.P(36));
 		rMajA = (MajAAfficher ? new Rectangle(num9, num + Zx.P(198), num7, Zx.P(48)) : Rectangle.Empty);
 		ThemeBase.Cartes = (rInfos.IsEmpty ? new Rectangle[2] { rProfil, rCarte } : new Rectangle[3] { rProfil, rCarte, rInfos });
-		rDiscord = new Rectangle(Zx.P(24), height - Zx.P(24) - Zx.P(48), Zx.P(250), Zx.P(48));
+		rDiscord = new Rectangle(Zx.P(24), height - Zx.P(24) - Zx.P(48), Zx.P(286), Zx.P(48));
 		int num16 = Math.Max((int)((double)height * 0.37), rProfil.Y + Zx.P(452) + Zx.P(20));
 		if (rDiscord.Y - Zx.P(44) - num16 < Zx.P(220))
 		{
@@ -11214,6 +11234,19 @@ internal partial class Fenetre : Form
 				Profil(nouveau: false, result);
 			});
 			break;
+		}
+		if (Environment.GetEnvironmentVariable("TPS_DEMO_DISCORD") == "1")
+		{
+			MajCompteDiscord(1234, 56);
+			System.Windows.Forms.Timer timerDc = new System.Windows.Forms.Timer();
+			timerDc.Interval = 6000;
+			int etape0 = 0;
+			timerDc.Tick += delegate
+			{
+				etape0++;
+				MajCompteDiscord(1234 + ((etape0 % 2 == 1) ? 12 : 0), 56 - ((etape0 % 2 == 1) ? 9 : 0));
+			};
+			timerDc.Start();
 		}
 		System.Windows.Forms.Timer timer = new System.Windows.Forms.Timer();
 		timer.Interval = 1500;
