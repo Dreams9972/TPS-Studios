@@ -3877,6 +3877,60 @@ internal partial class Fenetre : Form
 		Transition(avant, StyleTrans.Monte);
 	}
 
+	/// <summary>
+	/// Capture la page affichée et la fige à l'écran (voile opaque par-dessus la zone) :
+	/// la page suivante se construit en dessous sans jamais apparaître avant le début
+	/// de la transition (plus de clignotement).
+	/// </summary>
+	private Bitmap Figer()
+	{
+		Bitmap img = Snap(zone);
+		RetirerCouvercle();
+		couvercle = new Voile();
+		couvercle.Bounds = new Rectangle(0, 0, zone.ClientSize.Width, zone.ClientSize.Height);
+		couvercle.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom;
+		couvercle.Peindre = delegate(Graphics g)
+		{
+			g.DrawImageUnscaled(img, 0, 0);
+		};
+		zone.Controls.Add(couvercle);
+		couvercle.BringToFront();
+		couvercle.Update();
+		return img;
+	}
+
+	private Voile couvercle;
+
+	private void RetirerCouvercle()
+	{
+		if (couvercle != null)
+		{
+			Voile v = couvercle;
+			couvercle = null;
+			zone.Controls.Remove(v);
+			v.Dispose();
+		}
+	}
+
+	/// <summary>Capture la zone sans le voile qui la recouvre (la page suivante, encore cachée).</summary>
+	private Bitmap SnapSous(Control sauf)
+	{
+		Bitmap bitmap = new Bitmap(Math.Max(1, zone.Width), Math.Max(1, zone.Height), PixelFormat.Format32bppPArgb);
+		using (Graphics g = Graphics.FromImage(bitmap))
+		{
+			g.Clear(zone.BackColor);
+		}
+		for (int k = zone.Controls.Count - 1; k >= 0; k--)
+		{
+			Control c = zone.Controls[k];
+			if (c != sauf && c.Visible && c.Width > 0 && c.Height > 0)
+			{
+				c.DrawToBitmap(bitmap, c.Bounds);
+			}
+		}
+		return bitmap;
+	}
+
 	private void Transition(Bitmap avant, StyleTrans style)
 	{
 		Bitmap apres = null;
@@ -3884,8 +3938,7 @@ internal partial class Fenetre : Form
 		try
 		{
 			zone.PerformLayout();
-			zone.Update();
-			apres = Snap(zone);
+			apres = ((couvercle != null) ? SnapSous(couvercle) : Snap(zone));
 		}
 		catch
 		{
@@ -3894,6 +3947,7 @@ internal partial class Fenetre : Form
 		StatSnap = stopwatch.ElapsedMilliseconds;
 		if (apres == null || avant.Size != apres.Size)
 		{
+			RetirerCouvercle();
 			avant.Dispose();
 			if (apres != null)
 			{
@@ -3903,8 +3957,12 @@ internal partial class Fenetre : Form
 		}
 		enTransition = true;
 		double vp = 0.0;
-		Voile vo = new Voile();
-		vo.Dock = DockStyle.Fill;
+		Voile vo = couvercle ?? new Voile();
+		couvercle = null;
+		if (vo.Parent == null)
+		{
+			vo.Dock = DockStyle.Fill;
+		}
 		vo.Peindre = delegate(Graphics g)
 		{
 			int width = apres.Width;
@@ -3915,8 +3973,12 @@ internal partial class Fenetre : Form
 				noel.PeindreNeige(g, width, height, (neigeTrans == 2) ? Math.Min(1.0, vp * 1.5) : (1.0 - vp));
 			}
 		};
-		zone.Controls.Add(vo);
+		if (vo.Parent == null)
+		{
+			zone.Controls.Add(vo);
+		}
 		vo.BringToFront();
+		vo.Invalidate();
 		vo.Update();
 		long derT = 0L;
 		Stopwatch swN = Stopwatch.StartNew();
@@ -4443,7 +4505,7 @@ internal partial class Fenetre : Form
 			try
 			{
 				SuspendreVideos(s: true);
-				bitmap = Snap(zone);
+				bitmap = Figer();
 			}
 			catch
 			{
@@ -4489,6 +4551,7 @@ internal partial class Fenetre : Form
 		{
 			Transition(bitmap, ChoisirStyle(ancienne, v));
 		}
+		RetirerCouvercle();
 		SuspendreVideos(s: false);
 		if (noel != null)
 		{
@@ -11182,6 +11245,7 @@ internal partial class Fenetre : Form
 	/// <summary>Outil de développement : ouvre directement une page (« /apercu biblio », « /apercu projet parisview »).</summary>
 	public void Apercu(string vue, string arg)
 	{
+		ForceAnim = Environment.GetEnvironmentVariable("TPS_ANIM") == "1";
 		Show();
 		Application.DoEvents();
 		for (int i = 0; i < 80 && cat == null; i++)
@@ -11226,6 +11290,18 @@ internal partial class Fenetre : Form
 				jeuId = arg;
 			}
 			ShowVue(Vue.Biblio);
+			break;
+		case "params":
+			BeginInvoke((MethodInvoker)delegate
+			{
+				Parametres();
+			});
+			break;
+		case "boutique":
+			BeginInvoke((MethodInvoker)delegate
+			{
+				Boutique();
+			});
 			break;
 		case "profil":
 			BeginInvoke((MethodInvoker)delegate

@@ -193,7 +193,7 @@ internal partial class Fenetre
 			try
 			{
 				SuspendreVideos(s: true);
-				bitmap = Snap(zone);
+				bitmap = Figer();
 			}
 			catch
 			{
@@ -206,6 +206,7 @@ internal partial class Fenetre
 		{
 			Transition(bitmap, versMods ? StyleTrans.Pousse : StyleTrans.Retour);
 		}
+		RetirerCouvercle();
 		SuspendreVideos(s: false);
 	}
 

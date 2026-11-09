@@ -89,7 +89,7 @@ internal class FenParametres : Form, IPage
 		PleinEcran = pleinActuel;
 		Text = "Paramètres";
 		Size hote = Integre.Hote;
-		CW = Math.Min(hote.Width, Zx.P(1140));
+		CW = Math.Max(Math.Min(hote.Width, Zx.P(900)), Math.Min(hote.Width - Zx.P(48), Zx.P(2200)));
 		X0 = (hote.Width - CW) / 2;
 		base.ClientSize = hote;
 		base.FormBorderStyle = FormBorderStyle.None;
