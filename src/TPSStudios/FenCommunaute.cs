@@ -174,7 +174,7 @@ internal class FenCommunaute : Form
 		{
 			Plein = false,
 			Size = new Size(Zx.P(112), Zx.P(38)),
-			Location = new Point(Zx.P(254), Zx.P(16))
+			Location = new Point(Zx.P(136), Zx.P(16))
 		};
 		string[] cles = FenOptionsLanceur.Cles;
 		foreach (string key in cles)
@@ -184,7 +184,7 @@ internal class FenCommunaute : Form
 		Bouton bouton7 = new Bouton("Options…");
 		bouton7.Plein = false;
 		bouton7.Size = new Size(Zx.P(104), Zx.P(38));
-		bouton7.Location = new Point(Zx.P(374), Zx.P(16));
+		bouton7.Location = new Point(Zx.P(256), Zx.P(16));
 		bouton7.Click += delegate
 		{
 			using FenOptionsLanceur fenOptionsLanceur = new FenOptionsLanceur(opts);
@@ -209,7 +209,6 @@ internal class FenCommunaute : Form
 		bouton4.Location = new Point(base.ClientSize.Width - Zx.P(28) - Zx.P(106), Zx.P(16));
 		panel.Controls.Add(bouton3);
 		panel.Controls.Add(bouton4);
-		panel.Controls.Add(bouton5);
 		panel.Controls.Add(bouton6);
 		panel.Controls.Add(bouton7);
 	}

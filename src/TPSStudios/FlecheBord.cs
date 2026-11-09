@@ -10,6 +10,14 @@ internal class FlecheBord : Control
 {
 	public bool Droite = true;
 
+	/// <summary>Texte affiché à côté de la flèche (vide : flèche seule).</summary>
+	public string Libelle = "";
+
+	/// <summary>Largeur de la pastille de la flèche ; le reste de la largeur sert au texte.</summary>
+	public int LargeurFleche = Zx.P(30);
+
+	public static readonly Font PoliceLibelle = new Font("Segoe UI Semibold", Zx.P(11f));
+
 	private bool survol;
 
 	public FlecheBord()
@@ -37,8 +45,14 @@ internal class FlecheBord : Control
 	{
 		Graphics graphics = e.Graphics;
 		graphics.SmoothingMode = SmoothingMode.AntiAlias;
-		Rectangle r = new Rectangle(0, 0, base.Width - 1, base.Height - 1);
-		using (GraphicsPath path = Bouton.Rond(r, Math.Min(base.Width / 2, Zx.P(14))))
+		int lf = Math.Min(LargeurFleche, base.Width);
+		Rectangle r = new Rectangle(Droite ? (base.Width - lf) : 0, 0, lf - 1, base.Height - 1);
+		if (lf < base.Width && !string.IsNullOrEmpty(Libelle))
+		{
+			Rectangle rt = (Droite ? new Rectangle(0, 0, r.X - Zx.P(10), base.Height) : new Rectangle(r.Right + Zx.P(10), 0, base.Width - r.Right - Zx.P(10), base.Height));
+			Lang.DrawText(graphics, Libelle, PoliceLibelle, rt, Color.FromArgb(survol ? 255 : 205, 255, 255, 255), TextFormatFlags.VerticalCenter | TextFormatFlags.SingleLine | TextFormatFlags.NoPadding | (Droite ? TextFormatFlags.Right : TextFormatFlags.Left));
+		}
+		using (GraphicsPath path = Bouton.Rond(r, Math.Min(lf / 2, Zx.P(14))))
 		{
 			using (SolidBrush brush = new SolidBrush(Color.FromArgb(survol ? 90 : 38, 255, 255, 255)))
 			{
@@ -47,7 +61,7 @@ internal class FlecheBord : Control
 			using Pen pen = new Pen(Color.FromArgb(survol ? 120 : 60, 255, 255, 255));
 			graphics.DrawPath(pen, path);
 		}
-		int num = base.Width / 2;
+		int num = r.X + r.Width / 2;
 		int num2 = base.Height / 2;
 		int num3 = Zx.P(5);
 		int num4 = Zx.P(9);
