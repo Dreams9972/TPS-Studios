@@ -3798,7 +3798,7 @@ internal partial class Fenetre : Form
 
 	private void Transition(Bitmap avant)
 	{
-		Transition(avant, StyleTrans.Diagonale);
+		Transition(avant, StyleTrans.Monte);
 	}
 
 	private void Transition(Bitmap avant, StyleTrans style)

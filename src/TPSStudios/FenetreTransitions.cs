@@ -18,7 +18,9 @@ internal partial class Fenetre
 		Retour,
 		Zoom,
 		Cercle,
-		Volet
+		Volet,
+		Monte,
+		Descend
 	}
 
 	private StyleTrans dernierStyle = StyleTrans.Diagonale;
@@ -27,37 +29,11 @@ internal partial class Fenetre
 
 	private Point centreTrans = Point.Empty;
 
-	/// <summary>Plus on « entre » (Accueil → Jeux → Bibliothèque → page), plus le rang est haut.</summary>
+	/// <summary>Une seule transition entre les menus : la page monte quand on avance, descend quand on revient.</summary>
 	private StyleTrans ChoisirStyle(Vue de, Vue vers)
 	{
-		StyleTrans[] array = (((int)vers >= (int)de) ? new StyleTrans[4]
-		{
-			StyleTrans.Pousse,
-			StyleTrans.Zoom,
-			StyleTrans.Cercle,
-			StyleTrans.Diagonale
-		} : new StyleTrans[3]
-		{
-			StyleTrans.Retour,
-			StyleTrans.Volet,
-			StyleTrans.Zoom
-		});
-		StyleTrans styleTrans;
-		do
-		{
-			styleTrans = array[hasardTrans.Next(array.Length)];
-		}
-		while (styleTrans == dernierStyle && array.Length > 1);
-		dernierStyle = styleTrans;
-		try
-		{
-			centreTrans = zone.PointToClient(Cursor.Position);
-		}
-		catch
-		{
-			centreTrans = Point.Empty;
-		}
-		return styleTrans;
+		dernierStyle = (((int)vers >= (int)de) ? StyleTrans.Monte : StyleTrans.Descend);
+		return dernierStyle;
 	}
 
 	private void PeindreTrans(Graphics g, StyleTrans style, Bitmap avant, Bitmap apres, double vp)
@@ -68,6 +44,24 @@ internal partial class Fenetre
 		g.PixelOffsetMode = PixelOffsetMode.HighSpeed;
 		switch (style)
 		{
+		case StyleTrans.Monte:
+		{
+			int num20 = (int)Math.Round((double)height * (1.0 - vp));
+			g.DrawImageUnscaled(avant, 0, -(int)Math.Round((double)height * 0.3 * vp));
+			Assombrir(g, new Rectangle(0, 0, width, height), 0.55 * vp);
+			OmbreV(g, num20, width);
+			g.DrawImageUnscaled(apres, 0, num20);
+			break;
+		}
+		case StyleTrans.Descend:
+		{
+			int num21 = (int)Math.Round((double)height * vp);
+			g.DrawImageUnscaled(apres, 0, -(int)Math.Round((double)height * 0.3 * (1.0 - vp)));
+			Assombrir(g, new Rectangle(0, 0, width, height), 0.55 * (1.0 - vp));
+			OmbreV(g, num21, width);
+			g.DrawImageUnscaled(avant, 0, num21);
+			break;
+		}
 		case StyleTrans.Pousse:
 		{
 			int num11 = (int)Math.Round((double)width * (1.0 - vp));
@@ -191,6 +185,17 @@ internal partial class Fenetre
 		{
 			using SolidBrush brush = new SolidBrush(Color.FromArgb((int)(255.0 * Math.Min(1.0, a)), 2, 3, 10));
 			g.FillRectangle(brush, r);
+		}
+	}
+
+	/// <summary>Ombre au-dessus du bord haut de la page qui glisse.</summary>
+	private static void OmbreV(Graphics g, int y, int w)
+	{
+		int num = Zx.P(30);
+		if (y > 0)
+		{
+			using LinearGradientBrush brush = new LinearGradientBrush(new Rectangle(0, y - num, w, num + 1), Color.FromArgb(0, 0, 0, 0), Color.FromArgb(140, 0, 0, 0), 90f);
+			g.FillRectangle(brush, 0, y - num, w, num);
 		}
 	}
 
