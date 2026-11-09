@@ -478,7 +478,7 @@ internal class FenBanniere : Form
 			}
 		};
 		tAnimB = new Timer();
-		tAnimB.Interval = 40;
+		tAnimB.Interval = 16;
 		tAnimB.Tick += delegate
 		{
 			if (m.Type == "anim")

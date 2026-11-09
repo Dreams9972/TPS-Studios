@@ -53,6 +53,9 @@ internal partial class Fenetre : Form
 
 		public string Libelle = "";
 
+		/// <summary>Adresse ouverte par un clic sur la case (articles du site web).</summary>
+		public string Lien = "";
+
 		public Bitmap Cache;
 
 		public Size CacheTaille;
@@ -638,7 +641,7 @@ internal partial class Fenetre : Form
 
 	private List<KeyValuePair<Rectangle, Annonce>> rAnnonces = new List<KeyValuePair<Rectangle, Annonce>>();
 
-	private static readonly string[] NouveautesLanceur = new string[4] { "Pause sur les bandes-annonces", "Boutons plus soignés", "Retour sur la même page après un changement de langue", "« Les Mods » et « Mes Cartes » dans la bibliothèque" };
+	private static readonly string[] NouveautesLanceur = new string[4] { "Animations fluides à 60 images/s et plus", "Grande case « Actualités » reliée au site", "Statut Discord avec le jeu et la carte", "Admin des mods rangé en onglets, sans défilement" };
 
 	private static readonly Font fAnT2 = new Font("Segoe UI Semibold", Zx.P(11f));
 
@@ -743,7 +746,8 @@ internal partial class Fenetre : Form
 			return;
 		}
 		avis.Poser(t, c);
-		avis.Location = new Point(Math.Max(0, (base.ClientSize.Width - avis.Width) / 2), base.ClientSize.Height - avis.Height - Zx.P(40));
+		int lv = Lang.MeasureText("Lanceur v" + Config.VERSION, fVersion).Width;
+		avis.Location = new Point(Math.Max(0, base.ClientSize.Width - Zx.P(20) - lv - Zx.P(14) - avis.Width), base.ClientSize.Height - avis.Height - Zx.P(6));
 		avis.Visible = true;
 		avis.BringToFront();
 		if (tAvis == null)
@@ -1395,7 +1399,7 @@ internal partial class Fenetre : Form
 		bulle.SetToolTip(nJeux, "Choisir un jeu (Ctrl+2)");
 		bulle.SetToolTip(nBiblio, "Bibliothèque (Ctrl+3) · recherche : Ctrl+F");
 		animation = new System.Windows.Forms.Timer();
-		animation.Interval = 16;
+		animation.Interval = Math.Max(8, Math.Min(16, PasImage()));
 		animation.Tick += delegate
 		{
 			try
@@ -1434,7 +1438,7 @@ internal partial class Fenetre : Form
 				{
 				}
 			}
-			if (jeuEnCours != null && (DateTime.Now - debutJeu).TotalSeconds > (double)Zx.P(30) && !((jeuWebProfil != null) ? FenetreJeuWeb() : (JeuxWebParId.ContainsKey(jeuEnCours.Id ?? "") ? ((DateTime.Now - debutJeu).TotalMinutes < (double)Zx.P(120)) : Omsi.JeuLance())))
+			if (jeuEnCours != null && (DateTime.Now - debutJeu).TotalSeconds > 30.0 && !((jeuWebProfil != null) ? FenetreJeuWeb() : (JeuxWebParId.ContainsKey(jeuEnCours.Id ?? "") ? ((DateTime.Now - debutJeu).TotalMinutes < 120.0) : Omsi.JeuLance())))
 			{
 				jeuEnCours = null;
 				jeuWebProfil = null;
@@ -3434,7 +3438,7 @@ internal partial class Fenetre : Form
 			{
 				num = 60;
 			}
-			pasImage = Math.Max(6, (int)Math.Round(1000.0 / (double)Math.Min(num, 144)));
+			pasImage = Math.Max(6, (int)Math.Floor(1000.0 / (double)Math.Min(num, 144)));
 		}
 		return pasImage;
 	}
@@ -4847,12 +4851,13 @@ internal partial class Fenetre : Form
 		dernierTick = elapsedMilliseconds;
 		PanelFond panelFond = PanelVisible();
 		bool flag = (panelFond == pAccueil || (panelFond == pJeux && themeJeux != null)) && couches.Count == 0 && !enTransition && fond.Pret && !ModeCapture && base.Visible && base.WindowState != FormWindowState.Minimized && (Form.ActiveForm == this || themeNoel) && (AnimationActive() || themeNoel);
-		if (flag != periodeHaute)
+		bool haute = !ModeCapture && base.Visible && base.WindowState != FormWindowState.Minimized;
+		if (haute != periodeHaute)
 		{
-			periodeHaute = flag;
+			periodeHaute = haute;
 			try
 			{
-				if (flag)
+				if (haute)
 				{
 					Winmm.timeBeginPeriod(1u);
 				}
@@ -5680,7 +5685,7 @@ internal partial class Fenetre : Form
 		string text3 = (flag ? text : (DiscordPresence.EnMarche ? (text2.StartsWith("Discord non détecté") ? "ouvrez Discord" : "connexion…") : (text2.StartsWith("Identifiant") ? "identifiant refusé" : "désactivé")));
 		Color color = (flag ? Color.FromArgb(88, 101, 242) : C.Gris);
 		int num2 = rectangle.Right + Zx.P(12);
-		int width = Math.Max(60, w - 18 - 46 - 10 - num2);
+		int width = Math.Max(Zx.P(60), w - Zx.P(18) - Zx.P(46) - Zx.P(16) - num2);
 		Rectangle r3 = new Rectangle(num2, num + Zx.P(16), width, Zx.P(28));
 		using (GraphicsPath path2 = Bouton.Rond(r3, Zx.P(14)))
 		{
@@ -6115,10 +6120,18 @@ internal partial class Fenetre : Form
 		{
 			return;
 		}
-		Lang.DrawText(g, "NOUVEAUTÉS", fStat, new Point(rCarte.X + Zx.P(2), rCarte.Y - Zx.P(26)), C.Gris);
+		Lang.DrawText(g, "ACTUALITÉS", fStat, new Point(rCarte.X + Zx.P(2), rCarte.Y - Zx.P(26)), C.Gris);
 		using (SolidBrush brush = new SolidBrush(C.Orange))
 		{
-			g.FillEllipse(brush, rCarte.X + Zx.P(88), rCarte.Y - Zx.P(20), Zx.P(7), Zx.P(7));
+			g.FillEllipse(brush, rCarte.X + Zx.P(2) + Lang.MeasureText("ACTUALITÉS", fStat).Width + Zx.P(6), rCarte.Y - Zx.P(20), Zx.P(7), Zx.P(7));
+		}
+		rSiteLien = Rectangle.Empty;
+		if (SiteUrl().Length > 0)
+		{
+			string ts = "Voir le site  ↗";
+			Size ss = Lang.MeasureText(ts, fStat);
+			rSiteLien = new Rectangle(rCarte.Right - ss.Width - Zx.P(2), rCarte.Y - Zx.P(28), ss.Width, ss.Height + Zx.P(4));
+			Lang.DrawText(g, ts, fStat, new Point(rSiteLien.X, rCarte.Y - Zx.P(26)), C.Orange);
 		}
 		if (diapos.Count == 0)
 		{
@@ -6578,6 +6591,10 @@ internal partial class Fenetre : Form
 							{
 								diapos[dIdx].Ouvrir();
 							}
+							else if (rCarte.Contains(e.Location) && SiteUrl().Length > 0)
+							{
+								OuvrirSite(SiteUrl());
+							}
 						}
 					}
 				}
@@ -6651,6 +6668,38 @@ internal partial class Fenetre : Form
 		}
 		return result;
 	}
+
+	/// <summary>Adresse du site web TPS Groupe (Admin › Accueil › Site web), ou vide.</summary>
+	private string SiteUrl()
+	{
+		string s = Opt("site").Trim();
+		if (Uri.TryCreate(s, UriKind.Absolute, out var u) && (u.Scheme == Uri.UriSchemeHttps || u.Scheme == Uri.UriSchemeHttp))
+		{
+			return u.AbsoluteUri;
+		}
+		return "";
+	}
+
+	private void OuvrirSite(string url)
+	{
+		if (string.IsNullOrEmpty(url))
+		{
+			return;
+		}
+		try
+		{
+			Process.Start(new ProcessStartInfo(url)
+			{
+				UseShellExecute = true
+			});
+		}
+		catch (Exception e)
+		{
+			Toast("Impossible d'ouvrir le site : " + e.Message, C.Rouge, 6000);
+		}
+	}
+
+	private Rectangle rSiteLien;
 
 	private Diapo NouvelleDiapo(string tag, Color col, string titre, string sous, string detail, Image img, string action, Action ouvrir)
 	{
@@ -6819,6 +6868,39 @@ internal partial class Fenetre : Form
 					}
 				}));
 			}
+		}
+		int pos = 0;
+		string site = SiteUrl();
+		SiteWeb.Rafraichir(Opt("site_flux"), site, delegate
+		{
+			Sur(delegate
+			{
+				ConstruireDiapos();
+				pAccueil.Invalidate();
+			});
+		});
+		foreach (ArticleSite a in SiteWeb.Articles)
+		{
+			string lien = ((a.Lien.Length > 0) ? a.Lien : site);
+			Diapo da = NouvelleDiapo("Actualité", C.Orange, a.Titre, a.Resume, a.Date.HasValue ? ("Publié le " + a.Date.Value.ToString("dd/MM/yyyy")) : "", a.Image, "Lire sur le site", delegate
+			{
+				OuvrirSite(lien);
+			});
+			da.Lien = lien;
+			list.Insert(pos++, da);
+		}
+		foreach (Annonce an in annonces)
+		{
+			Projet pm = an.Mod;
+			Diapo di = NouvelleDiapo("Info", an.Couleur, an.Titre, an.Texte, "", null, (pm != null) ? "Voir la page" : ((site.Length > 0) ? "Voir le site" : ""), (pm != null) ? ((Action)delegate
+			{
+				Choisir(pm);
+				ShowVue(Vue.Projet);
+			}) : ((site.Length > 0) ? ((Action)delegate
+			{
+				OuvrirSite(site);
+			}) : null));
+			list.Insert(pos++, di);
 		}
 		if (list.Count == 0)
 		{
@@ -8042,9 +8124,9 @@ internal partial class Fenetre : Form
 		{
 			item2.Neige = ((noel != null && noel.NeigeTuiles) ? 1f : 0f);
 		}
+		MajInfos();
 		ConstruireDiapos();
 		DisposerAccueil();
-		MajInfos();
 	}
 
 	private void Quitter()
@@ -8158,21 +8240,22 @@ internal partial class Fenetre : Form
 		num11 = Math.Max(Zx.P(180), Math.Min(num11, width - num - num12));
 		if (list.Count >= 4 && num6 >= Zx.P(40))
 		{
-			rCarte = new Rectangle(num12, list[0].Y, num11, list[1].Bottom - list[0].Y);
 			int num30 = height - Zx.P(14) - Zx.P(98) - Zx.P(32);
 			int num31 = Math.Min(list[3].Y + Zx.P(98), num30) - list[2].Y;
-			rInfos = new Rectangle(num12, list[2].Y, num11, Math.Max(list[2].Height, num31));
+			int basCarte = list[2].Y + Math.Max(list[2].Height, num31);
+			rCarte = new Rectangle(num12, list[0].Y, num11, basCarte - list[0].Y);
+			rInfos = Rectangle.Empty;
 			int num32 = (int)((double)num11 * 0.82);
-			rPilule = new Rectangle(num12 + (num11 - num32) / 2, rInfos.Bottom + Zx.P(32), num32, Zx.P(44));
+			rPilule = new Rectangle(num12 + (num11 - num32) / 2, rCarte.Bottom + Zx.P(32), num32, Zx.P(44));
 		}
 		else
 		{
 			int num13 = Math.Min(num5, (int)((double)num11 * 0.42) + Zx.P(120));
-			rCarte = new Rectangle(num12, num3, num11, num13);
 			int num14 = num3 + num13 + Zx.P(46);
 			int num15 = Math.Min(num4 - num14, Zx.P(110));
-			rInfos = ((num15 >= Zx.P(84)) ? new Rectangle(num12, num14, num11, num15) : Rectangle.Empty);
-			rPilule = (rInfos.IsEmpty ? Rectangle.Empty : new Rectangle(rInfos.X, rInfos.Bottom + Zx.P(16), rInfos.Width, Zx.P(44)));
+			rCarte = new Rectangle(num12, num3, num11, num13 + ((num15 >= Zx.P(84)) ? (Zx.P(46) + num15) : 0));
+			rInfos = Rectangle.Empty;
+			rPilule = ((num15 >= Zx.P(84)) ? new Rectangle(rCarte.X, rCarte.Bottom + Zx.P(16), rCarte.Width, Zx.P(44)) : Rectangle.Empty);
 		}
 		rBandeau = new Rectangle(num9, num + Zx.P(202), num7, Zx.P(36));
 		rMajA = (MajAAfficher ? new Rectangle(num9, num + Zx.P(198), num7, Zx.P(48)) : Rectangle.Empty);
@@ -9157,7 +9240,11 @@ internal partial class Fenetre : Form
 			string text2 = ((actif != null && actif.Statut.Length > 0) ? actif.Statut : "TPS Groupe");
 			if (jeuEnCours != null)
 			{
-				DiscordPresence.Definir("Joue à " + jeuEnCours.Nom, text2, debutJeu);
+				string jeu = JeuDe(jeuEnCours);
+				bool estJeu = jeuEnCours.Id == jeu || JeuxWebParId.ContainsKey(jeuEnCours.Id ?? "");
+				string nomJeu = (estJeu ? jeuEnCours.Nom : NomJeu(jeu));
+				string detail = (estJeu ? text2 : (((jeuEnCours.Categorie == "cartes") ? "Carte : " : "Mod : ") + jeuEnCours.Nom));
+				DiscordPresence.Definir("Joue à " + nomJeu, detail, debutJeu);
 			}
 			else
 			{
@@ -11351,6 +11438,13 @@ internal partial class Fenetre : Form
 				Parametres();
 			});
 			break;
+		case "admin":
+			BeginInvoke((MethodInvoker)delegate
+			{
+				using FenAdmin f = new FenAdmin();
+				f.Afficher(this);
+			});
+			break;
 		case "boutique":
 			BeginInvoke((MethodInvoker)delegate
 			{
@@ -11364,6 +11458,10 @@ internal partial class Fenetre : Form
 				Profil(nouveau: false, result);
 			});
 			break;
+		}
+		if (Environment.GetEnvironmentVariable("TPS_DEMO_TOAST") == "1")
+		{
+			Toast("Le lanceur est à jour (v" + Config.VERSION + ").", C.Vert, 60000);
 		}
 		if (Environment.GetEnvironmentVariable("TPS_DEMO_DISCORD") == "1")
 		{

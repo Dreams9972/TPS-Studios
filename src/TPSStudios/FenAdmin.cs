@@ -421,14 +421,29 @@ internal class FenAdmin : Form, IPage
 		edition.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
 		base.Controls.Add(edition);
 		Theme.Sombre(edition);
-		int num = Math.Min(edition.ClientSize.Width - SystemInformation.VerticalScrollBarWidth - Zx.P(4), Zx.P(2000));
+		int largeurEd = Math.Min(edition.ClientSize.Width - SystemInformation.VerticalScrollBarWidth - Zx.P(8), Zx.P(2400));
+		colonnesEd = ((largeurEd >= Zx.P(1000)) ? 2 : 1);
+		int num = ((colonnesEd == 2) ? ((largeurEd - Zx.P(16)) / 2) : largeurEd);
+		largeurColEd = num;
 		int num2 = 0;
+		sgSousOnglet = new Segments();
+		sgSousOnglet.Items = new string[3] { "Général", "Options et tarif", "Médias et contenu" };
+		sgSousOnglet.Etire = true;
+		sgSousOnglet.Location = new Point(Zx.P(4), 0);
+		sgSousOnglet.Width = Math.Min(largeurEd, Zx.P(620));
+		sgSousOnglet.Changed += delegate
+		{
+			sousOnglet = Math.Max(0, sgSousOnglet.Index);
+			OrganiserBlocs();
+		};
+		edition.Controls.Add(sgSousOnglet);
 		lInfo = new Label();
 		lInfo.Font = new Font("Segoe UI", Zx.P(9f));
 		lInfo.ForeColor = C.Gris;
 		lInfo.BackColor = C.Fond;
-		lInfo.Location = new Point(Zx.P(4), num2 + Zx.P(2));
-		lInfo.Size = new Size(num, Zx.P(20));
+		lInfo.Location = new Point(sgSousOnglet.Right + Zx.P(20), Zx.P(9));
+		lInfo.Size = new Size(Math.Max(Zx.P(200), largeurEd - sgSousOnglet.Width - Zx.P(24)), Zx.P(20));
+		lInfo.AutoEllipsis = true;
 		edition.Controls.Add(lInfo);
 		num2 += Zx.P(28);
 		cdIdentite = Bloc("Identité", ref num2, num, Zx.P(44) + 3 * Zx.P(70) + Zx.P(6));
@@ -679,11 +694,11 @@ internal class FenAdmin : Form, IPage
 			Appliquer();
 		};
 		cdOpt.Controls.Add(cNouv);
-		cdDlc = Bloc("DLC Steam nécessaires", ref num2, num, Zx.P(44) + Zx.P(22) + Zx.P(170) + Zx.P(14) + Zx.P(38) + Zx.P(12) + Zx.P(38) + Zx.P(30));
+		cdDlc = Bloc("DLC Steam nécessaires", ref num2, num, Zx.P(44) + Zx.P(22) + Zx.P(120) + Zx.P(14) + Zx.P(38) + Zx.P(12) + Zx.P(38) + Zx.P(30));
 		Etiq(cdDlc, "Affichés sur la page du mod ; un clic ouvre le DLC dans Steam.  ★ = obligatoire pour jouer", Zx.P(24), Zx.P(44));
 		lDlc = new ListBox();
 		lDlc.Location = new Point(Zx.P(24), Zx.P(66));
-		lDlc.Size = new Size(num - Zx.P(48), Zx.P(170));
+		lDlc.Size = new Size(num - Zx.P(48), Zx.P(120));
 		lDlc.BorderStyle = BorderStyle.None;
 		lDlc.BackColor = C.Fond;
 		lDlc.ForeColor = C.Texte;
@@ -692,13 +707,13 @@ internal class FenAdmin : Form, IPage
 		cdDlc.Controls.Add(lDlc);
 		Theme.Sombre(lDlc);
 		tDlcId = new Champ(multi: false, Zx.P(36));
-		tDlcId.Location = new Point(Zx.P(24), Zx.P(250));
+		tDlcId.Location = new Point(Zx.P(24), Zx.P(200));
 		tDlcId.Width = Zx.P(170);
 		tDlcId.Indice = "AppID Steam";
 		tDlcId.MaxLength = 10;
 		cdDlc.Controls.Add(tDlcId);
 		tDlcNom = new Champ(multi: false, Zx.P(36));
-		tDlcNom.Location = new Point(Zx.P(206), Zx.P(250));
+		tDlcNom.Location = new Point(Zx.P(206), Zx.P(200));
 		tDlcNom.Width = num - Zx.P(48) - Zx.P(182);
 		tDlcNom.Indice = "nom (vide = repris de Steam)";
 		tDlcNom.MaxLength = 90;
@@ -706,14 +721,14 @@ internal class FenAdmin : Form, IPage
 		sgDlc = new Segments();
 		sgDlc.Items = new string[2] { "★ Obligatoire", "Facultatif" };
 		sgDlc.Etire = true;
-		sgDlc.Location = new Point(Zx.P(24), Zx.P(300));
+		sgDlc.Location = new Point(Zx.P(24), Zx.P(250));
 		sgDlc.Width = Zx.P(300);
 		cdDlc.Controls.Add(sgDlc);
 		Bouton bouton7 = new Bouton("Ajouter / modifier")
 		{
 			Plein = false,
 			Size = new Size(Zx.P(170), Zx.P(38)),
-			Location = new Point(num - Zx.P(24) - Zx.P(130) - Zx.P(10) - Zx.P(170), Zx.P(299))
+			Location = new Point(num - Zx.P(24) - Zx.P(130) - Zx.P(10) - Zx.P(170), Zx.P(249))
 		};
 		cdDlc.Controls.Add(bouton7);
 		Bouton bouton8 = new Bouton("Retirer")
@@ -721,14 +736,14 @@ internal class FenAdmin : Form, IPage
 			Plein = false,
 			Danger = true,
 			Size = new Size(Zx.P(130), Zx.P(38)),
-			Location = new Point(num - Zx.P(24) - Zx.P(130), Zx.P(299))
+			Location = new Point(num - Zx.P(24) - Zx.P(130), Zx.P(249))
 		};
 		cdDlc.Controls.Add(bouton8);
 		lDlcEtat = new Label();
 		lDlcEtat.Font = new Font("Segoe UI", Zx.P(9f));
 		lDlcEtat.ForeColor = C.Gris;
 		lDlcEtat.BackColor = C.Carte;
-		lDlcEtat.Location = new Point(Zx.P(24), Zx.P(344));
+		lDlcEtat.Location = new Point(Zx.P(24), Zx.P(294));
 		lDlcEtat.Size = new Size(num - Zx.P(48), Zx.P(20));
 		cdDlc.Controls.Add(lDlcEtat);
 		lDlc.SelectedIndexChanged += delegate
@@ -1022,6 +1037,7 @@ internal class FenAdmin : Form, IPage
 			Appliquer();
 		};
 		cdContenu.Controls.Add(tConsigne);
+		OrganiserBlocs();
 		bool demarre = false;
 		base.VisibleChanged += delegate
 		{
@@ -1046,6 +1062,66 @@ internal class FenAdmin : Form, IPage
 		bouton.Click += h;
 		base.Controls.Add(bouton);
 		return bouton;
+	}
+
+	private Segments sgSousOnglet;
+
+	private int sousOnglet;
+
+	private int colonnesEd = 2;
+
+	private int largeurColEd;
+
+	/// <summary>
+	/// Range les sections de l'éditeur de mod : trois onglets (Général, Options et tarif,
+	/// Médias et contenu), chacun sur deux colonnes, pour tout voir sans défiler.
+	/// </summary>
+	private void OrganiserBlocs()
+	{
+		if (cdContenu == null)
+		{
+			return;
+		}
+		Cadre[][][] groupes = new Cadre[3][][]
+		{
+			new Cadre[2][]
+			{
+				new Cadre[2] { cdIdentite, cdClass },
+				new Cadre[1] { cdPub }
+			},
+			new Cadre[2][]
+			{
+				new Cadre[1] { cdOpt },
+				new Cadre[2] { cdTarif, cdDlc }
+			},
+			new Cadre[2][]
+			{
+				new Cadre[2] { cdVisuel, cdGal },
+				new Cadre[1] { cdContenu }
+			}
+		};
+		edition.SuspendLayout();
+		Point defil = edition.AutoScrollPosition;
+		int y0 = Zx.P(52) + defil.Y;
+		for (int g = 0; g < groupes.Length; g++)
+		{
+			bool vis = g == sousOnglet;
+			int yUnique = y0;
+			for (int c = 0; c < groupes[g].Length; c++)
+			{
+				int x = Zx.P(4) + defil.X + ((colonnesEd == 2) ? (c * (largeurColEd + Zx.P(16))) : 0);
+				int y = ((colonnesEd == 2) ? y0 : yUnique);
+				foreach (Cadre cadre in groupes[g][c])
+				{
+					cadre.Location = new Point(x, y);
+					cadre.Visible = vis;
+					y += cadre.Height + Zx.P(16);
+				}
+				yUnique = y;
+			}
+		}
+		edition.ResumeLayout();
+		edition.Invalidate(invalidateChildren: true);
 	}
 
 	private Cadre Bloc(string titre, ref int y, int cw, int h)
@@ -1264,16 +1340,11 @@ internal class FenAdmin : Form, IPage
 		{
 			item.Visible = flag;
 		}
-		int num = (flag ? 420 : 112);
-		int num2 = num - cdTarif.Height;
-		if (num2 != 0)
+		int num = (flag ? Zx.P(420) : Zx.P(112));
+		if (num != cdTarif.Height)
 		{
 			cdTarif.Height = num;
-			Cadre[] array = new Cadre[3] { cdVisuel, cdGal, cdContenu };
-			for (int i = 0; i < array.Length; i++)
-			{
-				array[i].Top += num2;
-			}
+			OrganiserBlocs();
 		}
 	}
 
@@ -2343,8 +2414,12 @@ internal class FenAdmin : Form, IPage
 		pageReglages.Section("Bandeau d'alerte");
 		pageReglages.Texte("alerte", "Message en haut de l'accueil (vide = aucun bandeau)", "ex. Maintenance du serveur ce soir de 22 h à 23 h", 140);
 		pageReglages.Choix("alerte_type", "Couleur du bandeau", new string[3] { "Information", "Avertissement", "Important" }, new string[3] { "information", "avertissement", "important" });
+		pageReglages.Section("Site web");
+		pageReglages.Note("La grande case « Actualités » de l'accueil affiche les articles du site ; un clic ouvre le site.");
+		pageReglages.Texte("site", "Adresse du site TPS Groupe", "https://…", 300);
+		pageReglages.Texte("site_flux", "Flux des actualités du site (RSS, Atom ou JSON)", "ex. https://…/feed.xml ou https://…/actualites.json", 300);
 		pageReglages.Section("Annonces de l'équipe");
-		pageReglages.Note("Une annonce par ligne : « Titre | texte ». Elles s'affichent en premier dans « Informations ».");
+		pageReglages.Note("Une annonce par ligne : « Titre | texte ». Elles s'affichent dans la case « Actualités », après les articles du site.");
 		pageReglages.Texte("annonces", "Annonces", "Tournoi ParisView samedi | Rendez-vous sur le Discord à 20 h", 1500, multi: true, 160);
 		pageReglages.Section("Thèmes des fêtes");
 		pageReglages.Choix("themes", "Décors de l'accueil (Noël, Halloween, Carnaval…)", new string[2] { "Selon le calendrier", "Désactivés pour tous" }, new string[2] { "", "off" });

@@ -48,6 +48,9 @@ internal class VideoFond : Panel
 	/// <summary>Mise en pause demandée par le joueur (gardée tant que la vidéo ne change pas).</summary>
 	private bool enPause;
 
+	/// <summary>Rayon des coins : la vidéo est découpée à la forme du cadre arrondi de la page.</summary>
+	public int Arrondi = Zx.P(14);
+
 	/// <summary>Vrai quand la page qui contient la vidéo est à l'écran.</summary>
 	public Func<bool> Actif;
 
@@ -165,6 +168,15 @@ internal class VideoFond : Panel
 	protected override void OnResize(EventArgs e)
 	{
 		base.OnResize(e);
+		if (base.Width > 4 && base.Height > 4)
+		{
+			using (System.Drawing.Drawing2D.GraphicsPath path = Bouton.Rond(new Rectangle(0, 0, base.Width, base.Height), Arrondi))
+			{
+				Region old = base.Region;
+				base.Region = new Region(path);
+				old?.Dispose();
+			}
+		}
 		if (bSon != null)
 		{
 			bSon.Location = new Point(base.Width - bSon.Width - Zx.P(14), base.Height - bSon.Height - Zx.P(14));

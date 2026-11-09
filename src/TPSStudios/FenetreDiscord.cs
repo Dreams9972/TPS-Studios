@@ -50,9 +50,13 @@ internal partial class Fenetre
 			return;
 		}
 		tAnimDc = new System.Windows.Forms.Timer();
-		tAnimDc.Interval = 30;
+		tAnimDc.Interval = 16;
 		tAnimDc.Tick += delegate
 		{
+			if (!tAnimDc.Enabled)
+			{
+				return;
+			}
 			AnimerCompteDiscord();
 		};
 		if (ModeCapture)
@@ -143,15 +147,26 @@ internal partial class Fenetre
 		{
 			dcEnLigne = o;
 		}
+		if (tAnimDc != null && !tAnimDc.Enabled)
+		{
+			derDc = chronoDc.ElapsedMilliseconds;
+		}
 		tAnimDc?.Start();
 		InvaliderDiscord();
 	}
 
+	private readonly System.Diagnostics.Stopwatch chronoDc = System.Diagnostics.Stopwatch.StartNew();
+
+	private long derDc;
+
 	private void AnimerCompteDiscord()
 	{
 		bool flag = false;
-		affMembres = Rapprocher(affMembres, dcMembres, ref flag);
-		affEnLigne = Rapprocher(affEnLigne, Math.Max(0, dcEnLigne), ref flag);
+		long ms = chronoDc.ElapsedMilliseconds;
+		double k = Math.Max(0.2, Math.Min(4.0, (double)(ms - derDc) / 30.0));
+		derDc = ms;
+		affMembres = Rapprocher(affMembres, dcMembres, k, ref flag);
+		affEnLigne = Rapprocher(affEnLigne, Math.Max(0, dcEnLigne), k, ref flag);
 		DateTime now = DateTime.Now;
 		bool flag2 = (now - quandMembres).TotalSeconds < 4.0 || (now - quandEnLigne).TotalSeconds < 4.0;
 		if (!flag && !flag2)
@@ -161,7 +176,7 @@ internal partial class Fenetre
 		InvaliderDiscord();
 	}
 
-	private static double Rapprocher(double v, int cible, ref bool bouge)
+	private static double Rapprocher(double v, int cible, double k, ref bool bouge)
 	{
 		double num = (double)cible - v;
 		if (Math.Abs(num) < 0.5)
@@ -169,10 +184,10 @@ internal partial class Fenetre
 			return cible;
 		}
 		bouge = true;
-		double num2 = num * 0.14;
-		if (Math.Abs(num2) < 0.35)
+		double num2 = num * (1.0 - Math.Pow(0.86, k));
+		if (Math.Abs(num2) < 0.35 * k)
 		{
-			num2 = Math.Sign(num) * 0.35;
+			num2 = Math.Sign(num) * Math.Min(Math.Abs(num), 0.35 * k);
 		}
 		return v + num2;
 	}

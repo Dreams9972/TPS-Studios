@@ -161,7 +161,7 @@ internal class FenJeux : Form
 			ImporterImage();
 		};
 		base.Controls.Add(bouton3);
-		Lb("Photos : une adresse d'image par ligne (10 au maximum), ou ajoutez des fichiers depuis votre PC", num, Zx.P(440), num2, Zx.P(20), new Font("Segoe UI", Zx.P(9f)), C.Gris);
+		Lb("Photos : une adresse par ligne (10 au maximum), ou « Ajouter des photos… »", num, Zx.P(440), num2, Zx.P(20), new Font("Segoe UI", Zx.P(9f)), C.Gris);
 		tPhotos = new Champ(multi: true, Zx.P(96));
 		tPhotos.Location = new Point(num, Zx.P(462));
 		tPhotos.Width = num2;
@@ -222,7 +222,7 @@ internal class FenJeux : Form
 		int wm = (wd - Zx.P(10)) / 2;
 		tSortie = ChampL("Date de sortie", xd, Zx.P(580), wm, 40);
 		tGenres = ChampL("Genres", xd + wm + Zx.P(10), Zx.P(580), wm, 120);
-		Lb("Description (si pas de fiche Steam)", xd, Zx.P(642), wd, Zx.P(20), new Font("Segoe UI", Zx.P(9f)), C.Gris);
+		Lb("Description (remplace celle de Steam)", xd, Zx.P(642), wd, Zx.P(20), new Font("Segoe UI", Zx.P(9f)), C.Gris);
 		tDescJ = new Champ(multi: true, Zx.P(170));
 		tDescJ.Location = new Point(xd, Zx.P(664));
 		tDescJ.Width = wd;
