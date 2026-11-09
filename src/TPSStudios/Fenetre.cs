@@ -595,6 +595,8 @@ internal partial class Fenetre : Form
 
 	private static readonly Font fAnG2 = new Font("Segoe MDL2 Assets", Zx.P(15f));
 
+	private static readonly Font fAnG3 = new Font("Segoe MDL2 Assets", Zx.P(24f));
+
 	private static readonly Font fAnT = new Font("Segoe UI Semibold", Zx.P(9.5f));
 
 	private static readonly Font fAnX = new Font("Segoe UI", Zx.P(9f));
@@ -7422,20 +7424,28 @@ internal partial class Fenetre : Form
 					int num11 = j * rectangle2.Width - num10;
 					if (num11 < rectangle2.Width && num11 + rectangle2.Width > 0)
 					{
-						int x = num11 + Zx.P(70);
-						int width = rectangle2.Width - Zx.P(70) - Zx.P(16);
+						bool grande = rectangle2.Height >= Zx.P(200);
+						int x = num11 + (grande ? Zx.P(24) : Zx.P(70));
+						int width = rectangle2.Width - (grande ? Zx.P(48) : (Zx.P(70) + Zx.P(16)));
 						int height = Lang.MeasureText("Ag", fAnT2).Height;
 						int height2 = Lang.MeasureText("Ag", fAnX).Height;
-						int num12 = Math.Max(1, Math.Min(4, (rectangle2.Height - Zx.P(24) - height - Zx.P(6)) / Math.Max(1, height2)));
+						int num12 = Math.Max(1, Math.Min(grande ? 9 : 4, (rectangle2.Height - Zx.P(24) - height - Zx.P(6) - (grande ? Zx.P(80) : 0)) / Math.Max(1, height2)));
 						int num13 = Math.Min(num12 * height2, Lang.MeasureText(annonce.Texte, fAnX, new Size(width, Zx.P(400)), TextFormatFlags.TextBoxControl | TextFormatFlags.WordBreak | TextFormatFlags.NoPadding).Height);
 						int num14 = height + ((annonce.Texte.Length > 0) ? (Zx.P(6) + num13) : 0);
 						int num15 = Math.Max(Zx.P(10), (rectangle2.Height - num14) / 2);
 						Rectangle rectangle3 = new Rectangle(num11 + Zx.P(16), Math.Max(Zx.P(8), (rectangle2.Height - Zx.P(42)) / 2), Zx.P(42), Zx.P(42));
+						if (grande)
+						{
+							int num16 = Zx.P(64) + Zx.P(16) + num14;
+							int num17 = Math.Max(Zx.P(20), (rectangle2.Height - num16) / 2);
+							rectangle3 = new Rectangle(x, num17, Zx.P(64), Zx.P(64));
+							num15 = num17 + Zx.P(64) + Zx.P(16);
+						}
 						using (SolidBrush brush4 = new SolidBrush(Color.FromArgb(55, annonce.Couleur)))
 						{
 							g.FillEllipse(brush4, rectangle3);
 						}
-						Lang.DrawText(g, annonce.Glyphe, fAnG2, rectangle3, annonce.Couleur, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+						Lang.DrawText(g, annonce.Glyphe, grande ? fAnG3 : fAnG2, rectangle3, annonce.Couleur, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
 						Lang.DrawText(g, annonce.Titre, fAnT2, new Rectangle(x, num15, width, height), C.Texte, TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding);
 						if (annonce.Texte.Length > 0)
 						{
@@ -7941,8 +7951,11 @@ internal partial class Fenetre : Form
 		if (list.Count >= 4 && num6 >= Zx.P(40))
 		{
 			rCarte = new Rectangle(num12, list[0].Y, num11, list[1].Bottom - list[0].Y);
-			rInfos = new Rectangle(num12, list[2].Y, num11, list[2].Height);
-			rPilule = new Rectangle(num12, list[3].Y, num11, Zx.P(44));
+			int num30 = height - Zx.P(14) - Zx.P(98) - Zx.P(32);
+			int num31 = Math.Min(list[3].Y + Zx.P(98), num30) - list[2].Y;
+			rInfos = new Rectangle(num12, list[2].Y, num11, Math.Max(list[2].Height, num31));
+			int num32 = (int)((double)num11 * 0.82);
+			rPilule = new Rectangle(num12 + (num11 - num32) / 2, rInfos.Bottom + Zx.P(32), num32, Zx.P(44));
 		}
 		else
 		{
