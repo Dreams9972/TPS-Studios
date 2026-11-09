@@ -1736,7 +1736,7 @@ internal class FenAdmin : Form, IPage
 		int num = dlcEd.Count - count;
 		if (dlcEd.Count > 0)
 		{
-			tPrereq.Text = "OMSI 2 + " + count + " DLC obligatoire" + ((count > 1) ? "s" : "") + ((num > 0) ? (" (" + num + " facultatif" + ((num > 1) ? "s" : "") + ")") : "");
+			tPrereq.Text = "OMSI 2 + " + count + ((count > 1) ? " DLC obligatoires" : " DLC obligatoire") + ((num > 0) ? (" (" + num + ((num > 1) ? " facultatifs" : " facultatif") + ")") : "");
 		}
 		modifiees.Add(cur);
 		liste.Invalidate();
