@@ -315,7 +315,7 @@ internal class FenCompte : Form, IPage
 		}
 		base.ClientSize = Integre.Hote;
 		BackColor = C.Fond;
-		CW = Math.Min(base.ClientSize.Width, Zx.P(1240));
+		CW = Math.Max(Zx.P(900), Math.Min(base.ClientSize.Width - Zx.P(48), Zx.P(2200)));
 		X0 = (base.ClientSize.Width - CW) / 2;
 		Panel panel = new Panel();
 		panel.Dock = DockStyle.Bottom;
@@ -370,7 +370,7 @@ internal class FenCompte : Form, IPage
 		int num4 = CW - 48 - num2 - 24;
 		apercu = new ZoneDessin();
 		apercu.Location = new Point(X0 + Zx.P(24), Zx.P(4));
-		apercu.Size = new Size(num2, num - Zx.P(18));
+		apercu.Size = new Size(num2, Math.Min(num - Zx.P(18), Zx.P(590)));
 		apercu.Dessiner = DessinerApercu;
 		contenu.Controls.Add(apercu);
 		Segments tabs = new Segments();
@@ -381,7 +381,7 @@ internal class FenCompte : Form, IPage
 		tabs.BackColor = C.Fond;
 		contenu.Controls.Add(tabs);
 		pages = new Panel[6];
-		int num5 = (num4 - 16) / 2;
+		int num5 = (num4 - 2 * Zx.P(16)) / 3;
 		for (int i = 0; i < 6; i++)
 		{
 			Panel panel3 = new Panel();
@@ -394,9 +394,10 @@ internal class FenCompte : Form, IPage
 			Theme.Sombre(panel3);
 			pages[i] = panel3;
 		}
-		pages[0].Width = num5;
-		pages[1].Location = new Point(num3 + num5 + Zx.P(16), Zx.P(52));
-		pages[1].Width = num4 - num5 - Zx.P(16);
+		pages[0].Width = 2 * num5 + Zx.P(16);
+		pages[0].AutoScroll = true;
+		pages[1].Location = new Point(num3 + 2 * num5 + Zx.P(32), Zx.P(52));
+		pages[1].Width = num4 - 2 * num5 - Zx.P(32);
 		Cadre cadre = new Cadre();
 		cadre.Titre = "Informations";
 		cadre.Location = new Point(0, 0);
@@ -567,14 +568,14 @@ internal class FenCompte : Form, IPage
 		cadre2.Height = bouton5.Bottom + Zx.P(18);
 		Cadre cadre3 = new Cadre();
 		cadre3.Titre = "Couleurs";
-		cadre3.Location = new Point(0, cadre2.Bottom + Zx.P(16));
-		cadre3.Size = new Size(num7, Zx.P(390));
-		pages[1].Controls.Add(cadre3);
-		int width = num7 - 48;
+		cadre3.Location = new Point(num5 + Zx.P(16), 0);
+		cadre3.Size = new Size(num5, Zx.P(390));
+		pages[0].Controls.Add(cadre3);
+		int width = num5 - 48;
 		int x = Zx.P(24);
 		oAuto = new Option("Couleurs d'après ma photo", "Avatar et bannière suivent la photo.", a.AutoCouleurs);
 		oAuto.Location = new Point(Zx.P(8), Zx.P(38));
-		oAuto.Width = num7 - Zx.P(16);
+		oAuto.Width = num5 - Zx.P(16);
 		cadre3.Controls.Add(oAuto);
 		oAuto.Changed += delegate
 		{
@@ -612,6 +613,10 @@ internal class FenCompte : Form, IPage
 			lb.Invalidate();
 		};
 		cadre3.Height = selAvatar.Bottom + Zx.P(20);
+		int num40 = Math.Max(cadre.Height, cadre3.Height);
+		cadre.Height = num40;
+		cadre3.Height = num40;
+		apercu.Height = Math.Min(num - Zx.P(18), Zx.P(590));
 		Progression.Init(a);
 		Progression.Verifier(a);
 		zSucces = new ZoneDessin();

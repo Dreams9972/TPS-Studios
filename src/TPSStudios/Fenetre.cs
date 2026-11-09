@@ -440,13 +440,13 @@ internal partial class Fenetre : Form
 
 	private Rectangle rHorloge;
 
-	private static readonly Font fHeure = new Font("Segoe UI Semibold", Zx.P(11f));
+	private static readonly Font fHeure = new Font("Segoe UI Semibold", Zx.P(16f));
 
-	private static readonly Font fDate = new Font("Segoe UI", Zx.P(10f));
+	private static readonly Font fDate = new Font("Segoe UI", Zx.P(13f));
 
-	private static readonly Font fTitreA = new Font("Segoe UI Semibold", Zx.P(30f));
+	private static readonly Font fTitreA = new Font("Segoe UI Semibold", Zx.P(42f));
 
-	private static readonly Font fSousA = new Font("Segoe UI Semibold", Zx.P(10f));
+	private static readonly Font fSousA = new Font("Segoe UI Semibold", Zx.P(12.5f));
 
 	private Bitmap cacheProfil;
 
@@ -589,7 +589,7 @@ internal partial class Fenetre : Form
 
 	private List<KeyValuePair<Rectangle, Annonce>> rAnnonces = new List<KeyValuePair<Rectangle, Annonce>>();
 
-	private static readonly string[] NouveautesLanceur = new string[4] { "Nouvelle bibliothèque : page du jeu et « Mes mods »", "Activer ou désactiver un mod en un clic", "Jouer directement sur une carte", "Onglet Mods avec tri (nom, récents, populaires)" };
+	private static readonly string[] NouveautesLanceur = new string[4] { "Bande-annonce et photos sur les pages des jeux et des mods", "« À propos » façon Steam", "Flèche pour glisser vers tous les mods", "Nouvelles transitions et profil plein écran" };
 
 	private static readonly Font fAnT2 = new Font("Segoe UI Semibold", Zx.P(11f));
 
@@ -2422,14 +2422,8 @@ internal partial class Fenetre : Form
 		List<Image> list = DiapoPage();
 		int num7 = Math.Max(1, list.Count);
 		rMini.Clear();
-		int num8 = Math.Min(Zx.P(124), (num4 - (num7 - 1) * Zx.P(8)) / num7);
 		int num9 = num2 + num6 + Zx.P(12);
-		for (int i = 0; i < list.Count; i++)
-		{
-			rMini.Add(new Rectangle(num + i * (num8 + Zx.P(8)), num9, num8, num8 * 9 / 16));
-		}
-		int num10 = ((list.Count > 1) ? (num8 * 9 / 16) : 0);
-		int num11 = num9 + num10 + ((num10 > 0) ? 26 : 8);
+		int num11 = num9 + 8;
 		bOngDesc.Location = new Point(num, num11);
 		bOngNotes.Location = new Point(num + Zx.P(170), num11);
 		bOngGal.Visible = sel == null || sel.Commentaires;
@@ -2491,6 +2485,21 @@ internal partial class Fenetre : Form
 		num16 += Zx.P(46);
 		bDesinst.SetBounds(num13 + num14 + num17 + Zx.P(10), num16, num17, Zx.P(34));
 		rAchat = new Rectangle(num13, num2, num5, num16 + Zx.P(34) + Zx.P(20) - num2);
+		rPhotosP = Rectangle.Empty;
+		if (list.Count > 1)
+		{
+			int num30 = 3;
+			int num31 = Zx.P(8);
+			int num32 = (num5 - 2 * num14 - (num30 - 1) * num31) / num30;
+			int num33 = num32 * 9 / 16;
+			int num34 = (list.Count + num30 - 1) / num30;
+			rPhotosP = new Rectangle(num13, rAchat.Bottom + Zx.P(16), num5, Zx.P(50) + num34 * (num33 + num31) + Zx.P(12));
+			for (int i = 0; i < list.Count; i++)
+			{
+				rMini.Add(new Rectangle(num13 + num14 + i % num30 * (num32 + num31), rPhotosP.Y + Zx.P(50) + i / num30 * (num33 + num31), num32, num33));
+			}
+		}
+		PlacerVideoPage();
 		int num18 = ((sel != null) ? LignesInfo(sel).Count : 8);
 		int num19 = ((sel != null) ? sel.Liens.Count : 0);
 		int num20 = ((sel != null) ? sel.Dlc.Count : 0);
@@ -2506,7 +2515,7 @@ internal partial class Fenetre : Form
 			}
 		}
 		int num22 = num20 - num21;
-		rInfo = new Rectangle(num13, rAchat.Bottom + Zx.P(16), num5, Zx.P(54) + num18 * Zx.P(30) + Zx.P(10) + ((num19 > 0) ? (Zx.P(34) + num19 * Zx.P(36)) : 0) + ((num21 > 0) ? (Zx.P(34) + num21 * Zx.P(32)) : 0) + ((num22 > 0) ? (Zx.P(34) + num22 * Zx.P(32)) : 0));
+		rInfo = new Rectangle(num13, (rPhotosP.IsEmpty ? rAchat.Bottom : rPhotosP.Bottom) + Zx.P(16), num5, Zx.P(54) + num18 * Zx.P(30) + Zx.P(10) + ((num19 > 0) ? (Zx.P(34) + num19 * Zx.P(36)) : 0) + ((num21 > 0) ? (Zx.P(34) + num21 * Zx.P(32)) : 0) + ((num22 > 0) ? (Zx.P(34) + num22 * Zx.P(32)) : 0));
 		return Math.Max(val, rInfo.Bottom) + 40;
 	}
 
@@ -2720,6 +2729,11 @@ internal partial class Fenetre : Form
 				g.FillPath(brush6, path2);
 			}
 			Txt.Dessiner(g, t3, F.Etat, r, Color.White, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+			if (!rPhotosP.IsEmpty)
+			{
+				Carte(g, rPhotosP, Zx.P(14));
+				Txt.Dessiner(g, "PHOTOS", fCarteT, new Point(rPhotosP.X + Zx.P(20), rPhotosP.Y + Zx.P(18)), C.Gris);
+			}
 			for (int j = 0; j < list.Count && j < rMini.Count; j++)
 			{
 				Rectangle rectangle2 = rMini[j];
@@ -3161,6 +3175,14 @@ internal partial class Fenetre : Form
 						{
 							if (rMini[i].Contains(pt))
 							{
+								if (videoP != null && videoP.Visible)
+								{
+									using (FenVisionneuse f2 = new FenVisionneuse(list, Math.Min(i, list.Count - 1)))
+									{
+										f2.Afficher(this);
+									}
+									return;
+								}
 								vIdx = i;
 								page.Invalidate();
 								return;
@@ -3774,6 +3796,11 @@ internal partial class Fenetre : Form
 
 	private void Transition(Bitmap avant)
 	{
+		Transition(avant, StyleTrans.Diagonale);
+	}
+
+	private void Transition(Bitmap avant, StyleTrans style)
+	{
 		Bitmap apres = null;
 		Stopwatch stopwatch = Stopwatch.StartNew();
 		try
@@ -3804,24 +3831,7 @@ internal partial class Fenetre : Form
 		{
 			int width = apres.Width;
 			int height = apres.Height;
-			g.DrawImageUnscaled(avant, 0, 0);
-			using (SolidBrush brush = new SolidBrush(Color.FromArgb((int)(110.0 * vp), 2, 3, 10)))
-			{
-				g.FillRectangle(brush, 0, 0, width, height);
-			}
-			using (GraphicsPath path = Zone(width, height, vp, gauche: true))
-			{
-				GraphicsState gstate = g.Save();
-				g.SetClip(path, CombineMode.Replace);
-				g.DrawImageUnscaled(apres, (int)Math.Round(36.0 * (1.0 - vp)), 0);
-				if (vp < 1.0)
-				{
-					using SolidBrush brush2 = new SolidBrush(C.Fond);
-					g.FillRectangle(brush2, 0, 0, (int)Math.Round(36.0 * (1.0 - vp)), height);
-				}
-				g.Restore(gstate);
-			}
-			Bord(g, width, height, vp);
+			PeindreTrans(g, style, avant, apres, vp);
 			if (neigeTrans > 0)
 			{
 				noel.PeindreNeige(g, width, height, (neigeTrans == 2) ? Math.Min(1.0, vp * 1.5) : (1.0 - vp));
@@ -3832,7 +3842,7 @@ internal partial class Fenetre : Form
 		vo.Update();
 		long derT = 0L;
 		Stopwatch swN = Stopwatch.StartNew();
-		Jouer((neigeTrans > 0) ? 520 : 320, delegate(double p)
+		Jouer((neigeTrans > 0) ? 520 : ((style == StyleTrans.Diagonale) ? 320 : 380), delegate(double p)
 		{
 			if (neigeTrans > 0)
 			{
@@ -4361,6 +4371,7 @@ internal partial class Fenetre : Form
 				bitmap = null;
 			}
 		}
+		Vue ancienne = vue;
 		vue = v;
 		MajPresence();
 		pAccueil.Visible = v == Vue.Accueil;
@@ -4397,7 +4408,7 @@ internal partial class Fenetre : Form
 		}
 		if (bitmap != null)
 		{
-			Transition(bitmap);
+			Transition(bitmap, ChoisirStyle(ancienne, v));
 		}
 		if (noel != null)
 		{
@@ -4915,7 +4926,7 @@ internal partial class Fenetre : Form
 	{
 		if (rProfil.Height >= 20)
 		{
-			int num = rProfil.Y + Math.Max(0, (rProfil.Height - Zx.P(96)) / 2) + dy;
+			int num = rProfil.Y - Zx.P(14) + dy;
 			Size size = Lang.MeasureText("TPS Studios", fTitreA);
 			Lang.DrawText(g, "TPS Studios", fTitreA, new Point((w - size.Width) / 2, num), C.Texte, TextFormatFlags.NoPadding);
 			Size size2 = Lang.MeasureText("LAUNCHER", fSousA);
@@ -7858,10 +7869,10 @@ internal partial class Fenetre : Form
 		int width = pAccueil.ClientSize.Width;
 		int height = pAccueil.ClientSize.Height;
 		int num = Marge(width);
-		int width2 = Math.Max(Zx.P(340), Math.Min(Zx.P(440), (int)((double)width * 0.26)));
-		int num2 = Math.Max(Zx.P(104), Math.Min(Zx.P(150), (int)((double)height * 0.13)));
+		int width2 = Math.Max(Zx.P(280), Math.Min(Zx.P(340), (int)((double)width * 0.18)));
+		int num2 = Math.Max(Zx.P(84), Math.Min(Zx.P(104), (int)((double)height * 0.09)));
 		rProfil = new Rectangle(num, num, width2, num2);
-		int num3 = num + num2 + Zx.P(40);
+		int num3 = num + Math.Max(num2, Zx.P(150)) + Zx.P(30);
 		int num4 = height - num - Zx.P(14);
 		int num5 = Math.Max(Zx.P(220), num4 - num3);
 		int count = tuilesA.Count;
@@ -7909,11 +7920,11 @@ internal partial class Fenetre : Form
 		rBandeau = new Rectangle(num9, rProfil.Bottom + Zx.P(4), num7, Zx.P(30));
 		ThemeBase.Cartes = (rInfos.IsEmpty ? new Rectangle[2] { rProfil, rCarte } : new Rectangle[3] { rProfil, rCarte, rInfos });
 		rDiscord = new Rectangle(Zx.P(24), height - Zx.P(24) - Zx.P(48), Zx.P(250), Zx.P(48));
-		int num16 = rProfil.Bottom + Zx.P(70);
-		rAmisA = new Rectangle(num, num16, Math.Min(Zx.P(260), rProfil.Width), Math.Max(0, Math.Min(Zx.P(372), rDiscord.Y - Zx.P(28) - num16)));
+		int num16 = Math.Max(rProfil.Bottom + Zx.P(70), (int)((double)height * 0.37));
+		rAmisA = new Rectangle(num, num16, Math.Min(Zx.P(300), rProfil.Width), Math.Max(0, Math.Min(Zx.P(560), rDiscord.Y - Zx.P(44) - num16)));
 		rCloche = new Rectangle(width - num - Zx.P(44), num + Zx.P(6), Zx.P(44), Zx.P(44));
 		rMusique = Rectangle.Empty;
-		ThemeBase.ZoneLibre = new Rectangle(num, rAmisA.Bottom + Zx.P(6), Math.Max(Zx.P(200), rAmisA.Width), Math.Max(0, rDiscord.Y - rAmisA.Bottom - Zx.P(12)));
+		ThemeBase.ZoneLibre = new Rectangle(num, rProfil.Bottom + Zx.P(16), Math.Max(Zx.P(200), rAmisA.Width), Math.Max(0, rAmisA.Y - rProfil.Bottom - Zx.P(32)));
 		pAccueil.Invalidate();
 	}
 
@@ -11032,6 +11043,13 @@ internal partial class Fenetre : Form
 		}
 		case "biblio":
 			ShowVue(Vue.Biblio);
+			break;
+		case "profil":
+			BeginInvoke((MethodInvoker)delegate
+			{
+				int.TryParse(arg ?? "0", out var result);
+				Profil(nouveau: false, result);
+			});
 			break;
 		}
 		System.Windows.Forms.Timer timer = new System.Windows.Forms.Timer();
