@@ -666,7 +666,30 @@ internal static class Social
 		return Msg(dictionary, "achat impossible");
 	}
 
+	/// <summary>Crée n codes VIP (1 à 500) : le serveur en accepte 50 par demande, on enchaîne les demandes.</summary>
 	public static List<string> CodesVip(int n, string note, out string err)
+	{
+		err = null;
+		n = Math.Max(1, Math.Min(500, n));
+		List<string> tous = new List<string>();
+		while (tous.Count < n)
+		{
+			List<string> lot = CodesVipLot(Math.Min(50, n - tous.Count), note, out err);
+			if (lot == null || lot.Count == 0)
+			{
+				if (tous.Count == 0)
+				{
+					return null;
+				}
+				err = null;
+				break;
+			}
+			tous.AddRange(lot);
+		}
+		return tous;
+	}
+
+	private static List<string> CodesVipLot(int n, string note, out string err)
 	{
 		err = null;
 		int statut;
