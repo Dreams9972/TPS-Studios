@@ -40,6 +40,48 @@ internal class FenAmiProfil : Form
 	/// <summary>Bas de l'en-tête (bannière, bio, statistiques), calculé au dessin.</summary>
 	private int hautEntete = Zx.P(300);
 
+	private void ChangerRole(string role)
+	{
+		string id = ((pr != null) ? pr.A.Id : a.Id);
+		Thread t = new Thread((ThreadStart)delegate
+		{
+			string e;
+			try
+			{
+				e = Social.DonnerRole(id, role);
+			}
+			catch (Exception ex)
+			{
+				e = ex.Message;
+			}
+			try
+			{
+				BeginInvoke((MethodInvoker)delegate
+				{
+					if (e == null)
+					{
+						string r = ((role == "joueur") ? "" : role);
+						a.Role = r;
+						if (pr != null)
+						{
+							pr.A.Role = r;
+						}
+					}
+					else
+					{
+						err = e;
+					}
+					z.Invalidate();
+				});
+			}
+			catch
+			{
+			}
+		});
+		t.IsBackground = true;
+		t.Start();
+	}
+
 	public FenAmiProfil(Ami ami)
 	{
 		a = ami;
@@ -252,6 +294,10 @@ internal class FenAmiProfil : Form
 			Badge.PilleVip(g, new Rectangle(num, Zx.P(146), Zx.P(40), Zx.P(20)));
 			num += Zx.P(48);
 		}
+		if (ami.Role.Length > 0)
+		{
+			num += Badge.Role(g, ami.Role, num, Zx.P(147)) + Zx.P(8);
+		}
 		Lang.DrawText(g, "Niv. " + ami.Niveau, fM, new Point(num, Zx.P(146)), Color.FromArgb(255, 196, 140));
 		string t = ((pr != null) ? ((!pr.EstAmi) ? "Pas encore dans vos amis" : (pr.A.EnLigne ? pr.A.Statut : "Hors ligne")) : ((err != null) ? ("✖  " + err) : "Chargement du profil…"));
 		Lang.DrawText(g, t, fT, new Rectangle(xt, Zx.P(174), w - xt - Zx.P(24), Zx.P(20)), (pr == null || !pr.EstAmi || !pr.A.EnLigne) ? ((err != null) ? C.Rouge : C.Gris) : (pr.A.Statut.StartsWith("En jeu") ? C.Orange : C.Vert), TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding);
@@ -316,6 +362,28 @@ internal class FenAmiProfil : Form
 		if (infos.Count > 0)
 		{
 			yi += Zx.P(40);
+		}
+		if (Social.EstAdmin && pr != null && ami.Id != Social.MonId && ami.Role != "admin")
+		{
+			Lang.DrawText(g, "RÔLE (administrateurs)", FenAmis.fRub, new Point(28, yi + Zx.P(8)), C.Gris);
+			int droite = w - 28;
+			string[][] roles = new string[3][]
+			{
+				new string[2] { "modo", "Modérateur" },
+				new string[2] { "equipe", "Équipe" },
+				new string[2] { "joueur", "Joueur" }
+			};
+			foreach (string[] ro in roles)
+			{
+				string code = ro[0];
+				bool actuel = (code == "joueur") ? (ami.Role.Length == 0) : (ami.Role == code);
+				Rectangle rb2 = FenAmis.Bt(g, clics, souris, droite, yi, ro[1], (code == "modo") ? Color.FromArgb(60, 140, 255) : ((code == "equipe") ? C.Orange : C.Gris), actuel, actuel ? null : ((Action)delegate
+				{
+					ChangerRole(code);
+				}));
+				droite = rb2.X - Zx.P(8);
+			}
+			yi += Zx.P(46);
 		}
 		hautEntete = yi;
 		if (pr == null)

@@ -12,6 +12,8 @@ internal class ComSocial
 
 	public bool Admin;
 
+	public string Role = "";
+
 	public bool Moi;
 
 	public bool Vip;

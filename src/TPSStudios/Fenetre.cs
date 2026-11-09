@@ -56,6 +56,9 @@ internal partial class Fenetre : Form
 		/// <summary>Adresse ouverte par un clic sur la case (articles du site web).</summary>
 		public string Lien = "";
 
+		/// <summary>Icône (Segoe MDL2) affichée en grand quand la fiche n'a pas d'image.</summary>
+		public string Glyphe = "";
+
 		public Bitmap Cache;
 
 		public Size CacheTaille;
@@ -719,7 +722,7 @@ internal partial class Fenetre : Form
 
 	private List<KeyValuePair<Rectangle, Annonce>> rAnnonces = new List<KeyValuePair<Rectangle, Annonce>>();
 
-	private static readonly string[] NouveautesLanceur = new string[3] { "Amis : pseudos avec [ ] et tags d'équipe corrigés", "Recherche de joueurs plus souple", "Boutons plus réactifs (clics rapides pris en compte)" };
+	private static readonly string[] NouveautesLanceur = new string[4] { "Succès pour chaque mod et chaque jeu", "Téléchargements en direct sur les pages", "Amis : bannières, statuts et rôles", "Pseudos libres, insultes interdites" };
 
 	private static readonly Font fAnT2 = new Font("Segoe UI Semibold", Zx.P(11f));
 
@@ -1805,13 +1808,29 @@ internal partial class Fenetre : Form
 		comListe = new ZoneDessin();
 		comListe.Dessiner = DessinerComs;
 		comListe.MouseClick += ClicComs;
+		comListe.MouseDown += delegate(object o, MouseEventArgs e)
+		{
+			if (e.Button != MouseButtons.Left)
+			{
+				return;
+			}
+			for (int j = 0; j < rLikeCom.Count; j++)
+			{
+				if (rLikeCom[j].Contains(e.Location))
+				{
+					Sons.Clic();
+					AimerCom(idLikeCom[j]);
+					return;
+				}
+			}
+		};
 		comP.Controls.Add(comListe);
 		comP.Resize += delegate
 		{
 			PlacerCom();
 		};
 		tTel = new System.Windows.Forms.Timer();
-		tTel.Interval = 120000;
+		tTel.Interval = 30000;
 		tTel.Tick += delegate
 		{
 			if (vue == Vue.Projet || vue == Vue.Accueil)
@@ -1945,16 +1964,10 @@ internal partial class Fenetre : Form
 			Size size = Lang.MeasureText(comSocial.Auteur, fComNom, new Size(Zx.P(400), Zx.P(24)), TextFormatFlags.NoPadding);
 			Lang.DrawText(g, comSocial.Auteur, fComNom, new Point(num4, num + Zx.P(12)), C.Texte);
 			int num5 = num4 + size.Width + Zx.P(10);
-			if (comSocial.Admin)
+			string roleCom = (comSocial.Admin ? "admin" : comSocial.Role);
+			if (roleCom.Length > 0)
 			{
-				Rectangle r2 = new Rectangle(num5, num + Zx.P(13), Zx.P(52), Zx.P(18));
-				using (GraphicsPath path2 = Bouton.Rond(r2, Zx.P(9)))
-				{
-					using SolidBrush brush3 = new SolidBrush(C.Orange);
-					g.FillPath(brush3, path2);
-				}
-				Lang.DrawText(g, "ÉQUIPE", fPetit, r2, Color.White, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
-				num5 += Zx.P(60);
+				num5 += Badge.Role(g, roleCom, num5, num + Zx.P(13)) + Zx.P(8);
 			}
 			if (comSocial.Vip)
 			{
@@ -1992,7 +2005,7 @@ internal partial class Fenetre : Form
 			Lang.DrawText(g, text9, fPetit, rectangle9, comSocial.Aime ? C.Orange : Color.FromArgb(200, 208, 228), TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
 			rLikeCom.Add(Rectangle.Inflate(rectangle9, Zx.P(4), Zx.P(4)));
 			idLikeCom.Add(comSocial.Id);
-			if (comSocial.Moi || Social.EstAdmin)
+			if (comSocial.Moi || Social.PeutModerer)
 			{
 				Size size3 = Lang.MeasureText("Supprimer", fPetit);
 				Rectangle rectangle2 = new Rectangle(w - Zx.P(16) - size3.Width, num + Zx.P(12), size3.Width, Zx.P(18));
@@ -2008,12 +2021,27 @@ internal partial class Fenetre : Form
 
 	private readonly List<int> idLikeCom = new List<int>();
 
+	private readonly HashSet<int> likeEnCours = new HashSet<int>();
+
 	private void AimerCom(int id)
 	{
 		if (!Social.Actif || !Social.Connecte)
 		{
 			Toast("Connectez-vous à la communauté pour aimer un commentaire.", C.Orange, 4000);
 			return;
+		}
+		if (!likeEnCours.Add(id))
+		{
+			return;
+		}
+		ComSocial local = soc.Coms.Find((ComSocial x) => x.Id == id);
+		bool avant = local != null && local.Aime;
+		int likesAvant = ((local != null) ? local.Likes : 0);
+		if (local != null)
+		{
+			local.Aime = !avant;
+			local.Likes = Math.Max(0, likesAvant + (avant ? (-1) : 1));
+			comListe?.Invalidate();
 		}
 		Thread thread = new Thread((ThreadStart)delegate
 		{
@@ -2023,6 +2051,7 @@ internal partial class Fenetre : Form
 				int likes = Social.AimerCom(id, out aime);
 				Sur(delegate
 				{
+					likeEnCours.Remove(id);
 					ComSocial comSocial = soc.Coms.Find((ComSocial x) => x.Id == id);
 					if (comSocial != null)
 					{
@@ -2037,6 +2066,14 @@ internal partial class Fenetre : Form
 				Exception e = ex;
 				Sur(delegate
 				{
+					likeEnCours.Remove(id);
+					ComSocial c2 = soc.Coms.Find((ComSocial x) => x.Id == id);
+					if (c2 != null)
+					{
+						c2.Aime = avant;
+						c2.Likes = likesAvant;
+						comListe?.Invalidate();
+					}
 					Toast("J'aime impossible : " + e.Message, C.Rouge, 5000);
 				});
 			}
@@ -2051,7 +2088,6 @@ internal partial class Fenetre : Form
 		{
 			if (rLikeCom[j].Contains(e.Location))
 			{
-				AimerCom(idLikeCom[j]);
 				return;
 			}
 		}
@@ -2224,7 +2260,7 @@ internal partial class Fenetre : Form
 			Champ champ = comSaisie;
 			bool enabled = (comPub.Enabled = actif);
 			champ.Enabled = enabled;
-			comInfo.Text = ((!actif) ? "Les commentaires seront disponibles dès que le serveur TPS Groupe sera configuré." : (socEnLigne ? "●  En direct : les nouveaux messages apparaissent tout de suite" : "Connexion au serveur…"));
+			comInfo.Text = ((!actif) ? "Les commentaires seront disponibles dès que le serveur TPS Groupe sera configuré." : (socEnLigne ? "" : "Connexion au serveur…"));
 			comInfo.ForeColor = (socEnLigne ? C.Vert : C.Gris);
 			garderScroll = true;
 			Disposer();
@@ -2658,6 +2694,7 @@ internal partial class Fenetre : Form
 		bool avecComs = sel != null && sel.Commentaires;
 		comP.Visible = avecComs;
 		rEtoiles = new Rectangle(num + num4 - Zx.P(186), num11 + Zx.P(4), Zx.P(186), Zx.P(28));
+		rTelP = new Rectangle(bOngNotes.Right + Zx.P(14), num11, Math.Max(Zx.P(150), Math.Min(Zx.P(240), rEtoiles.X - Zx.P(14) - bOngNotes.Right - Zx.P(14))), Zx.P(36));
 		int largeurTexte = (avecComs ? ((num4 - Zx.P(28)) * 54 / 100) : num4);
 		int width = Math.Max(Zx.P(240), largeurTexte - Zx.P(44));
 		lDesc.MaximumSize = new Size(width, 0);
@@ -3013,6 +3050,7 @@ internal partial class Fenetre : Form
 		}
 		Txt.Dessiner(g, t, fCarteT, r2, (c == C.Gris) ? C.Texte : c, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
 		DessinerEtoiles(g, rEtoiles, Note(sel));
+		DessinerTelechargements(g);
 		Carte(g, rInfo, Zx.P(14));
 		Txt.Dessiner(g, "INFORMATIONS", fCarteT, new Point(rInfo.X + Zx.P(20), rInfo.Y + Zx.P(18)), C.Gris);
 		List<string[]> list2 = LignesInfo(sel);
@@ -3136,11 +3174,6 @@ internal partial class Fenetre : Form
 		{
 			"Tarif",
 			p.Payant ? p.PrixTexte : "Gratuit"
-		});
-		list.Add(new string[2]
-		{
-			"Téléchargements",
-			Telechargements(p).ToString("N0", cultureInfo)
 		});
 		return list;
 	}
@@ -4750,6 +4783,11 @@ internal partial class Fenetre : Form
 		return value2.Trim();
 	}
 
+	public static string NomJeuPublic(string id)
+	{
+		return NomJeu(id);
+	}
+
 	private static string NomJeu(string id)
 	{
 		string text = ValJeu(id, "nom");
@@ -5621,8 +5659,9 @@ internal partial class Fenetre : Form
 		{
 			g.DrawLine(pen4, r.X + Zx.P(12), r.Y + Zx.P(44), r.Right - Zx.P(12), r.Y + Zx.P(44));
 		}
-		int num3 = r.Y + Zx.P(52);
-		int num4 = (r.Bottom - 8 - num3) / 46;
+		int num3 = r.Y + Zx.P(54);
+		int pasAmi = Zx.P(76);
+		int num4 = Math.Max(1, (r.Bottom - Zx.P(8) - num3) / pasAmi);
 		if (list.Count == 0)
 		{
 			string t = ((!Social.Connecte) ? "Ajoutez vos amis TPS Groupe" : ((Social.Amis.Count == 0) ? "Pas encore d'amis" : "Aucun ami en ligne"));
@@ -5638,30 +5677,60 @@ internal partial class Fenetre : Form
 				Lang.DrawText(g, "+ " + (list.Count - i) + " autres en ligne", fAmS, new Rectangle(r.X + Zx.P(14), num3 + Zx.P(12), r.Width - Zx.P(28), Zx.P(18)), C.Gris, TextFormatFlags.NoPadding);
 				break;
 			}
-			Rectangle rectangle = new Rectangle(r.X + Zx.P(14), num3 + Zx.P(4), Zx.P(34), Zx.P(34));
-			int num5 = 0;
-			string id = ami.Id;
-			foreach (char c in id)
+			Rectangle carte = new Rectangle(r.X + Zx.P(10), num3, r.Width - Zx.P(20), Zx.P(68));
+			using (GraphicsPath pc = Bouton.Rond(carte, Zx.P(12)))
 			{
-				num5 = num5 * 31 + c;
+				GraphicsState gsC = g.Save();
+				g.SetClip(pc, CombineMode.Intersect);
+				FenAmis.DessinerBanniere(g, ami, carte);
+				using (LinearGradientBrush voile = new LinearGradientBrush(carte, Color.FromArgb(225, 10, 12, 28), Color.FromArgb(120, 10, 12, 28), LinearGradientMode.Horizontal))
+				{
+					g.FillRectangle(voile, carte);
+				}
+				g.Restore(gsC);
+				using Pen bordC = new Pen(Color.FromArgb(70, 255, 255, 255));
+				g.DrawPath(bordC, pc);
 			}
-			using (SolidBrush brush5 = new SolidBrush(Comptes.Palette[Math.Abs(num5) % Comptes.Palette.Length]))
+			Rectangle rectangle = new Rectangle(carte.X + Zx.P(10), carte.Y + (carte.Height - Zx.P(40)) / 2, Zx.P(40), Zx.P(40));
+			using (SolidBrush brush5 = new SolidBrush(FenAmis.CouleurAvatar(ami)))
 			{
 				g.FillEllipse(brush5, rectangle);
 			}
 			Lang.DrawText(g, (ami.Pseudo.Length > 0) ? ami.Pseudo.Substring(0, 1).ToUpperInvariant() : "?", fAmI, rectangle, Color.White, TextFormatFlags.HorizontalCenter | TextFormatFlags.NoPrefix | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
 			Color color = (ami.Statut.StartsWith("En jeu") ? C.Orange : C.Vert);
-			using (SolidBrush brush6 = new SolidBrush(Color.FromArgb(220, 14, 16, 34)))
+			using (SolidBrush brush6 = new SolidBrush(Color.FromArgb(230, 14, 16, 34)))
 			{
-				g.FillEllipse(brush6, rectangle.Right - Zx.P(12), rectangle.Bottom - Zx.P(12), Zx.P(15), Zx.P(15));
+				g.FillEllipse(brush6, rectangle.Right - Zx.P(13), rectangle.Bottom - Zx.P(13), Zx.P(16), Zx.P(16));
 			}
 			using (SolidBrush brush7 = new SolidBrush(color))
 			{
-				g.FillEllipse(brush7, rectangle.Right - Zx.P(9), rectangle.Bottom - Zx.P(9), Zx.P(9), Zx.P(9));
+				g.FillEllipse(brush7, rectangle.Right - Zx.P(10), rectangle.Bottom - Zx.P(10), Zx.P(10), Zx.P(10));
 			}
-			Lang.DrawText(g, ami.Pseudo, fAmN, new Rectangle(rectangle.Right + Zx.P(10), num3 + Zx.P(4), r.Right - rectangle.Right - Zx.P(22), Zx.P(18)), C.Texte, TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding);
-			Lang.DrawText(g, ami.Statut, fAmS, new Rectangle(rectangle.Right + Zx.P(10), num3 + Zx.P(22), r.Right - rectangle.Right - Zx.P(22), Zx.P(16)), color, TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding);
-			num3 += Zx.P(46);
+			int xt = rectangle.Right + Zx.P(10);
+			int wt = carte.Right - Zx.P(10) - xt;
+			int lp = Math.Min(wt, Lang.MeasureText(ami.Pseudo, fAmN).Width);
+			Lang.DrawText(g, ami.Pseudo, fAmN, new Rectangle(xt, carte.Y + Zx.P(8), lp + Zx.P(2), Zx.P(18)), Color.White, TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding);
+			int xb = xt + lp + Zx.P(6);
+			string roleA = ami.Role ?? "";
+			if (roleA.Length > 0 && xb + Zx.P(50) < carte.Right)
+			{
+				xb += Badge.Role(g, roleA, xb, carte.Y + Zx.P(8)) + Zx.P(4);
+			}
+			else if (ami.Vip && xb + Zx.P(36) < carte.Right)
+			{
+				Badge.PilleVip(g, new Rectangle(xb, carte.Y + Zx.P(9), Zx.P(32), Zx.P(15)));
+			}
+			Lang.DrawText(g, (ami.Statut.Length > 0) ? ami.Statut : "En ligne", fAmS, new Rectangle(xt, carte.Y + Zx.P(27), wt, Zx.P(16)), color, TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding);
+			string perso = ami.Texte("statut");
+			if (perso.Length == 0)
+			{
+				perso = ami.Texte("bio");
+			}
+			if (perso.Length > 0)
+			{
+				Lang.DrawText(g, perso, fAmS, new Rectangle(xt, carte.Y + Zx.P(45), wt, Zx.P(16)), Color.FromArgb(185, 195, 215), TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding);
+			}
+			num3 += pasAmi;
 		}
 		g.SmoothingMode = smoothingMode;
 	}
@@ -6051,8 +6120,7 @@ internal partial class Fenetre : Form
 			}
 			else
 			{
-				using LinearGradientBrush brush = new LinearGradientBrush(new Rectangle(0, 0, width, height + 1), C.JadeFonce, C.Cote, 35f);
-				graphics.FillRectangle(brush, 0, 0, width, height);
+				SansImage(graphics, d, new Rectangle(0, 0, width, height));
 			}
 			using (LinearGradientBrush linearGradientBrush = new LinearGradientBrush(new Rectangle(0, 0, width, height), Color.FromArgb(235, 6, 8, 20), Color.FromArgb(0, 6, 8, 20), LinearGradientMode.Horizontal))
 			{
@@ -6150,8 +6218,7 @@ internal partial class Fenetre : Form
 		}
 		else
 		{
-			using LinearGradientBrush brush2 = new LinearGradientBrush(rect, C.JadeFonce, C.Cote, 35f);
-			g.FillRectangle(brush2, rect);
+			SansImage(g, d, rect);
 		}
 		using (Pen pen = new Pen(C.Ligne))
 		{
@@ -6175,11 +6242,19 @@ internal partial class Fenetre : Form
 			int num9 = Math.Min(Zx.P(30), Math.Max(0, num8 - num7));
 			Lang.DrawText(g, d.Titre, f, new Rectangle(num, num7, num3, num9), C.Texte, TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding);
 			num7 += num9 + Zx.P(4);
-			int num10 = Math.Max(0, num8 - num7);
+			int hLigne = Lang.MeasureText("Ag", f2).Height;
+			int hDetail = ((d.Detail.Length > 0) ? (Lang.MeasureText("Ag", fPetit).Height + Zx.P(8)) : 0);
+			int num10 = Math.Max(0, num8 - num7 - hDetail);
 			if (d.Sous.Length > 0 && num10 >= Zx.P(16))
 			{
-				int num11 = Math.Max(1, Math.Min(3, num10 / Lang.MeasureText("Ag", f2).Height));
-				Lang.DrawText(g, d.Sous, f2, new Rectangle(num, num7, num3, num11 * Lang.MeasureText("Ag", f2).Height), Color.FromArgb(200, 208, 228), TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix | TextFormatFlags.TextBoxControl | TextFormatFlags.WordBreak | TextFormatFlags.NoPadding);
+				int besoin = Lang.MeasureText(d.Sous, f2, new Size(num3, Zx.P(2000)), TextFormatFlags.WordBreak | TextFormatFlags.NoPadding).Height;
+				int num11 = Math.Max(1, Math.Min(Math.Max(1, num10 / hLigne), (besoin + hLigne - 1) / hLigne));
+				Lang.DrawText(g, d.Sous, f2, new Rectangle(num, num7, num3, num11 * hLigne), Color.FromArgb(200, 208, 228), TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix | TextFormatFlags.TextBoxControl | TextFormatFlags.WordBreak | TextFormatFlags.NoPadding);
+				num7 += num11 * hLigne + Zx.P(8);
+			}
+			if (d.Detail.Length > 0 && num7 + hDetail <= num8 + Zx.P(8))
+			{
+				Lang.DrawText(g, d.Detail, fPetit, new Rectangle(num, num7, num3, hDetail), Color.FromArgb(160, 172, 200), TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding);
 			}
 		}
 		if (d.Ouvrir != null)
@@ -6198,9 +6273,39 @@ internal partial class Fenetre : Form
 		g.DrawPath(pen2, path);
 	}
 
+	private static readonly Font fGlypheDiapo = new Font("Segoe MDL2 Assets", Zx.P(54f));
+
+	/// <summary>Fiche sans image : fond aux couleurs de la fiche et son icône en grand (ou le logo).</summary>
+	private void SansImage(Graphics g, Diapo d, Rectangle r)
+	{
+		Color c = d.Couleur;
+		using (LinearGradientBrush b = new LinearGradientBrush(new Rectangle(r.X, r.Y, r.Width, r.Height + 1), Color.FromArgb(255, (int)(c.R * 0.55), (int)(c.G * 0.55), (int)(c.B * 0.55)), Color.FromArgb(255, 14, 16, 36), 35f))
+		{
+			g.FillRectangle(b, r);
+		}
+		using (GraphicsPath halo = new GraphicsPath())
+		{
+			int t = Math.Min(r.Width, r.Height);
+			halo.AddEllipse(r.X + r.Width / 2 - t / 2, r.Y + r.Height / 2 - t / 2, t, t);
+			using PathGradientBrush pg = new PathGradientBrush(halo);
+			pg.CenterColor = Color.FromArgb(90, c);
+			pg.SurroundColors = new Color[1] { Color.FromArgb(0, c) };
+			g.FillPath(pg, halo);
+		}
+		if (d.Glyphe.Length > 0)
+		{
+			Lang.DrawText(g, d.Glyphe, fGlypheDiapo, r, Color.FromArgb(230, 255, 255, 255), TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+		}
+		else if (logo != null)
+		{
+			int t2 = Math.Min(Zx.P(96), Math.Min(r.Width, r.Height) / 2);
+			g.DrawImage(logo, r.X + (r.Width - t2) / 2, r.Y + (r.Height - t2) / 2, t2, t2);
+		}
+	}
+
 	private static int HautImagePetite(int W, int H)
 	{
-		return Math.Max((int)((double)W * 0.36), Math.Min((int)((double)W * 0.62), H - Zx.P(132)));
+		return Math.Max((int)((double)W * 0.36), H - Zx.P(210));
 	}
 
 	private Bitmap CacheDiapo(Diapo d)
@@ -6710,6 +6815,66 @@ internal partial class Fenetre : Form
 		ChargerPopularite(force: false);
 	}
 
+	/// <summary>ETag de la dernière liste des releases : une réponse « non modifiée » ne compte pas dans la limite de GitHub.</summary>
+	private string etagPop = "";
+
+	private Rectangle rTelP;
+
+	private double affTelP = -1.0;
+
+	private string affTelPour = "";
+
+	private System.Windows.Forms.Timer tTelAnim;
+
+	/// <summary>Compteur de téléchargements de la page (en direct, le chiffre défile jusqu'à sa nouvelle valeur).</summary>
+	private void DessinerTelechargements(Graphics g)
+	{
+		if (rTelP.IsEmpty || sel == null)
+		{
+			return;
+		}
+		int cible = Telechargements(sel);
+		if (affTelPour != sel.Id || affTelP < 0.0)
+		{
+			affTelPour = sel.Id;
+			affTelP = cible;
+		}
+		else if (Math.Abs(affTelP - cible) >= 0.5)
+		{
+			if (tTelAnim == null)
+			{
+				tTelAnim = new System.Windows.Forms.Timer();
+				tTelAnim.Interval = 16;
+				tTelAnim.Tick += delegate
+				{
+					int c2 = ((sel != null) ? Telechargements(sel) : 0);
+					double d = c2 - affTelP;
+					affTelP = ((Math.Abs(d) < 0.5) ? c2 : (affTelP + ((Math.Abs(d * 0.12) < 0.4) ? (Math.Sign(d) * 0.4) : (d * 0.12))));
+					if (Math.Abs(affTelP - c2) < 0.5)
+					{
+						affTelP = c2;
+						tTelAnim.Stop();
+					}
+					page.Invalidate(Rectangle.Inflate(rTelP, Zx.P(4), Zx.P(4)));
+				};
+			}
+			tTelAnim.Start();
+		}
+		int n = (int)Math.Round(affTelP);
+		string t = "↓  " + n.ToString("N0", CultureInfo.GetCultureInfo("fr-FR")) + ((n > 1) ? " téléchargements" : " téléchargement");
+		SmoothingMode sm = g.SmoothingMode;
+		g.SmoothingMode = SmoothingMode.AntiAlias;
+		using (GraphicsPath p = Bouton.Rond(rTelP, rTelP.Height / 2))
+		{
+			using SolidBrush b = new SolidBrush(Color.FromArgb(40, C.Jade));
+			g.FillPath(b, p);
+			using Pen pen = new Pen(Color.FromArgb(150, C.Jade));
+			g.DrawPath(pen, p);
+		}
+		Lang.DrawText(g, t, fNote, rTelP, C.Texte, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+		g.SmoothingMode = sm;
+	}
+
 	private void ChargerPopularite(bool force)
 	{
 		if ((popDemandee && !force) || cat == null || File.Exists(Config.Catalogue))
@@ -6724,7 +6889,19 @@ internal partial class Fenetre : Form
 				string input;
 				using (WebClient webClient = Web.Client())
 				{
-					input = webClient.DownloadString("https://api.github.com/repos/Dreams9972/TPS-Studios/releases?per_page=100");
+					if (etagPop.Length > 0)
+					{
+						webClient.Headers[HttpRequestHeader.IfNoneMatch] = etagPop;
+					}
+					try
+					{
+						input = webClient.DownloadString("https://api.github.com/repos/Dreams9972/TPS-Studios/releases?per_page=100");
+						etagPop = webClient.ResponseHeaders?[HttpResponseHeader.ETag] ?? "";
+					}
+					catch (WebException we) when (we.Response is HttpWebResponse hr && hr.StatusCode == HttpStatusCode.NotModified)
+					{
+						return;
+					}
 				}
 				IEnumerable enumerable = new JavaScriptSerializer().DeserializeObject(input) as object[];
 				Dictionary<string, int> i = new Dictionary<string, int>();
@@ -6990,12 +7167,18 @@ internal partial class Fenetre : Form
 				OuvrirSite(lien);
 			});
 			da.Lien = lien;
+			da.Glyphe = "\ue774";
 			list.Insert(pos++, da);
 		}
 		foreach (Annonce an in annonces)
 		{
 			Projet pm = an.Mod;
-			Diapo di = NouvelleDiapo("Info", an.Couleur, an.Titre, an.Texte, "", null, (pm != null) ? "Voir la page" : ((site.Length > 0) ? "Voir le site" : ""), (pm != null) ? ((Action)delegate
+			Image imgMod = null;
+			if (pm != null)
+			{
+				images.TryGetValue(pm.Id, out imgMod);
+			}
+			Diapo di = NouvelleDiapo("Info", an.Couleur, an.Titre, an.Texte, "", imgMod, (pm != null) ? "Voir la page" : ((site.Length > 0) ? "Voir le site" : ""), (pm != null) ? ((Action)delegate
 			{
 				Choisir(pm);
 				ShowVue(Vue.Projet);
@@ -7003,6 +7186,7 @@ internal partial class Fenetre : Form
 			{
 				OuvrirSite(site);
 			}) : null));
+			di.Glyphe = an.Glyphe ?? "";
 			list.Insert(pos++, di);
 		}
 		if (list.Count == 0)
@@ -8220,6 +8404,13 @@ internal partial class Fenetre : Form
 			foreach (KeyValuePair<string, int> item in dictionary)
 			{
 				Progression.EnregistrerJeu(item.Key, NomJeu(item.Key), item.Value);
+			}
+			foreach (Projet pm in cat.Projets)
+			{
+				if (pm.Installable && pm.StatutEffectif != "masque")
+				{
+					Progression.EnregistrerMod(pm.Id, pm.Nom, pm.Categorie);
+				}
 			}
 		}
 		MajTheme();

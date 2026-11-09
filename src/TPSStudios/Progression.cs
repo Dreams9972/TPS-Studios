@@ -180,6 +180,11 @@ internal static class Progression
 				c.Stats["jlj_" + text] = 1;
 				Compter(c, "lanc_jours", 1);
 			}
+			if (!c.Stats.ContainsKey("g_mod_" + projetId + "_jour_" + text))
+			{
+				c.Stats["g_mod_" + projetId + "_jour_" + text] = 1;
+				Compter(c, "mod_" + projetId + "_jours", 1);
+			}
 			if (!c.Stats.ContainsKey(text2 + "jour_" + text))
 			{
 				c.Stats[text2 + "jour_" + text] = 1;
@@ -400,6 +405,7 @@ internal static class Progression
 		list2.AddRange(P("traj", new string[4] { "t5", "t25", "t100", "t500" }, new string[4] { "Cinq trajets", "Navetteur", "Centenaire de la ligne", "Réseau entier" }, "Faire {0} trajets en jeu", "\ue806", new int[4] { 5, 25, 100, 500 }, new int[4] { 100, 300, 1000, 3000 }, (Compte c) => S(c, "jeu_trajets")));
 		list2.AddRange(P("like", new string[5] { "v1", "v3", "v5", "v10", "v25" }, new string[5] { "Première voix", "Bon goût", "Critique", "Connaisseur", "Jury TPS" }, "Aimer {0} mod{1} différent{1}", "\ueb51", new int[5] { 1, 3, 5, 10, 25 }, new int[5] { 50, 100, 200, 400, 1000 }, (Compte c) => S(c, "votes")));
 		list2.AddRange(P("comm", new string[5] { "k1", "k5", "k10", "k25", "k50" }, new string[5] { "Premier commentaire", "Bavard", "Plume de la communauté", "Chroniqueur", "Voix de la communauté" }, "Publier {0} commentaire{1} (3 comptés par jour)", "\ue8bd", new int[5] { 1, 5, 10, 25, 50 }, new int[5] { 50, 120, 250, 600, 1200 }, (Compte c) => S(c, "comm_comptes")));
+		list2.AddRange(P("amis", new string[3] { "a1", "a5", "a10" }, new string[3] { "Premier ami", "Bande de copains", "Réseau d'amis" }, "Avoir {0} ami{1} TPS Groupe", "\ue716", new int[3] { 1, 5, 10 }, new int[3] { 50, 150, 400 }, (Compte c) => Math.Max(S(c, "amis_max"), Social.Amis.Count)));
 		list2.AddRange(P("niv", new string[5] { "n10", "n25", "n50", "n75", "n100" }, new string[5] { "Voyageur", "Conducteur confirmé", "Capitaine", "Maître de ligne", "Légende TPS" }, "Atteindre le niveau {0}", "\ue735", new int[5] { 10, 25, 50, 75, 100 }, new int[5] { 100, 300, 800, 1400, 2000 }, (Compte c) => NiveauDe(c)));
 		return list2;
 	}
@@ -454,13 +460,87 @@ internal static class Progression
 		value = D(g + "tout", nom + " : complétionniste", "Jouer à chacun des " + Math.Max(1, contenus) + " mods " + nom, "\ue73e", 800, Math.Max(1, contenus), (Compte c) => S(c, g + "contenus"));
 		Defs.Add(value);
 		complets[id] = value;
+		foreach (DefSucces dj in Defs)
+		{
+			if (dj.Id.StartsWith(g))
+			{
+				dj.Groupe = id;
+			}
+		}
 		if (id == "omsi2")
 		{
 			Defs.Add(D(g + "bus", "OMSI 2 : nouveau véhicule", "Installer un bus OMSI 2", "\ue806", 80, 1, (Compte c) => S(c, g + "cat_bus")));
 			Defs.Add(D(g + "livree", "OMSI 2 : coup de peinture", "Installer une livrée OMSI 2", "\ue790", 60, 1, (Compte c) => S(c, g + "cat_livrees")));
 			Defs.Add(D(g + "girouette", "OMSI 2 : bonne destination", "Installer des girouettes OMSI 2", "\ue7c1", 60, 1, (Compte c) => S(c, g + "cat_girouettes")));
 			Defs.Add(D(g + "ia", "OMSI 2 : trafic vivant", "Installer un pack IA OMSI 2", "\ue716", 60, 1, (Compte c) => S(c, g + "cat_packs_ia")));
+			foreach (DefSucces dj2 in Defs)
+			{
+				if (dj2.Id.StartsWith(g))
+				{
+					dj2.Groupe = id;
+				}
+			}
 		}
+	}
+
+	private static readonly HashSet<string> modsEnregistres = new HashSet<string>();
+
+	/// <summary>
+	/// Succès propres à un mod, créés dès qu'il apparaît dans le catalogue. Carte : l'installer, faire
+	/// son premier service, y jouer 5 jours. Autres mods : l'installer.
+	/// </summary>
+	public static void EnregistrerMod(string id, string nom, string categorie)
+	{
+		if (string.IsNullOrEmpty(id) || !modsEnregistres.Add(id))
+		{
+			return;
+		}
+		string fam = "mod_" + id;
+		if (categorie == "cartes")
+		{
+			DefSucces a = D("mod_" + id + "_inst", nom + " : bienvenue", "Installer la carte " + nom, "\ue896", 40, 1, (Compte c) => S(c, "inst_" + id));
+			DefSucces b = D("mod_" + id + "_joue", nom + " : premier service", "Lancer une partie sur " + nom, "\ue768", 60, 1, (Compte c) => S(c, "joue_" + id));
+			DefSucces d = D("mod_" + id + "_j5", nom + " : habitué de la ligne", "Jouer sur " + nom + " 5 jours différents", "\ue787", 150, 5, (Compte c) => S(c, "mod_" + id + "_jours"));
+			DefSucces[] rangs = new DefSucces[3] { a, b, d };
+			for (int i = 0; i < rangs.Length; i++)
+			{
+				rangs[i].Famille = fam;
+				rangs[i].Rang = i + 1;
+				rangs[i].NbRangs = rangs.Length;
+				rangs[i].Prec = ((i > 0) ? rangs[i - 1].Id : null);
+				rangs[i].Groupe = "mods";
+				Defs.Add(rangs[i]);
+			}
+			return;
+		}
+		string glyphe;
+		string verbe;
+		switch (categorie)
+		{
+		case "bus":
+			glyphe = "\ue806";
+			verbe = "Installer le bus ";
+			break;
+		case "livrees":
+			glyphe = "\ue790";
+			verbe = "Installer la livrée ";
+			break;
+		case "girouettes":
+			glyphe = "\ue7c1";
+			verbe = "Installer les girouettes ";
+			break;
+		case "packs_ia":
+			glyphe = "\ue716";
+			verbe = "Installer le pack IA ";
+			break;
+		default:
+			glyphe = "\ue896";
+			verbe = "Installer ";
+			break;
+		}
+		DefSucces e = D("mod_" + id + "_inst", nom + " : installé", verbe + nom, glyphe, 40, 1, (Compte c) => S(c, "inst_" + id));
+		e.Groupe = "mods";
+		Defs.Add(e);
 	}
 
 	public static List<DefSucces> Vitrine(Compte c)

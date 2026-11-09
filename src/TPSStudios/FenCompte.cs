@@ -622,7 +622,7 @@ internal class FenCompte : Form, IPage
 		zSucces = new ZoneDessin();
 		zSucces.Location = new Point(0, 0);
 		zSucces.Width = num4 - SystemInformation.VerticalScrollBarWidth - Zx.P(2);
-		zSucces.Height = Zx.P(236) + (Progression.Vitrine(a).Count + 1) / 2 * 106 + 8;
+		zSucces.Height = HauteurSucces(a, zSucces.Width);
 		zSucces.Dessiner = DessinerSucces;
 		pages[2].Controls.Add(zSucces);
 		ConstruireVip(pages[3], num4, a);
@@ -1652,6 +1652,48 @@ internal class FenCompte : Form, IPage
 		}
 	}
 
+	private static int ColsSucces(int w)
+	{
+		return Math.Max(2, Math.Min(4, (w + Zx.P(14)) / Zx.P(430)));
+	}
+
+	/// <summary>Succès rangés par rubrique : le lanceur, chaque jeu, puis les mods.</summary>
+	private static List<KeyValuePair<string, List<DefSucces>>> Sections(Compte a)
+	{
+		List<DefSucces> tous = Progression.Vitrine(a);
+		List<string> ordre = new List<string> { "lanceur" };
+		foreach (DefSucces d in tous)
+		{
+			if (!ordre.Contains(d.Groupe) && d.Groupe != "mods")
+			{
+				ordre.Add(d.Groupe);
+			}
+		}
+		ordre.Add("mods");
+		List<KeyValuePair<string, List<DefSucces>>> res = new List<KeyValuePair<string, List<DefSucces>>>();
+		foreach (string g in ordre)
+		{
+			List<DefSucces> l = tous.FindAll((DefSucces d) => d.Groupe == g);
+			if (l.Count > 0)
+			{
+				string titre = ((g == "lanceur") ? "LANCEUR" : ((g == "mods") ? "MODS" : Fenetre.NomJeuPublic(g).ToUpperInvariant()));
+				res.Add(new KeyValuePair<string, List<DefSucces>>(titre, l));
+			}
+		}
+		return res;
+	}
+
+	private static int HauteurSucces(Compte a, int w)
+	{
+		int cols = ColsSucces(w);
+		int y = Zx.P(212);
+		foreach (KeyValuePair<string, List<DefSucces>> sec in Sections(a))
+		{
+			y += Zx.P(26) + (sec.Value.Count + cols - 1) / cols * Zx.P(106) + Zx.P(14);
+		}
+		return y + Zx.P(8);
+	}
+
 	private void DessinerSucces(Graphics g, int w, int h)
 	{
 		Compte actif = Comptes.Actif;
@@ -1674,7 +1716,13 @@ internal class FenCompte : Form, IPage
 			using Pen pen = new Pen(C.Ligne);
 			g.DrawPath(pen, path);
 		}
-		Badge.Dessiner(g, new Rectangle(Zx.P(20), Zx.P(16), Zx.P(90), Zx.P(90)), niv, temps);
+		try
+		{
+			Badge.Dessiner(g, new Rectangle(Zx.P(20), Zx.P(16), Zx.P(90), Zx.P(90)), niv, temps);
+		}
+		catch
+		{
+		}
 		int num = Zx.P(130);
 		Lang.DrawText(g, "Niveau " + niv + "  ·  " + Progression.Titre(niv), new Font("Segoe UI Semibold", Zx.P(15f)), new Point(num, Zx.P(20)), C.Texte);
 		Rectangle r2 = new Rectangle(num, Zx.P(56), w - num - Zx.P(24), Zx.P(10));
@@ -1699,25 +1747,45 @@ internal class FenCompte : Form, IPage
 		{
 			Rectangle rectangle = new Rectangle(Zx.P(20) + (int)((float)i * num5), Zx.P(126), num4, num4);
 			bool flag = niv >= i * 10 + 1;
-			if (flag)
+			try
 			{
-				Badge.Dessiner(g, rectangle, i * 10 + Math.Min(10, niv - i * 10), temps);
+				if (flag)
+				{
+					Badge.Dessiner(g, rectangle, i * 10 + Math.Min(10, niv - i * 10), temps);
+				}
+				else
+				{
+					Badge.Verrou(g, rectangle);
+				}
 			}
-			else
+			catch
 			{
-				Badge.Verrou(g, rectangle);
 			}
 			Lang.DrawText(g, flag ? ("Niv. " + (i * 10 + 1)) : "???", fPetitS, new Rectangle(rectangle.X - Zx.P(14), rectangle.Bottom + Zx.P(4), rectangle.Width + Zx.P(28), Zx.P(16)), flag ? C.Texte : C.Gris, TextFormatFlags.HorizontalCenter | TextFormatFlags.NoPadding);
 		}
-		Lang.DrawText(g, "SUCCÈS", F.Rubrique, new Point(Zx.P(4), Zx.P(212)), C.Gris);
-		int num6 = (w - Zx.P(14)) / 2;
-		List<DefSucces> list = Progression.Vitrine(actif);
+		int cols = ColsSucces(w);
+		int num6 = (w - (cols - 1) * Zx.P(14)) / cols;
+		int ySec = Zx.P(212);
+		List<DefSucces> list = new List<DefSucces>();
+		List<Rectangle> rects = new List<Rectangle>();
+		foreach (KeyValuePair<string, List<DefSucces>> sec in Sections(actif))
+		{
+			int faits = sec.Value.FindAll((DefSucces d) => actif.Succes.ContainsKey(d.Id)).Count;
+			Lang.DrawText(g, sec.Key + "  ·  " + faits + " / " + sec.Value.Count, F.Rubrique, new Point(Zx.P(4), ySec), C.Gris);
+			ySec += Zx.P(26);
+			for (int q = 0; q < sec.Value.Count; q++)
+			{
+				list.Add(sec.Value[q]);
+				rects.Add(new Rectangle(q % cols * (num6 + Zx.P(14)), ySec + q / cols * Zx.P(106), num6, Zx.P(94)));
+			}
+			ySec += (sec.Value.Count + cols - 1) / cols * Zx.P(106) + Zx.P(14);
+		}
 		for (int j = 0; j < list.Count; j++)
 		{
 			DefSucces defSucces = list[j];
 			bool flag2 = actif.Succes.ContainsKey(defSucces.Id);
 			int num7 = Math.Min(defSucces.Objectif, Math.Max(0, defSucces.Valeur(actif)));
-			Rectangle r3 = new Rectangle(j % 2 * (num6 + Zx.P(14)), Zx.P(236) + j / 2 * Zx.P(106), num6, Zx.P(94));
+			Rectangle r3 = rects[j];
 			using (GraphicsPath path4 = Bouton.Rond(r3, Zx.P(14)))
 			{
 				using (SolidBrush brush4 = new SolidBrush(flag2 ? Color.FromArgb(34, 38, 78) : C.Carte))

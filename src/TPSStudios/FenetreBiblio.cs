@@ -357,10 +357,11 @@ internal partial class Fenetre
 		{
 			if (bouton != null && bouton.Visible)
 			{
-				bouton.Text = ((bouton == bChemins) ? "⚙" : ((bouton == bPhotosJeu) ? "▣" : "▶"));
-				bouton.SetBounds(num6 - Zx.P(46), num5 + Zx.P(5), Zx.P(46), Zx.P(44));
-				bulle.SetToolTip(bouton, (bouton == bChemins) ? "Dossiers du jeu (OMSI 2 et openOMSI)" : ((bouton == bPhotosJeu) ? "Photos" : "Bande-annonce"));
-				num6 -= Zx.P(54);
+				bouton.Text = ((bouton == bChemins) ? "⚙  Dossiers" : ((bouton == bPhotosJeu) ? "▣  Photos" : "▶  Bande-annonce"));
+				int lb = Lang.MeasureText(bouton.Text, bouton.Font).Width + Zx.P(30);
+				bouton.SetBounds(num6 - lb, num5 + Zx.P(5), lb, Zx.P(44));
+				bulle.SetToolTip(bouton, (bouton == bChemins) ? "Dossiers du jeu (OMSI 2 et openOMSI)" : ((bouton == bPhotosJeu) ? "Voir toutes les photos" : "Voir la bande-annonce en grand"));
+				num6 -= lb + Zx.P(8);
 			}
 		}
 		CalculerEtats();
@@ -578,7 +579,7 @@ internal partial class Fenetre
 		{
 			if (bouton != null && bouton.Visible)
 			{
-				num10 -= Zx.P(54);
+				num10 -= bouton.Width + Zx.P(8);
 			}
 		}
 		while (list.Count > 1 && (num10 - num9) / list.Count < Zx.P(96))
