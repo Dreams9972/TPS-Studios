@@ -719,7 +719,7 @@ internal partial class Fenetre : Form
 
 	private List<KeyValuePair<Rectangle, Annonce>> rAnnonces = new List<KeyValuePair<Rectangle, Annonce>>();
 
-	private static readonly string[] NouveautesLanceur = new string[4] { "Pages des mods repensées : description, notes et commentaires côte à côte", "Note sur 5 étoiles", "Boutons vidéo translucides", "Barres de défilement sombres partout" };
+	private static readonly string[] NouveautesLanceur = new string[4] { "Amis : vrais pseudos, niveaux et bannières", "Cartes d'amis avec détails au survol", "Recherche de joueurs par pseudo ou code ami", "Fenêtre Amis en pleine largeur" };
 
 	private static readonly Font fAnT2 = new Font("Segoe UI Semibold", Zx.P(11f));
 
@@ -2093,7 +2093,7 @@ internal partial class Fenetre : Form
 					try
 					{
 						moi = Social.Moi();
-						Social.MajNiveau(Progression.NiveauDe(Comptes.Actif));
+						Social.SyncProfil(Comptes.Actif);
 					}
 					catch
 					{
@@ -10978,6 +10978,23 @@ internal partial class Fenetre : Form
 		catch
 		{
 		}
+		Compte profilSync = Comptes.Actif;
+		if (Social.Actif && Social.Connecte && profilSync != null)
+		{
+			Thread ts = new Thread((ThreadStart)delegate
+			{
+				try
+				{
+					Social.SyncProfil(profilSync);
+				}
+				catch (Exception es)
+				{
+					Journal.Une("social-profil", es);
+				}
+			});
+			ts.IsBackground = true;
+			ts.Start();
+		}
 		if (cacheProfil != null)
 		{
 			cacheProfil.Dispose();
@@ -11548,6 +11565,55 @@ internal partial class Fenetre : Form
 			BeginInvoke((MethodInvoker)delegate
 			{
 				Parametres();
+			});
+			break;
+		case "amis":
+			BeginInvoke((MethodInvoker)delegate
+			{
+				if (Environment.GetEnvironmentVariable("TPS_DEMO_AMIS") == "1")
+				{
+					Func<string, string, int, bool, string, Dictionary<string, string>, Ami> f = delegate(string id, string ps, int niv, bool en, string st, Dictionary<string, string> app)
+					{
+						return new Ami
+						{
+							Id = id,
+							Pseudo = ps,
+							Niveau = niv,
+							EnLigne = en,
+							Statut = st,
+							Vip = niv > 10,
+							Communs = niv % 3,
+							Cree = 1767225600L,
+							App = app
+						};
+					};
+					Social.Amis = new List<Ami>
+					{
+						f("a1b2c3d4e5f6a7b8", "Callme", 13, true, "En jeu · Paris 25", new Dictionary<string, string>
+						{
+							["couleur"] = "3",
+							["banniere"] = "2",
+							["bio"] = "Conducteur de la ligne 25 depuis 2024. Fan de la RATP et des Citaro.",
+							["jeu_favori"] = "OMSI 2",
+							["lieu"] = "Ivry-sur-Seine",
+							["secondes"] = "151200",
+							["succes"] = "15",
+							["deco"] = "couronne"
+						}),
+						f("b2c3d4e5f6a7b8c9", "Nicolas", 7, true, "Dans le lanceur", new Dictionary<string, string>
+						{
+							["couleur"] = "5",
+							["ban_type"] = "degrade",
+							["ban_c1"] = "-14336",
+							["ban_c2"] = "-10092442",
+							["statut"] = "En vacances",
+							["secondes"] = "36000"
+						}),
+						f("c3d4e5f6a7b8c9d0", "VeesGuy", 4, false, "", new Dictionary<string, string>())
+					};
+					Social.Recues = new List<Ami> { f("d4e5f6a7b8c9d0e1", "Sobol", 9, false, "", new Dictionary<string, string> { ["banniere"] = "4", ["bio"] = "Mappeur OMSI." }) };
+				}
+				OuvrirAmis();
 			});
 			break;
 		case "admin":

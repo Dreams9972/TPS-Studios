@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Security.Cryptography;
@@ -294,6 +295,20 @@ internal static class Social
 				if (dictionary.TryGetValue("statut", out value2))
 				{
 					ami.Statut = Convert.ToString(value2);
+				}
+				if (dictionary.TryGetValue("cree", out value2) && value2 != null && !(value2 is IEnumerable))
+				{
+					long.TryParse(Convert.ToString(value2, CultureInfo.InvariantCulture), out ami.Cree);
+				}
+				if (dictionary.TryGetValue("apparence", out value2) && value2 is Dictionary<string, object> dApp)
+				{
+					foreach (KeyValuePair<string, object> kv in dApp)
+					{
+						if (kv.Value != null && !(kv.Value is IEnumerable && !(kv.Value is string)))
+						{
+							ami.App[kv.Key] = Convert.ToString(kv.Value, CultureInfo.InvariantCulture);
+						}
+					}
 				}
 				if (dictionary.TryGetValue("en_ligne", out value2))
 				{
@@ -838,12 +853,155 @@ internal static class Social
 
 	public static string Assurer(Compte c)
 	{
-		pseudoSouhaite = ((c != null) ? c.Pseudo : "Joueur");
+		pseudoSouhaite = PseudoServeur((c != null) ? c.Pseudo : "Joueur");
 		if (!Connecte)
 		{
-			return Inscrire(pseudoSouhaite);
+			string err = Inscrire(pseudoSouhaite);
+			if (err != null)
+			{
+				return err;
+			}
+		}
+		try
+		{
+			string avert = SyncProfil(c);
+			if (avert != null)
+			{
+				Journal.Ecrire("social-profil", new Exception(avert));
+			}
+		}
+		catch
+		{
 		}
 		return null;
+	}
+
+	/// <summary>Pseudo accepté par le serveur : 2 à 20 lettres, chiffres, espaces, _ ( ) . -</summary>
+	public static string PseudoServeur(string p)
+	{
+		string s = Regex.Replace((p ?? "").Trim(), "[^\\p{L}\\p{N} _().\\-]", "");
+		s = Regex.Replace(s, "\\s+", " ").Trim();
+		if (s.Length > 20)
+		{
+			s = s.Substring(0, 20).Trim();
+		}
+		if (s.Length < 2)
+		{
+			s = "Joueur";
+		}
+		return s;
+	}
+
+	private static string pseudoEnvoye = "";
+
+	private static int niveauEnvoye = -1;
+
+	/// <summary>
+	/// Envoie au serveur le vrai pseudo et le niveau du profil actif (sinon les amis voient
+	/// « Joueur », niveau 1). Renvoie null si tout va bien, sinon le message d'erreur.
+	/// </summary>
+	public static string SyncProfil(Compte c)
+	{
+		if (!Actif || !Connecte || c == null)
+		{
+			return null;
+		}
+		string pseudo = PseudoServeur(c.Pseudo);
+		int niveau = 1;
+		try
+		{
+			niveau = Math.Max(1, Progression.NiveauDe(c));
+		}
+		catch
+		{
+		}
+		if (pseudo == Pseudo && pseudo == pseudoEnvoye && niveau == niveauEnvoye)
+		{
+			EnvoyerApparence(c);
+			return null;
+		}
+		int st;
+		Dictionary<string, object> r = AppelAuth("PUT", "/v1/moi", new Dictionary<string, object>
+		{
+			{ "pseudo", pseudo },
+			{ "niveau", niveau }
+		}, out st);
+		if (st == 409 && pseudo != Pseudo)
+		{
+			r = AppelAuth("PUT", "/v1/moi", new Dictionary<string, object> { { "niveau", niveau } }, out st);
+			if (st == 200)
+			{
+				niveauEnvoye = niveau;
+			}
+			return "le pseudo « " + pseudo + " » est déjà pris sur le serveur : vos amis voient « " + Pseudo + " »";
+		}
+		if (st != 200 || r == null)
+		{
+			return Msg(r, "profil non synchronisé");
+		}
+		if (r.TryGetValue("pseudo", out var v))
+		{
+			Pseudo = Convert.ToString(v);
+			Ecrire();
+		}
+		pseudoEnvoye = pseudo;
+		niveauEnvoye = niveau;
+		EnvoyerApparence(c);
+		return null;
+	}
+
+	private static string apparenceEnvoyee = "";
+
+	/// <summary>Envoie l'apparence publique du profil (bannière, couleurs, décor, bio, statistiques) pour que les amis la voient.</summary>
+	public static void EnvoyerApparence(Compte c)
+	{
+		if (!Actif || !Connecte || c == null)
+		{
+			return;
+		}
+		int lancements = 0;
+		foreach (int v in c.Lancements.Values)
+		{
+			lancements += v;
+		}
+		long secondes = 0L;
+		foreach (KeyValuePair<string, int> st in c.Stats)
+		{
+			if (st.Key.EndsWith("_sec"))
+			{
+				secondes += st.Value;
+			}
+		}
+		Dictionary<string, object> d = new Dictionary<string, object>
+		{
+			{ "couleur", c.Couleur },
+			{ "banniere", c.Banniere },
+			{ "couleur_perso", c.CouleurPerso },
+			{ "ban_type", c.BanType ?? "" },
+			{ "ban_motif", c.BanMotif ?? "" },
+			{ "ban_c1", c.BanC1 },
+			{ "ban_c2", c.BanC2 },
+			{ "ban_angle", c.BanAngle },
+			{ "deco", c.Deco ?? "" },
+			{ "bio", c.Bio ?? "" },
+			{ "statut", c.Statut ?? "" },
+			{ "jeu_favori", c.JeuFavori ?? "" },
+			{ "lieu", c.Lieu ?? "" },
+			{ "succes", c.Succes.Count },
+			{ "lancements", lancements },
+			{ "secondes", (int)Math.Min(2000000000L, secondes) }
+		};
+		string cle = new JavaScriptSerializer().Serialize(d);
+		if (cle == apparenceEnvoyee)
+		{
+			return;
+		}
+		int stc;
+		AppelAuth("PUT", "/v1/apparence", d, out stc);
+		if (stc == 200)
+		{
+			apparenceEnvoyee = cle;
+		}
 	}
 
 	public static ComSocial Com(Dictionary<string, object> d)

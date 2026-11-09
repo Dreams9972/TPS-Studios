@@ -63,7 +63,7 @@ internal class FenAmis : Form, IPage
 		base.ClientSize = Integre.Hote;
 		int width = base.ClientSize.Width;
 		int height = base.ClientSize.Height;
-		int num = Math.Min(width, 1240);
+		int num = Math.Max(Math.Min(width, Zx.P(900)), Math.Min(width - Zx.P(48), Zx.P(2400)));
 		int num2 = (width - num) / 2;
 		Panel panel = new Panel
 		{
@@ -119,10 +119,10 @@ internal class FenAmis : Form, IPage
 		corps.BackColor = C.Fond;
 		base.Controls.Add(corps);
 		corps.BringToFront();
-		int num3 = height - 82 - 56;
-		int num4 = Zx.P(430);
+		int num3 = height - Zx.P(82) - Zx.P(56);
+		int num4 = Zx.P(420);
 		int lx = num2 + Zx.P(24);
-		int num5 = lx + num4 + 28;
+		int num5 = lx + num4 + Zx.P(32);
 		int num6 = num2 + num - Zx.P(24) - num5;
 		Func<string, int, Label> func = delegate(string t, int y)
 		{
@@ -138,9 +138,9 @@ internal class FenAmis : Form, IPage
 			corps.Controls.Add(label);
 			return label;
 		};
-		func("VOTRE CODE AMI  ·  donnez-le à vos amis pour qu'ils vous ajoutent", 6);
+		func("VOTRE CODE AMI  ·  donnez-le à vos amis pour qu'ils vous ajoutent", Zx.P(8));
 		tCode = new Champ(multi: false, Zx.P(38));
-		tCode.Location = new Point(lx, Zx.P(28));
+		tCode.Location = new Point(lx, Zx.P(30));
 		tCode.Width = num4 - Zx.P(118);
 		tCode.ReadOnly = true;
 		tCode.Text = "…";
@@ -149,7 +149,7 @@ internal class FenAmis : Form, IPage
 		{
 			Plein = false,
 			Size = new Size(Zx.P(108), Zx.P(38)),
-			Location = new Point(lx + num4 - Zx.P(108), Zx.P(28))
+			Location = new Point(lx + num4 - Zx.P(108), Zx.P(30))
 		};
 		corps.Controls.Add(bouton);
 		bouton.Click += delegate
@@ -167,9 +167,9 @@ internal class FenAmis : Form, IPage
 			{
 			}
 		};
-		func("AJOUTER AVEC UN CODE AMI", 80);
+		func("AJOUTER AVEC UN CODE AMI", Zx.P(88));
 		tAjout = new Champ(multi: false, Zx.P(38));
-		tAjout.Location = new Point(lx, Zx.P(102));
+		tAjout.Location = new Point(lx, Zx.P(110));
 		tAjout.Width = num4 - Zx.P(118);
 		tAjout.Indice = "ex. 1A2B-3C4D-5E6F-7A8B";
 		tAjout.MaxLength = 24;
@@ -177,7 +177,7 @@ internal class FenAmis : Form, IPage
 		Bouton bouton2 = new Bouton("Ajouter")
 		{
 			Size = new Size(Zx.P(108), Zx.P(38)),
-			Location = new Point(lx + num4 - Zx.P(108), Zx.P(102))
+			Location = new Point(lx + num4 - Zx.P(108), Zx.P(110))
 		};
 		corps.Controls.Add(bouton2);
 		bouton2.Click += delegate
@@ -197,21 +197,21 @@ internal class FenAmis : Form, IPage
 				tAjout.Text = "";
 			}
 		};
-		func("RECHERCHER UN JOUEUR", 156);
+		func("RECHERCHER UN JOUEUR", Zx.P(168));
 		tq = new Champ(multi: false, Zx.P(38));
-		tq.Location = new Point(lx, Zx.P(178));
+		tq.Location = new Point(lx, Zx.P(190));
 		tq.Width = num4;
-		tq.Indice = "Pseudo du joueur (2 lettres au moins)…";
-		tq.MaxLength = 20;
+		tq.Indice = "Pseudo ou code ami (2 caractères au moins)…";
+		tq.MaxLength = 24;
 		corps.Controls.Add(tq);
 		zr = new ZoneDessin();
-		zr.Location = new Point(lx, Zx.P(228));
-		zr.Size = new Size(num4, num3 - Zx.P(228) - Zx.P(12));
+		zr.Location = new Point(lx, Zx.P(242));
+		zr.Size = new Size(num4, num3 - Zx.P(242) - Zx.P(12));
 		zr.Dessiner = DessinerRecherche;
 		corps.Controls.Add(zr);
 		pl = new Panel();
-		pl.Location = new Point(num5, Zx.P(8));
-		pl.Size = new Size(num6, num3 - Zx.P(20));
+		pl.Location = new Point(num5, 0);
+		pl.Size = new Size(num6, num3 - Zx.P(8));
 		pl.AutoScroll = true;
 		pl.BackColor = C.Fond;
 		corps.Controls.Add(pl);
@@ -473,18 +473,33 @@ internal class FenAmis : Form, IPage
 		}
 	}
 
+	private const int Ecart = 16;
+
+	private static int HautCarte => Zx.P(262);
+
+	private int Colonnes(int w)
+	{
+		return Math.Max(1, (w + Zx.P(Ecart)) / (Zx.P(300) + Zx.P(Ecart)));
+	}
+
+	private int HauteurSection(int n, int w)
+	{
+		if (n <= 0)
+		{
+			return 0;
+		}
+		int cols = Colonnes(w);
+		int rangs = (n + cols - 1) / cols;
+		return Zx.P(40) + rangs * (HautCarte + Zx.P(Ecart));
+	}
+
 	private void MajTaille()
 	{
-		int num = Zx.P(40);
-		if (Social.Recues.Count > 0)
-		{
-			num += Zx.P(40) + Social.Recues.Count * Zx.P(62);
-		}
-		num += Zx.P(40) + Math.Max(1, Social.Amis.Count) * Zx.P(62);
-		if (Social.Envoyees.Count > 0)
-		{
-			num += Zx.P(40) + Social.Envoyees.Count * Zx.P(62);
-		}
+		int w = zl.Width;
+		int num = Zx.P(8);
+		num += HauteurSection(Social.Recues.Count, w);
+		num += Math.Max(HauteurSection(Math.Max(1, Social.Amis.Count), w), Zx.P(120));
+		num += HauteurSection(Social.Envoyees.Count, w);
 		zl.Height = Math.Max(pl.ClientSize.Height - 4, num);
 		zl.Invalidate();
 	}
@@ -500,9 +515,51 @@ internal class FenAmis : Form, IPage
 		return Comptes.Palette[Math.Abs(num) % Comptes.Palette.Length];
 	}
 
+	/// <summary>Couleur d'avatar choisie par le joueur (palette du profil), sinon une couleur tirée de son identifiant.</summary>
+	internal static Color CouleurAvatar(Ami a)
+	{
+		if (a.App.ContainsKey("couleur"))
+		{
+			int i = a.Nombre("couleur");
+			if (i >= 0 && i < Comptes.Palette.Length)
+			{
+				return Comptes.Palette[i];
+			}
+		}
+		return CouleurDe(a.Id);
+	}
+
+	/// <summary>Bannière du joueur (comme sur son profil) ; un modèle tiré de son identifiant s'il n'en a pas publié.</summary>
+	internal static void DessinerBanniere(Graphics g, Ami a, Rectangle r)
+	{
+		Compte c = a.EnCompte();
+		if (a.App.Count == 0)
+		{
+			c.Banniere = Math.Abs((a.Id ?? "").GetHashCode()) % Math.Max(1, Banniere.Modeles.Length);
+		}
+		try
+		{
+			Banniere.De(c).Dessiner(g, r);
+		}
+		catch
+		{
+			using LinearGradientBrush brush = new LinearGradientBrush(r, CouleurAvatar(a), C.Carte, 20f);
+			g.FillRectangle(brush, r);
+		}
+	}
+
+	internal static string Duree(int secondes)
+	{
+		if (secondes < 3600)
+		{
+			return Math.Max(0, secondes / 60) + " min";
+		}
+		return (secondes / 3600).ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("fr-FR")) + " h";
+	}
+
 	internal static void Avatar(Graphics g, Ami a, Rectangle r, bool point, Font f)
 	{
-		using (SolidBrush brush = new SolidBrush(CouleurDe(a.Id)))
+		using (SolidBrush brush = new SolidBrush(CouleurAvatar(a)))
 		{
 			g.FillEllipse(brush, r);
 		}
@@ -559,11 +616,11 @@ internal class FenAmis : Form, IPage
 		int num = w - Zx.P(60) - Zx.P(230);
 		string pseudo = a.Pseudo;
 		Lang.DrawText(g, pseudo, fNom, new Rectangle(Zx.P(60), y + Zx.P(8), num, Zx.P(20)), C.Texte, TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding);
-		int num2 = 60 + Math.Min(num, Lang.MeasureText(pseudo, fNom).Width) + 8;
+		int num2 = Zx.P(60) + Math.Min(num, Lang.MeasureText(pseudo, fNom).Width) + Zx.P(8);
 		if (a.Vip)
 		{
 			Badge.PilleVip(g, new Rectangle(num2, y + Zx.P(10), Zx.P(36), Zx.P(16)));
-			num2 += 42;
+			num2 += Zx.P(42);
 		}
 		Lang.DrawText(g, "Niv. " + a.Niveau, fSt, new Rectangle(num2, y + Zx.P(10), Zx.P(80), Zx.P(18)), Color.FromArgb(255, 196, 140), TextFormatFlags.NoPadding);
 		Lang.DrawText(g, sous + ((a.Communs > 0) ? ("  ·  " + a.Communs + ((a.Communs > 1) ? " amis en commun" : " ami en commun")) : ""), fSt, new Rectangle(Zx.P(60), y + Zx.P(30), num, Zx.P(18)), cs, TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding);
@@ -575,7 +632,7 @@ internal class FenAmis : Form, IPage
 		clicsR.Clear();
 		if (tq.Text.Trim().Length < 2)
 		{
-			Lang.DrawText(g, "Tapez au moins 2 lettres du pseudo d'un joueur.\nLe joueur doit avoir déjà utilisé les fonctions en ligne du lanceur.", fSt, new Rectangle(Zx.P(4), Zx.P(6), w - Zx.P(8), Zx.P(60)), C.Gris, TextFormatFlags.WordBreak | TextFormatFlags.NoPadding);
+			Lang.DrawText(g, "Tapez au moins 2 lettres du pseudo d'un joueur, ou son code ami.\nLe joueur doit avoir déjà utilisé les fonctions en ligne du lanceur.", fSt, new Rectangle(Zx.P(4), Zx.P(6), w - Zx.P(8), Zx.P(60)), C.Gris, TextFormatFlags.WordBreak | TextFormatFlags.NoPadding);
 			return;
 		}
 		if (rechEnCours && res.Count == 0)
@@ -591,7 +648,7 @@ internal class FenAmis : Form, IPage
 		int num = 0;
 		foreach (Ami re in res)
 		{
-			if (num + 54 > h)
+			if (num + Zx.P(54) > h)
 			{
 				break;
 			}
@@ -599,21 +656,21 @@ internal class FenAmis : Form, IPage
 			Ligne(g, re, num, w, (re.Lien == "ami") ? "Déjà votre ami" : ((re.Lien == "envoyee") ? "Demande envoyée" : ((re.Lien == "recue") ? "Il vous a demandé en ami" : "Joueur TPS Groupe")), C.Gris, point: false, sourisR);
 			if (re.Lien == "")
 			{
-				Bt(g, clicsR, sourisR, w - Zx.P(12), num + 11, "＋  Ajouter", C.Jade, plein: true, delegate
+				Bt(g, clicsR, sourisR, w - Zx.P(12), num + Zx.P(11), "＋  Ajouter", C.Jade, plein: true, delegate
 				{
 					Agir(() => Social.DemanderAmi(aa.Id), "✔  Demande envoyée à " + aa.Pseudo);
 				});
 			}
 			else if (re.Lien == "recue")
 			{
-				Bt(g, clicsR, sourisR, w - Zx.P(12), num + 11, "Accepter", C.Vert, plein: true, delegate
+				Bt(g, clicsR, sourisR, w - Zx.P(12), num + Zx.P(11), "Accepter", C.Vert, plein: true, delegate
 				{
 					Agir(() => Social.AccepterAmi(aa.Id), "✔  " + aa.Pseudo + " est maintenant votre ami");
 				});
 			}
 			else
 			{
-				Bt(g, clicsR, sourisR, w - Zx.P(12), num + 11, (re.Lien == "ami") ? "Ami ✔" : "Envoyée", C.Gris, plein: false, null);
+				Bt(g, clicsR, sourisR, w - Zx.P(12), num + Zx.P(11), (re.Lien == "ami") ? "Ami ✔" : "Envoyée", C.Gris, plein: false, null);
 			}
 			clicsR.Add(new KeyValuePair<Rectangle, Action>(new Rectangle(0, num, w, Zx.P(54)), delegate
 			{
@@ -623,36 +680,208 @@ internal class FenAmis : Form, IPage
 		}
 	}
 
+	private static readonly Font fCarteNom = new Font("Segoe UI Semibold", Zx.P(12f));
+
+	private static readonly Font fCarteIni = new Font("Segoe UI Semibold", Zx.P(20f));
+
+	private static readonly Font fPuce = new Font("Segoe UI", Zx.P(8.5f));
+
+	/// <summary>
+	/// Carte d'un joueur : bannière, avatar, décor, niveau et statut. Au survol, elle montre la
+	/// bio, le jeu favori, le lieu, le temps de jeu, les succès et les boutons ; un clic ouvre tout le profil.
+	/// </summary>
+	private void Carte(Graphics g, Ami a, Rectangle r, string mode)
+	{
+		bool survol = r.Contains(sourisL);
+		Ami aa = a;
+		using (GraphicsPath cadre = Bouton.Rond(r, Zx.P(14)))
+		{
+			using (SolidBrush fond = new SolidBrush(survol ? C.CarteSurvol : C.Carte))
+			{
+				g.FillPath(fond, cadre);
+			}
+			int hb = Zx.P(84);
+			Rectangle rb = new Rectangle(r.X, r.Y, r.Width, hb);
+			GraphicsState gs = g.Save();
+			g.SetClip(cadre, CombineMode.Intersect);
+			g.SetClip(rb, CombineMode.Intersect);
+			DessinerBanniere(g, a, rb);
+			using (LinearGradientBrush ombre = new LinearGradientBrush(new Rectangle(rb.X, rb.Bottom - Zx.P(40), rb.Width, Zx.P(41)), Color.FromArgb(0, 8, 10, 24), Color.FromArgb(150, 8, 10, 24), 90f))
+			{
+				g.FillRectangle(ombre, rb.X, rb.Bottom - Zx.P(40), rb.Width, Zx.P(40));
+			}
+			g.Restore(gs);
+			using Pen bord = new Pen(survol ? Color.FromArgb(220, C.Jade) : Color.FromArgb(150, C.Ligne), survol ? 1.6f : 1f);
+			g.DrawPath(bord, cadre);
+		}
+		Badge.Dessiner(g, new Rectangle(r.Right - Zx.P(46), r.Y + Zx.P(10), Zx.P(36), Zx.P(36)), a.Niveau, 0.0);
+		int d = Zx.P(66);
+		Rectangle av = new Rectangle(r.X + Zx.P(16), r.Y + Zx.P(84) - d / 2 - Zx.P(4), d, d);
+		using (SolidBrush anneau = new SolidBrush(survol ? C.CarteSurvol : C.Carte))
+		{
+			g.FillEllipse(anneau, Rectangle.Inflate(av, Zx.P(4), Zx.P(4)));
+		}
+		Avatar(g, a, av, mode == "ami", fCarteIni);
+		string deco = a.Texte("deco");
+		if (deco.Length > 0)
+		{
+			try
+			{
+				Deco.Forcer(g, av, deco, 0.0);
+			}
+			catch
+			{
+			}
+		}
+		int x = av.Right + Zx.P(12);
+		int wt = r.Right - Zx.P(14) - x;
+		int y = r.Y + Zx.P(90);
+		Lang.DrawText(g, a.Pseudo, fCarteNom, new Rectangle(x, y, wt, Zx.P(26)), C.Texte, TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding);
+		if (a.Vip)
+		{
+			int xv = x + Math.Min(wt - Zx.P(40), Lang.MeasureText(a.Pseudo, fCarteNom).Width + Zx.P(8));
+			Badge.PilleVip(g, new Rectangle(xv, y + Zx.P(4), Zx.P(36), Zx.P(16)));
+		}
+		string etat;
+		Color ce;
+		switch (mode)
+		{
+		case "recue":
+			etat = "Veut vous ajouter en ami";
+			ce = C.Orange;
+			break;
+		case "envoyee":
+			etat = "Demande envoyée";
+			ce = C.Gris;
+			break;
+		default:
+			etat = (a.EnLigne ? ((a.Statut.Length > 0) ? a.Statut : "En ligne") : "Hors ligne");
+			ce = ((!a.EnLigne) ? C.Gris : (a.Statut.StartsWith("En jeu") ? C.Orange : C.Vert));
+			break;
+		}
+		Lang.DrawText(g, etat, fSt, new Rectangle(x, y + Zx.P(28), wt, Zx.P(18)), ce, TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding);
+		int yc = r.Y + Zx.P(150);
+		int xc = r.X + Zx.P(16);
+		int wc = r.Width - Zx.P(32);
+		List<string> puces = new List<string>();
+		if (a.Texte("jeu_favori").Length > 0)
+		{
+			puces.Add("🎮  " + a.Texte("jeu_favori"));
+		}
+		if (a.Texte("lieu").Length > 0)
+		{
+			puces.Add("📍  " + a.Texte("lieu"));
+		}
+		if (a.Nombre("secondes") > 0)
+		{
+			puces.Add("⏱  " + Duree(a.Nombre("secondes")) + " de jeu");
+		}
+		if (a.Nombre("succes") > 0)
+		{
+			puces.Add("🏆  " + a.Nombre("succes") + " succès");
+		}
+		if (a.Communs > 0)
+		{
+			puces.Add(a.Communs + ((a.Communs > 1) ? " amis en commun" : " ami en commun"));
+		}
+		if (!survol)
+		{
+			string ligne = ((a.Texte("statut").Length > 0) ? ("« " + a.Texte("statut") + " »") : ((a.Texte("bio").Length > 0) ? a.Texte("bio") : "Joueur TPS Groupe"));
+			Lang.DrawText(g, ligne, fSt, new Rectangle(xc, yc, wc, Zx.P(36)), Color.FromArgb(190, 200, 220), TextFormatFlags.WordBreak | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding);
+			DessinerPuces(g, puces, xc, r.Bottom - Zx.P(34), wc);
+		}
+		else
+		{
+			string bio = ((a.Texte("bio").Length > 0) ? a.Texte("bio") : ((a.Texte("statut").Length > 0) ? ("« " + a.Texte("statut") + " »") : "Pas encore de bio."));
+			Lang.DrawText(g, bio, fSt, new Rectangle(xc, yc - Zx.P(4), wc, Zx.P(34)), Color.FromArgb(205, 214, 228), TextFormatFlags.WordBreak | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding);
+			DessinerPuces(g, puces, xc, yc + Zx.P(34), wc);
+			int yb = r.Bottom - Zx.P(44);
+			int droite = r.Right - Zx.P(12);
+			if (mode == "ami")
+			{
+				Rectangle rr = Bt(g, clicsL, sourisL, droite, yb, "Retirer", C.Rouge, plein: false, delegate
+				{
+					if (MessageBox.Show(this, "Retirer « " + aa.Pseudo + " » de vos amis ?", "Amis", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+					{
+						Agir(() => Social.RetirerAmi(aa.Id), aa.Pseudo + " a été retiré de vos amis");
+					}
+				});
+				Bt(g, clicsL, sourisL, rr.X - Zx.P(8), yb, "Profil et mods", C.Jade, plein: true, delegate
+				{
+					Profil(aa);
+				});
+			}
+			else if (mode == "recue")
+			{
+				Rectangle rr2 = Bt(g, clicsL, sourisL, droite, yb, "Refuser", C.Gris, plein: false, delegate
+				{
+					Agir(() => Social.RetirerAmi(aa.Id), "Demande de " + aa.Pseudo + " refusée");
+				});
+				Bt(g, clicsL, sourisL, rr2.X - Zx.P(8), yb, "Accepter", C.Vert, plein: true, delegate
+				{
+					Agir(() => Social.AccepterAmi(aa.Id), "✔  " + aa.Pseudo + " est maintenant votre ami");
+				});
+			}
+			else
+			{
+				Bt(g, clicsL, sourisL, droite, yb, "Annuler la demande", C.Gris, plein: false, delegate
+				{
+					Agir(() => Social.RetirerAmi(aa.Id), "Demande à " + aa.Pseudo + " annulée");
+				});
+			}
+		}
+		clicsL.Add(new KeyValuePair<Rectangle, Action>(r, delegate
+		{
+			Profil(aa);
+		}));
+	}
+
+	private static void DessinerPuces(Graphics g, List<string> puces, int x, int y, int w)
+	{
+		int xp = x;
+		foreach (string p in puces)
+		{
+			int lp = Lang.MeasureText(p, fPuce).Width + Zx.P(16);
+			if (xp + lp > x + w)
+			{
+				break;
+			}
+			Rectangle rp = new Rectangle(xp, y, lp, Zx.P(24));
+			using (GraphicsPath path = Bouton.Rond(rp, Zx.P(12)))
+			{
+				using SolidBrush b = new SolidBrush(Color.FromArgb(40, 255, 255, 255));
+				g.FillPath(b, path);
+			}
+			Lang.DrawText(g, p, fPuce, rp, Color.FromArgb(215, 222, 236), TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding);
+			xp += lp + Zx.P(6);
+		}
+	}
+
+	private int Grille(Graphics g, List<Ami> l, int y, int w, string mode)
+	{
+		int cols = Colonnes(w);
+		int gap = Zx.P(Ecart);
+		int cw = (w - (cols - 1) * gap) / cols;
+		for (int i = 0; i < l.Count; i++)
+		{
+			Rectangle r = new Rectangle(i % cols * (cw + gap), y + i / cols * (HautCarte + gap), cw - 1, HautCarte);
+			Carte(g, l[i], r, mode);
+		}
+		return y + (l.Count + cols - 1) / cols * (HautCarte + gap);
+	}
+
 	private void DessinerListe(Graphics g, int w, int h)
 	{
 		g.SmoothingMode = SmoothingMode.AntiAlias;
+		g.InterpolationMode = InterpolationMode.HighQualityBilinear;
 		clicsL.Clear();
-		int num = 0;
+		int num = Zx.P(8);
 		List<Ami> list = new List<Ami>(Social.Amis);
 		list.Sort((Ami a, Ami b) => (a.EnLigne != b.EnLigne) ? ((!a.EnLigne) ? 1 : (-1)) : string.Compare(a.Pseudo, b.Pseudo, StringComparison.OrdinalIgnoreCase));
 		if (Social.Recues.Count > 0)
 		{
-			Lang.DrawText(g, "DEMANDES REÇUES  ·  " + Social.Recues.Count, fRub, new Point(Zx.P(2), num + Zx.P(8)), C.Orange);
-			num += Zx.P(32);
-			foreach (Ami recue in Social.Recues)
-			{
-				Ami aa3 = recue;
-				Ligne(g, recue, num, w, "Veut vous ajouter en ami", C.Gris, point: false, sourisL);
-				Rectangle rectangle = Bt(g, clicsL, sourisL, w - Zx.P(12), num + 11, "Refuser", C.Gris, plein: false, delegate
-				{
-					Agir(() => Social.RetirerAmi(aa3.Id), "Demande de " + aa3.Pseudo + " refusée");
-				});
-				Bt(g, clicsL, sourisL, rectangle.X - Zx.P(8), num + 11, "Accepter", C.Vert, plein: true, delegate
-				{
-					Agir(() => Social.AccepterAmi(aa3.Id), "✔  " + aa3.Pseudo + " est maintenant votre ami");
-				});
-				clicsL.Add(new KeyValuePair<Rectangle, Action>(new Rectangle(0, num, w, Zx.P(54)), delegate
-				{
-					Profil(aa3);
-				}));
-				num += Zx.P(62);
-			}
-			num += Zx.P(8);
+			Lang.DrawText(g, "DEMANDES REÇUES  ·  " + Social.Recues.Count, fRub, new Point(Zx.P(2), num), C.Orange);
+			num = Grille(g, Social.Recues, num + Zx.P(26), w, "recue") + Zx.P(14);
 		}
 		int num2 = 0;
 		foreach (Ami item in list)
@@ -662,54 +891,21 @@ internal class FenAmis : Form, IPage
 				num2++;
 			}
 		}
-		Lang.DrawText(g, "MES AMIS  ·  " + list.Count + "   (" + num2 + " en ligne)", fRub, new Point(Zx.P(2), num + Zx.P(8)), C.Gris);
-		num += Zx.P(32);
+		Lang.DrawText(g, "MES AMIS  ·  " + list.Count + "   (" + num2 + " en ligne)", fRub, new Point(Zx.P(2), num), C.Gris);
+		num += Zx.P(26);
 		if (list.Count == 0)
 		{
 			Lang.DrawText(g, "Pas encore d'amis : ajoutez-les avec leur code ami ou cherchez-les à gauche.", fSt, new Rectangle(Zx.P(4), num + Zx.P(6), w - Zx.P(8), Zx.P(48)), C.Gris, TextFormatFlags.WordBreak | TextFormatFlags.NoPadding);
-			num += Zx.P(62);
+			num += Zx.P(70);
 		}
-		foreach (Ami item2 in list)
+		else
 		{
-			Ami aa2 = item2;
-			Ligne(g, item2, num, w, item2.EnLigne ? item2.Statut : "Hors ligne", item2.EnLigne ? (item2.Statut.StartsWith("En jeu") ? C.Orange : C.Vert) : C.Gris, point: true, sourisL);
-			Rectangle rectangle2 = Bt(g, clicsL, sourisL, w - Zx.P(12), num + 11, "Retirer", C.Rouge, plein: false, delegate
-			{
-				if (MessageBox.Show(this, "Retirer « " + aa2.Pseudo + " » de vos amis ?", "Amis", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
-				{
-					Agir(() => Social.RetirerAmi(aa2.Id), aa2.Pseudo + " a été retiré de vos amis");
-				}
-			});
-			Bt(g, clicsL, sourisL, rectangle2.X - Zx.P(8), num + 11, "Profil et mods", C.Jade, plein: false, delegate
-			{
-				Profil(aa2);
-			});
-			clicsL.Add(new KeyValuePair<Rectangle, Action>(new Rectangle(0, num, w, Zx.P(54)), delegate
-			{
-				Profil(aa2);
-			}));
-			num += Zx.P(62);
+			num = Grille(g, list, num, w, "ami") + Zx.P(14);
 		}
-		if (Social.Envoyees.Count <= 0)
+		if (Social.Envoyees.Count > 0)
 		{
-			return;
-		}
-		num += Zx.P(8);
-		Lang.DrawText(g, "DEMANDES ENVOYÉES  ·  " + Social.Envoyees.Count, fRub, new Point(Zx.P(2), num + Zx.P(8)), C.Gris);
-		num += Zx.P(32);
-		foreach (Ami envoyee in Social.Envoyees)
-		{
-			Ami aa = envoyee;
-			Ligne(g, envoyee, num, w, "En attente de réponse", C.Gris, point: false, sourisL);
-			Bt(g, clicsL, sourisL, w - Zx.P(12), num + 11, "Annuler", C.Gris, plein: false, delegate
-			{
-				Agir(() => Social.RetirerAmi(aa.Id), "Demande à " + aa.Pseudo + " annulée");
-			});
-			clicsL.Add(new KeyValuePair<Rectangle, Action>(new Rectangle(0, num, w, Zx.P(54)), delegate
-			{
-				Profil(aa);
-			}));
-			num += Zx.P(62);
+			Lang.DrawText(g, "DEMANDES ENVOYÉES  ·  " + Social.Envoyees.Count, fRub, new Point(Zx.P(2), num), C.Gris);
+			Grille(g, Social.Envoyees, num + Zx.P(26), w, "envoyee");
 		}
 	}
 }

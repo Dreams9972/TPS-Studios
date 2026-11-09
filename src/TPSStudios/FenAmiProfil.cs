@@ -37,6 +37,9 @@ internal class FenAmiProfil : Form
 
 	private static readonly Font fM = new Font("Segoe UI Semibold", Zx.P(10f));
 
+	/// <summary>Bas de l'en-tête (bannière, bio, statistiques), calculé au dessin.</summary>
+	private int hautEntete = Zx.P(300);
+
 	public FenAmiProfil(Ami ami)
 	{
 		a = ami;
@@ -45,17 +48,17 @@ internal class FenAmiProfil : Form
 		BackColor = C.Fond;
 		ForeColor = C.Texte;
 		Font = new Font("Segoe UI", Zx.P(10f));
-		base.ClientSize = new Size(Zx.P(700), Zx.P(640));
+		base.ClientSize = new Size(Zx.P(760), Zx.P(780));
 		pz = new Panel();
 		pz.Location = new Point(0, 0);
-		pz.Size = new Size(Zx.P(700), Zx.P(640) - Zx.P(70));
+		pz.Size = new Size(Zx.P(760), Zx.P(780) - Zx.P(70));
 		pz.AutoScroll = true;
 		pz.BackColor = C.Fond;
 		base.Controls.Add(pz);
 		Theme.Sombre(pz);
 		z = new ZoneDessin();
 		z.Location = new Point(0, 0);
-		z.Size = new Size(Zx.P(700) - SystemInformation.VerticalScrollBarWidth - Zx.P(2), Zx.P(560));
+		z.Size = new Size(Zx.P(760) - SystemInformation.VerticalScrollBarWidth - Zx.P(2), Zx.P(560));
 		z.Dessiner = Dessiner;
 		pz.Controls.Add(z);
 		ZoneDessin zoneDessin = z;
@@ -105,7 +108,7 @@ internal class FenAmiProfil : Form
 		bVip = new Bouton("\ud83c\udf81  Offrir le VIP");
 		bVip.Couleur = C.Or;
 		bVip.Size = new Size(Zx.P(190), Zx.P(38));
-		bVip.Location = new Point(Zx.P(700) - Zx.P(24) - Zx.P(190), Zx.P(16));
+		bVip.Location = new Point(Zx.P(760) - Zx.P(24) - Zx.P(190), Zx.P(16));
 		bVip.Visible = false;
 		panel.Controls.Add(bVip);
 		bVip.Click += delegate
@@ -120,7 +123,7 @@ internal class FenAmiProfil : Form
 		bAct = new Bouton("…");
 		bAct.Plein = false;
 		bAct.Size = new Size(Zx.P(170), Zx.P(38));
-		bAct.Location = new Point(Zx.P(700) - Zx.P(24) - Zx.P(190) - Zx.P(10) - Zx.P(170), Zx.P(16));
+		bAct.Location = new Point(Zx.P(760) - Zx.P(24) - Zx.P(190) - Zx.P(10) - Zx.P(170), Zx.P(16));
 		bAct.Visible = false;
 		panel.Controls.Add(bAct);
 		base.HandleCreated += delegate
@@ -204,7 +207,7 @@ internal class FenAmiProfil : Form
 		{
 			bAct.Visible = false;
 		}
-		int val = Zx.P(210) + Zx.P(34) + Math.Max(1, (pr.Communs.Count + Zx.P(3)) / 4) * Zx.P(40) + Zx.P(40) + (pr.EstAmi ? (Math.Max(1, pr.Mods.Count) * Zx.P(50)) : Zx.P(40)) + Zx.P(30);
+		int val = hautEntete + Zx.P(70) + Zx.P(34) + Math.Max(1, (pr.Communs.Count + Zx.P(3)) / 4) * Zx.P(40) + Zx.P(40) + (pr.EstAmi ? (Math.Max(1, pr.Mods.Count) * Zx.P(50)) : Zx.P(40)) + Zx.P(30);
 		z.Height = Math.Max(pz.ClientSize.Height, val);
 		z.Invalidate();
 	}
@@ -214,27 +217,112 @@ internal class FenAmiProfil : Form
 		g.SmoothingMode = SmoothingMode.AntiAlias;
 		clics.Clear();
 		Ami ami = ((pr != null) ? pr.A : a);
-		using (LinearGradientBrush brush = new LinearGradientBrush(new Rectangle(0, 0, w, Zx.P(120)), Color.FromArgb(60, FenAmis.CouleurDe(ami.Id)), C.Fond, 90f))
+		if (ami.App.Count == 0 && a.App.Count > 0)
 		{
-			g.FillRectangle(brush, 0, 0, w, Zx.P(120));
+			ami.App = a.App;
 		}
-		FenAmis.Avatar(g, ami, new Rectangle(Zx.P(28), Zx.P(28), Zx.P(84), Zx.P(84)), pr != null && pr.EstAmi, fI);
-		Lang.DrawText(g, ami.Pseudo, fP, new Rectangle(Zx.P(132), Zx.P(34), w - Zx.P(160), Zx.P(34)), C.Texte, TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding);
-		int num = Zx.P(132) + Math.Min(w - Zx.P(200), Lang.MeasureText(ami.Pseudo, fP).Width) + Zx.P(12);
+		Rectangle rb = new Rectangle(0, 0, w, Zx.P(130));
+		FenAmis.DessinerBanniere(g, ami, rb);
+		using (LinearGradientBrush ombre = new LinearGradientBrush(new Rectangle(0, Zx.P(70), w, Zx.P(61)), Color.FromArgb(0, 8, 10, 24), Color.FromArgb(200, C.Fond), 90f))
+		{
+			g.FillRectangle(ombre, 0, Zx.P(70), w, Zx.P(60));
+		}
+		Badge.Dessiner(g, new Rectangle(w - Zx.P(70), Zx.P(14), Zx.P(48), Zx.P(48)), ami.Niveau, 0.0);
+		Rectangle av = new Rectangle(Zx.P(28), Zx.P(84), Zx.P(96), Zx.P(96));
+		using (SolidBrush anneau = new SolidBrush(C.Fond))
+		{
+			g.FillEllipse(anneau, Rectangle.Inflate(av, Zx.P(5), Zx.P(5)));
+		}
+		FenAmis.Avatar(g, ami, av, pr != null && pr.EstAmi, fI);
+		if (ami.Texte("deco").Length > 0)
+		{
+			try
+			{
+				Deco.Forcer(g, av, ami.Texte("deco"), 0.0);
+			}
+			catch
+			{
+			}
+		}
+		int xt = av.Right + Zx.P(20);
+		Lang.DrawText(g, ami.Pseudo, fP, new Rectangle(xt, Zx.P(136), w - xt - Zx.P(24), Zx.P(34)), C.Texte, TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding);
+		int num = xt + Math.Min(w - xt - Zx.P(100), Lang.MeasureText(ami.Pseudo, fP).Width) + Zx.P(12);
 		if (ami.Vip)
 		{
-			Badge.PilleVip(g, new Rectangle(num, Zx.P(44), Zx.P(40), Zx.P(20)));
+			Badge.PilleVip(g, new Rectangle(num, Zx.P(146), Zx.P(40), Zx.P(20)));
 			num += Zx.P(48);
 		}
-		Lang.DrawText(g, "Niv. " + ami.Niveau, fM, new Point(num, Zx.P(44)), Color.FromArgb(255, 196, 140));
+		Lang.DrawText(g, "Niv. " + ami.Niveau, fM, new Point(num, Zx.P(146)), Color.FromArgb(255, 196, 140));
 		string t = ((pr != null) ? ((!pr.EstAmi) ? "Pas encore dans vos amis" : (pr.A.EnLigne ? pr.A.Statut : "Hors ligne")) : ((err != null) ? ("✖  " + err) : "Chargement du profil…"));
-		Lang.DrawText(g, t, fT, new Rectangle(Zx.P(132), Zx.P(76), w - Zx.P(160), Zx.P(20)), (pr == null || !pr.EstAmi || !pr.A.EnLigne) ? ((err != null) ? C.Rouge : C.Gris) : (pr.A.Statut.StartsWith("En jeu") ? C.Orange : C.Vert), TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding);
-		Lang.DrawText(g, "Code ami : " + Social.CodeAmi(ami.Id), FenAmis.fSt, new Point(Zx.P(132), Zx.P(98)), C.Gris);
+		Lang.DrawText(g, t, fT, new Rectangle(xt, Zx.P(174), w - xt - Zx.P(24), Zx.P(20)), (pr == null || !pr.EstAmi || !pr.A.EnLigne) ? ((err != null) ? C.Rouge : C.Gris) : (pr.A.Statut.StartsWith("En jeu") ? C.Orange : C.Vert), TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding);
+		Lang.DrawText(g, "Code ami : " + Social.CodeAmi(ami.Id), FenAmis.fSt, new Point(xt, Zx.P(196)), C.Gris);
+		int yi = Zx.P(226);
+		string bio = ami.Texte("bio");
+		string statutPerso = ami.Texte("statut");
+		if (statutPerso.Length > 0)
+		{
+			Lang.DrawText(g, "« " + statutPerso + " »", fM, new Rectangle(28, yi, w - 56, Zx.P(22)), Color.FromArgb(225, 230, 245), TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding);
+			yi += Zx.P(26);
+		}
+		if (bio.Length > 0)
+		{
+			int hb = Math.Min(Zx.P(60), Lang.MeasureText(bio, fT, new Size(w - 56, Zx.P(200)), TextFormatFlags.WordBreak).Height);
+			Lang.DrawText(g, bio, fT, new Rectangle(28, yi, w - 56, hb), Color.FromArgb(200, 210, 228), TextFormatFlags.WordBreak | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding);
+			yi += hb + Zx.P(8);
+		}
+		List<string> infos = new List<string>();
+		if (ami.Texte("jeu_favori").Length > 0)
+		{
+			infos.Add("🎮  " + ami.Texte("jeu_favori"));
+		}
+		if (ami.Texte("lieu").Length > 0)
+		{
+			infos.Add("📍  " + ami.Texte("lieu"));
+		}
+		if (ami.Nombre("secondes") > 0)
+		{
+			infos.Add("⏱  " + FenAmis.Duree(ami.Nombre("secondes")) + " de jeu");
+		}
+		if (ami.Nombre("lancements") > 0)
+		{
+			infos.Add("▶  " + ami.Nombre("lancements") + " lancements");
+		}
+		if (ami.Nombre("succes") > 0)
+		{
+			infos.Add("🏆  " + ami.Nombre("succes") + " succès");
+		}
+		if (ami.Cree > 0)
+		{
+			infos.Add("Membre depuis le " + new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(ami.Cree).ToLocalTime().ToString("dd/MM/yyyy"));
+		}
+		int xi = 28;
+		foreach (string inf in infos)
+		{
+			int li = Lang.MeasureText(inf, FenAmis.fSt).Width + Zx.P(20);
+			if (xi + li > w - 28)
+			{
+				xi = 28;
+				yi += Zx.P(34);
+			}
+			Rectangle ri = new Rectangle(xi, yi, li, Zx.P(28));
+			using (GraphicsPath pi = Bouton.Rond(ri, Zx.P(14)))
+			{
+				using SolidBrush bi = new SolidBrush(C.Carte);
+				g.FillPath(bi, pi);
+			}
+			Lang.DrawText(g, inf, FenAmis.fSt, ri, C.Texte, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding);
+			xi += li + Zx.P(8);
+		}
+		if (infos.Count > 0)
+		{
+			yi += Zx.P(40);
+		}
+		hautEntete = yi;
 		if (pr == null)
 		{
 			return;
 		}
-		int num2 = Zx.P(140);
+		int num2 = Math.Max(Zx.P(140), yi + Zx.P(6));
 		int num3 = 28;
 		int num4 = w - 56;
 		Lang.DrawText(g, "AMIS EN COMMUN  ·  " + pr.Communs.Count, FenAmis.fRub, new Point(num3, num2), C.Gris);
