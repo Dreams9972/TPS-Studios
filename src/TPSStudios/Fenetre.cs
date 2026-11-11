@@ -722,7 +722,7 @@ internal partial class Fenetre : Form
 
 	private List<KeyValuePair<Rectangle, Annonce>> rAnnonces = new List<KeyValuePair<Rectangle, Annonce>>();
 
-	private static readonly string[] NouveautesLanceur = new string[2] { "Mods désactivés rangés hors du jeu (TPS Studios\\Mods désactivés)", "Plus aucun dossier du lanceur dans OMSI 2" };
+	private static readonly string[] NouveautesLanceur = new string[3] { "Musique : bouton aléatoire et accès à vos playlists", "Seule la musique de Spotify ou d'Apple Music s'affiche (plus les bandes-annonces)", "Réglages Musique plus simples, en 3 étapes" };
 
 	private static readonly Font fAnT2 = new Font("Segoe UI Semibold", Zx.P(11f));
 
@@ -1022,7 +1022,7 @@ internal partial class Fenetre : Form
 						(Image)null,
 						(EventHandler)delegate
 						{
-							Musique.Touche(179);
+							Musique.Basculer();
 						}
 					},
 					{
@@ -1030,7 +1030,7 @@ internal partial class Fenetre : Form
 						(Image)null,
 						(EventHandler)delegate
 						{
-							Musique.Touche(176);
+							Musique.Commande("suivant");
 						}
 					},
 					{
@@ -1038,7 +1038,7 @@ internal partial class Fenetre : Form
 						(Image)null,
 						(EventHandler)delegate
 						{
-							Musique.Touche(177);
+							Musique.Commande("precedent");
 						}
 					},
 					(ToolStripItem)new ToolStripSeparator(),
@@ -7618,26 +7618,54 @@ internal partial class Fenetre : Form
 					rPiBt.Add(new KeyValuePair<Rectangle, Action>(rb, a));
 				}
 			};
-			action(new Rectangle(num4 - Zx.P(21), num3, Zx.P(42), Zx.P(42)), flag ? "\ue769" : "\ue768", fPiG2, C.Orange, arg5: true, delegate
+			// 7 boutons centrés sur Lecture : lecteur, aléatoire, précédent | LECTURE | suivant, volume, playlists ; resserrés si la pilule est étroite
+			float k = Math.Min(1f, (float)(r.Width - Zx.P(16)) / (float)Zx.P(290));
+			int tG = (int)(Zx.P(42) * k), tM = (int)(Zx.P(34) * k), tP = (int)(Zx.P(30) * k), ec = (int)(Zx.P(10) * k);
+			bool alea = MediaWin.Aleatoire;
+			action(new Rectangle(num4 - tG / 2, num3, tG, tG), flag ? "\ue769" : "\ue768", fPiG2, C.Orange, arg5: true, delegate
 			{
 				Musique.Basculer();
 			});
-			action(new Rectangle(num4 - Zx.P(21) - Zx.P(10) - Zx.P(34), num3 + Zx.P(4), Zx.P(34), Zx.P(34)), "\ue892", fPiG, color, arg5: false, delegate
+			int xg = num4 - tG / 2 - ec - tM, xd = num4 + tG / 2 + ec;
+			action(new Rectangle(xg, num3 + (tG - tM) / 2, tM, tM), "\ue892", fPiG, color, arg5: false, delegate
 			{
-				Musique.Touche(177);
+				Musique.Commande("precedent");
 			});
-			action(new Rectangle(num4 + Zx.P(21) + Zx.P(10), num3 + Zx.P(4), Zx.P(34), Zx.P(34)), "\ue893", fPiG, color, arg5: false, delegate
+			action(new Rectangle(xd, num3 + (tG - tM) / 2, tM, tM), "\ue893", fPiG, color, arg5: false, delegate
 			{
-				Musique.Touche(176);
+				Musique.Commande("suivant");
 			});
-			action(new Rectangle(num4 - Zx.P(21) - Zx.P(10) - Zx.P(34) - Zx.P(12) - Zx.P(30), num3 + Zx.P(6), Zx.P(30), Zx.P(30)), "\ue8a7", fPiG, C.Gris, arg5: false, delegate
+			int yp = num3 + (tG - tP) / 2;
+			action(new Rectangle(xg - ec - tP, yp, tP, tP), "\ue8b1", fPiG, alea ? color : C.Gris, alea, delegate
+			{
+				Musique.Commande("aleatoire", delegate(bool ok)
+				{
+					Sur(delegate
+					{
+						if (!ok)
+						{
+							Toast((Musique.Lecteur.Length > 0) ? (Musique.Lecteur + " ne permet pas de changer le mode aléatoire depuis le lanceur : faites-le dans l'application.") : "Lancez d'abord un titre dans Spotify ou Apple Music.", C.Orange, 4000);
+						}
+						else
+						{
+							Toast(MediaWin.Aleatoire ? "Lecture aléatoire activée" : "Lecture aléatoire désactivée", C.Jade, 1800);
+						}
+						pAccueil.Invalidate();
+					});
+				});
+			});
+			action(new Rectangle(xg - ec - tP - ec - tP, yp, tP, tP), "\ue8a7", fPiG, C.Gris, arg5: false, delegate
 			{
 				Musique.AfficherLecteur();
 			});
-			action(new Rectangle(num4 + Zx.P(21) + Zx.P(10) + Zx.P(34) + Zx.P(12), num3 + Zx.P(6), Zx.P(30), Zx.P(30)), "\ue767", fPiG, volOuvert ? C.Jade : C.Gris, volOuvert, delegate
+			action(new Rectangle(xd + tM + ec, yp, tP, tP), "\ue767", fPiG, volOuvert ? C.Jade : C.Gris, volOuvert, delegate
 			{
 				volOuvert = !volOuvert;
 				pAccueil.Invalidate();
+			});
+			action(new Rectangle(xd + tM + ec + tP + ec, yp, tP, tP), "\ue8fd", fPiG, C.Gris, arg5: false, delegate
+			{
+				MenuPlaylists();
 			});
 			rVolBar = Rectangle.Empty;
 			if (volOuvert && e > 0.85)
