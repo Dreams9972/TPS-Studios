@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -185,9 +185,52 @@ internal static class Omsi
 		return true;
 	}
 
+	// mods désactivés : rangés HORS du dossier du jeu, sur le même disque (déplacement instantané) : <disque>\TPS Studios\Mods désactivés\<id>
+	// ancien emplacement (jusqu'à la 2.9.9) : <OMSI 2>\_TPS Studios - mods désactivés\<id>, encore lu tant qu'un mod y est rangé
+	private const string AncienOff = "_TPS Studios - mods désactivés";
+
+	public static string RacineOff(string omsi)
+	{
+		try
+		{
+			string text = Path.Combine(Path.GetPathRoot(Path.GetFullPath(omsi)), "TPS Studios", "Mods désactivés");
+			Directory.CreateDirectory(text);
+			return text;
+		}
+		catch
+		{
+			return Path.Combine(Config.Dossier, "Mods désactivés");
+		}
+	}
+
 	public static string DossierOff(Projet p, string omsi)
 	{
-		return Path.Combine(omsi, "_TPS Studios - mods désactivés", p.Id);
+		string text = Path.Combine(omsi, AncienOff, p.Id);
+		if (File.Exists(Path.Combine(text, "desactive.txt")))
+		{
+			return text;
+		}
+		return Path.Combine(RacineOff(omsi), p.Id);
+	}
+
+	// l'ancien dossier dans le jeu, une fois vide, part à la corbeille
+	public static void RangerAncienOff(string omsi)
+	{
+		try
+		{
+			if (string.IsNullOrEmpty(omsi))
+			{
+				return;
+			}
+			string text = Path.Combine(omsi, AncienOff);
+			if (Directory.Exists(text) && Directory.GetFiles(text, "*", System.IO.SearchOption.AllDirectories).Length == 0)
+			{
+				FileSystem.DeleteDirectory(text, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
+			}
+		}
+		catch
+		{
+		}
 	}
 
 	public static bool Desactive(Projet p, string omsi)
@@ -294,6 +337,7 @@ internal static class Omsi
 		catch
 		{
 		}
+		RangerAncienOff(omsi);
 		return num;
 	}
 

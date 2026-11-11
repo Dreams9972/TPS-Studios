@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -722,7 +722,7 @@ internal partial class Fenetre : Form
 
 	private List<KeyValuePair<Rectangle, Annonce>> rAnnonces = new List<KeyValuePair<Rectangle, Annonce>>();
 
-	private static readonly string[] NouveautesLanceur = new string[4] { "Succès pour chaque mod et chaque jeu", "Téléchargements en direct sur les pages", "Amis : bannières, statuts et rôles", "Pseudos libres, insultes interdites" };
+	private static readonly string[] NouveautesLanceur = new string[2] { "Mods désactivés rangés hors du jeu (TPS Studios\\Mods désactivés)", "Plus aucun dossier du lanceur dans OMSI 2" };
 
 	private static readonly Font fAnT2 = new Font("Segoe UI Semibold", Zx.P(11f));
 
@@ -10930,6 +10930,10 @@ internal partial class Fenetre : Form
 		lDos.Text = ((text != null && text2 != null) ? "●  OMSI 2 et openOMSI trouvés" : "●  Dossiers du jeu à indiquer");
 		lDos.ForeColor = ((text != null && text2 != null) ? C.Vert : C.Orange);
 		bulle.SetToolTip(lDos, "OMSI 2 : " + (text ?? "introuvable") + "\nopenOMSI : " + (text2 ?? "introuvable") + "\n(cliquez pour changer)");
+		if (text != null && !ModeCapture)
+		{
+			Omsi.RangerAncienOff(text);   // plus de dossier du lanceur dans le jeu
+		}
 	}
 
 	private static int[] Num(string v)
