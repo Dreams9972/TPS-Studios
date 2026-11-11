@@ -722,7 +722,7 @@ internal partial class Fenetre : Form
 
 	private List<KeyValuePair<Rectangle, Annonce>> rAnnonces = new List<KeyValuePair<Rectangle, Annonce>>();
 
-	private static readonly string[] NouveautesLanceur = new string[3] { "Musique : bouton aléatoire et accès à vos playlists", "Seule la musique de Spotify ou d'Apple Music s'affiche (plus les bandes-annonces)", "Réglages Musique plus simples, en 3 étapes" };
+	private static readonly string[] NouveautesLanceur = new string[4] { "Images des mods affichées en entier", "Fin des mises à jour redemandées en boucle", "Son coupé des vidéos mémorisé", "Boutons plus réactifs" };
 
 	private static readonly Font fAnT2 = new Font("Segoe UI Semibold", Zx.P(11f));
 

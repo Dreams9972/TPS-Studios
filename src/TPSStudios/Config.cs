@@ -7,7 +7,7 @@ namespace TPSStudios;
 
 internal static class Config
 {
-	public const string VERSION = "3.0.1";
+	public const string VERSION = "3.0.2";
 
 	public const string CATALOGUE = "https://raw.githubusercontent.com/Dreams9972/TPS-Studios/main/catalogue.json";
 
