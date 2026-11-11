@@ -27,6 +27,15 @@ internal class FenPaquet : Form
 
 	private Champ tNotes;
 
+	private Option cSpeciale;
+
+	private Champ tAvert;
+
+	/// <summary>Version spéciale (ex. « V1 Alpha ») : publiée à côté de la version normale, au choix du joueur.</summary>
+	private bool speciale;
+
+	private string avertissement = "";
+
 	private Label lResume;
 
 	private Label lEtat;
@@ -52,7 +61,7 @@ internal class FenPaquet : Form
 		this.id = id;
 		this.nom = nom;
 		Text = "Publier le paquet de " + nom;
-		base.ClientSize = new Size(Zx.P(700), Zx.P(640));
+		base.ClientSize = new Size(Zx.P(700), Zx.P(770));
 		base.FormBorderStyle = FormBorderStyle.FixedDialog;
 		base.MaximizeBox = false;
 		base.MinimizeBox = false;
@@ -95,18 +104,33 @@ internal class FenPaquet : Form
 		tVersion.Indice = "ex. V1.2";
 		base.Controls.Add(tVersion);
 		Lb((version.Length > 0) ? ("Version actuelle : " + version) : "Premier paquet de cette page", Zx.P(284), Zx.P(272), Zx.P(380), Zx.P(22), new Font("Segoe UI", Zx.P(9.5f)), C.Gris);
-		Lb("Notes de version (affichées aux joueurs)", Zx.P(30), Zx.P(318), Zx.P(640), Zx.P(22), new Font("Segoe UI Semibold", Zx.P(10.5f)), C.Texte);
+		cSpeciale = new Option("Version spéciale", "Publiée à côté de la version normale : le joueur choisit laquelle jouer (ex. « V1 Alpha »).", val: false);
+		cSpeciale.Location = new Point(Zx.P(18), Zx.P(312));
+		cSpeciale.Width = Zx.P(664);
+		base.Controls.Add(cSpeciale);
+		tAvert = new Champ(multi: false, Zx.P(38));
+		tAvert.Location = new Point(Zx.P(28), Zx.P(380));
+		tAvert.Width = Zx.P(644);
+		tAvert.MaxLength = 200;
+		tAvert.Indice = "Avertissement montré au moment du choix (ex. version non maintenue, bugs possibles)";
+		tAvert.Enabled = false;
+		base.Controls.Add(tAvert);
+		cSpeciale.Changed += delegate
+		{
+			tAvert.Enabled = cSpeciale.Checked;
+		};
+		Lb("Notes de version (affichées aux joueurs)", Zx.P(30), Zx.P(432), Zx.P(640), Zx.P(22), new Font("Segoe UI Semibold", Zx.P(10.5f)), C.Texte);
 		tNotes = new Champ(multi: true, Zx.P(130));
-		tNotes.Location = new Point(Zx.P(28), Zx.P(344));
+		tNotes.Location = new Point(Zx.P(28), Zx.P(458));
 		tNotes.Width = Zx.P(644);
 		tNotes.Text = notes.Replace("\r\n", "\n").Replace("\n", "\r\n");
 		base.Controls.Add(tNotes);
 		barre = new Barre();
-		barre.Location = new Point(Zx.P(28), Zx.P(492));
+		barre.Location = new Point(Zx.P(28), Zx.P(606));
 		barre.Size = new Size(Zx.P(644), Zx.P(8));
 		barre.Visible = false;
 		base.Controls.Add(barre);
-		lEtat = Lb("", Zx.P(30), Zx.P(508), Zx.P(640), Zx.P(54), new Font("Segoe UI", Zx.P(9.5f)), C.Gris);
+		lEtat = Lb("", Zx.P(30), Zx.P(622), Zx.P(640), Zx.P(54), new Font("Segoe UI", Zx.P(9.5f)), C.Gris);
 		Panel panel = new Panel
 		{
 			Dock = DockStyle.Bottom,
@@ -233,6 +257,8 @@ internal class FenPaquet : Form
 	{
 		string version = tVersion.Text.Trim();
 		string notes = tNotes.Text.Trim().Replace("\r\n", "\n");
+		speciale = cSpeciale.Checked;
+		avertissement = tAvert.Text.Trim();
 		if (fichiers == null)
 		{
 			return;
@@ -256,7 +282,7 @@ internal class FenPaquet : Form
 		catch
 		{
 		}
-		if (MessageBox.Show(this, "Publier " + nom + " " + version + " pour tous les joueurs ?\n\nL'envoi peut être long selon votre connexion. Ne fermez pas le lanceur pendant l'envoi.", Text, MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
+		if (MessageBox.Show(this, "Publier " + nom + " " + version + (speciale ? " comme version spéciale (au choix, à côté de la version normale)" : "") + " pour tous les joueurs ?\n\nL'envoi peut être long selon votre connexion. Ne fermez pas le lanceur pendant l'envoi.", Text, MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
 		{
 			return;
 		}
@@ -342,7 +368,7 @@ internal class FenPaquet : Form
 		{
 			throw new Exception("la page « " + id + " » n'est pas dans le catalogue publié : publiez-la d'abord");
 		}
-		if (string.Equals(Str(page, "version").Trim(), version, StringComparison.OrdinalIgnoreCase))
+		if (!speciale && string.Equals(Str(page, "version").Trim(), version, StringComparison.OrdinalIgnoreCase))
 		{
 			throw new Exception("la version " + version + " est déjà celle du catalogue : changez le numéro");
 		}
@@ -394,7 +420,7 @@ internal class FenPaquet : Form
 		int numCourant = 1;
 		try
 		{
-			Paquet.Construire(liste, "jeu/" + fVersion.Replace('\\', '/'), version + "\r\n" + date + "\r\n" + md5 + "\r\n", tmp, baseNom, unSeul, delegate(string chemin, int num)
+			Paquet.Construire(liste, "jeu/" + fVersion.Replace('\\', '/'), version + "\r\n" + date + "\r\n" + md5 + "\r\nvariante:" + (speciale ? IdVariante(version) : "") + "\r\n", tmp, baseNom, unSeul, delegate(string chemin, int num)
 			{
 				string nomFichier = Path.GetFileName(chemin);
 				long taille = new FileInfo(chemin).Length;
@@ -460,12 +486,36 @@ internal class FenPaquet : Form
 		{
 			throw new Exception("la page « " + id + " » a disparu du catalogue pendant l'envoi");
 		}
+		Dictionary<string, object> pagePrincipale = page;
+		if (speciale)
+		{
+			ArrayList vars = ((page.TryGetValue("variantes", out var vv) && vv is ArrayList) ? ((ArrayList)vv) : new ArrayList());
+			string vid = IdVariante(version);
+			Dictionary<string, object> dv = null;
+			foreach (object o in vars)
+			{
+				if (o is Dictionary<string, object> d0 && Str(d0, "id") == vid)
+				{
+					dv = d0;
+				}
+			}
+			if (dv == null)
+			{
+				dv = new Dictionary<string, object>();
+				vars.Add(dv);
+			}
+			dv["id"] = vid;
+			dv["nom"] = version;
+			dv["avertissement"] = avertissement;
+			page["variantes"] = vars;
+			page = dv;
+		}
 		page["version"] = version;
 		page["date"] = date;
 		page["md5"] = md5;
 		page["taille"] = tailleTotale;
-		page["fichier_version"] = fVersion;
-		page["liste"] = fListe;
+		pagePrincipale["fichier_version"] = fVersion;
+		pagePrincipale["liste"] = fListe;
 		if (notes.Length > 0)
 		{
 			page["notes"] = notes;
@@ -489,6 +539,13 @@ internal class FenPaquet : Form
 		}
 		GitHub.EcrireCatalogue(cat, sha2, "Paquet " + nom + " " + version + " publié depuis le lanceur par " + ((Comptes.Actif != null) ? Comptes.Actif.Pseudo : "admin") + " (" + parties.Count + " partie(s), " + Taille(tailleTotale) + ")");
 		return "✔  " + nom + " " + version + " est en ligne (" + parties.Count + " partie(s), " + Taille(tailleTotale) + ").\n\nLes joueurs verront « METTRE À JOUR ». Aucun fichier du paquet n'est resté sur ce PC : vous pouvez supprimer vos anciennes archives ZIP de " + nom + ".";
+	}
+
+	/// <summary>« V1 Alpha » → « v1_alpha » (identifiant d'une version spéciale).</summary>
+	private static string IdVariante(string version)
+	{
+		string s = Categories.Slug(version);
+		return (s.Length > 0) ? s : "speciale";
 	}
 
 	/// <summary>Vrai si le paquet actuellement en ligne télécharge depuis cette release (on ne doit pas y toucher).</summary>

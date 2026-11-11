@@ -722,7 +722,7 @@ internal partial class Fenetre : Form
 
 	private List<KeyValuePair<Rectangle, Annonce>> rAnnonces = new List<KeyValuePair<Rectangle, Annonce>>();
 
-	private static readonly string[] NouveautesLanceur = new string[4] { "Images des mods affichées en entier", "Fin des mises à jour redemandées en boucle", "Son coupé des vidéos mémorisé", "Boutons plus réactifs" };
+	private static readonly string[] NouveautesLanceur = new string[3] { "Versions spéciales (ex. Alpha) au choix en cliquant sur JOUER", "Liste des mods : images en entier", "Pages des mods comme avant" };
 
 	private static readonly Font fAnT2 = new Font("Segoe UI Semibold", Zx.P(11f));
 
@@ -2680,7 +2680,7 @@ internal partial class Fenetre : Form
 			num5 = 310;
 			num4 = Math.Max(360, W - 2 * num - num3 - num5);
 		}
-		int num6 = Math.Min(Math.Max(Zx.P(300), base.ClientSize.Height - num2 - Zx.P(330)), num4 * 9 / 16);
+		int num6 = Math.Min(540, num4 * 9 / 16);
 		rVue = new Rectangle(num, num2, num4, num6);
 		List<Image> list = DiapoPage();
 		int num7 = Math.Max(1, list.Count);
@@ -2835,7 +2835,10 @@ internal partial class Fenetre : Form
 			graphics.SetClip(path, CombineMode.Intersect);
 			if (im != null)
 			{
-				DessinerAjuste(graphics, im, new Rectangle(0, 0, s.Width, s.Height));
+				double num = Math.Max((double)s.Width / (double)im.Width, (double)s.Height / (double)im.Height);
+				int num2 = (int)((double)im.Width * num);
+				int num3 = (int)((double)im.Height * num);
+				graphics.DrawImage(im, (s.Width - num2) / 2, (s.Height - num3) / 2, num2, num3);
 			}
 			else
 			{
@@ -6128,7 +6131,10 @@ internal partial class Fenetre : Form
 			graphics.SetClip(path, CombineMode.Intersect);
 			if (d.Img != null)
 			{
-				DessinerAjuste(graphics, d.Img, new Rectangle(0, 0, width, height));
+				double num = Math.Max((double)width / (double)d.Img.Width, (double)height / (double)d.Img.Height);
+				int num2 = (int)((double)d.Img.Width * num);
+				int num3 = (int)((double)d.Img.Height * num);
+				graphics.DrawImage(d.Img, (width - num2) / 2, (height - num3) / 2, num2, num3);
 			}
 			else
 			{
@@ -6222,7 +6228,10 @@ internal partial class Fenetre : Form
 		{
 			GraphicsState gstate2 = g.Save();
 			g.SetClip(rect, CombineMode.Intersect);
-			DessinerAjuste(g, d.Img, rect);
+			double num4 = Math.Max((double)rect.Width / (double)d.Img.Width, (double)rect.Height / (double)d.Img.Height);
+			int num5 = (int)((double)d.Img.Width * num4);
+			int num6 = (int)((double)d.Img.Height * num4);
+			g.DrawImage(d.Img, (W - num5) / 2, (num2 - num6) / 2, num5, num6);
 			g.Restore(gstate2);
 		}
 		else
@@ -9489,7 +9498,7 @@ internal partial class Fenetre : Form
 		int num14 = Zx.P(280);
 		int num15 = Math.Max(1, (width - 2 * margeB + num13) / (num14 + num13));
 		int num16 = Math.Max(Zx.P(200), (width - 2 * margeB - (num15 - 1) * num13) / num15);
-		int num17 = (int)((double)num16 * 0.9);
+		int num17 = num16 * 3 / 4 + Zx.P(116);
 		int num18 = num11 + Zx.P(52);
 		int num19 = 0;
 		rJeuB = Rectangle.Empty;
@@ -10107,7 +10116,7 @@ internal partial class Fenetre : Form
 		else
 		{
 			etat = E.AJour;
-			lEtat.Text = "✔  " + ((array[0].Length > 0) ? array[0] : sel.Version) + " installée et à jour" + ((array[1].Length > 0) ? ("\ndu " + array[1]) : "");
+			lEtat.Text = "✔  " + ((array[0].Length > 0) ? array[0] : sel.Version) + " installée et à jour" + ((sel.Variantes.Count > 0) ? ("\n" + (sel.Variantes.Count + 1) + " versions au choix : cliquez sur JOUER") : ((array[1].Length > 0) ? ("\ndu " + array[1]) : ""));
 		}
 		if (flag && etat != 0 && etat != E.SansJeu)
 		{
@@ -10186,15 +10195,102 @@ internal partial class Fenetre : Form
 			{
 				OuvrirAchat(sel);
 			}
+			else if (sel.Variantes.Count > 0 && (etat == E.AJour || etat == E.Rien))
+			{
+				ChoisirVersion();
+			}
 			else if (etat == E.AJour)
 			{
 				Jouer();
 			}
-			else if (etat == E.Rien || etat == E.MAJ)
+			else if (etat == E.MAJ)
+			{
+				string om = Omsi.DetecteOmsi();
+				Installer(Omsi.VarianteDe(sel, Omsi.Installee(sel, om)));
+			}
+			else if (etat == E.Rien)
 			{
 				Installer(sel);
 			}
 		}
+	}
+
+	/// <summary>Page avec versions spéciales : le joueur choisit la version à jouer (ou à installer).</summary>
+	private void ChoisirVersion()
+	{
+		string omsi = Omsi.DetecteOmsi();
+		string[] v = Omsi.Installee(sel, omsi);
+		Projet installee = ((v != null) ? Omsi.VarianteDe(sel, v) : null);
+		Projet choix;
+		using (FenChoixVariante f = new FenChoixVariante(sel, installee, omsi, installee == null))
+		{
+			if (f.Afficher(this) != DialogResult.OK || f.Choix == null)
+			{
+				return;
+			}
+			choix = f.Choix;
+		}
+		if (installee == null)
+		{
+			if (Omsi.VersionRangee(sel, omsi, choix.VarianteId))
+			{
+				ChangerVersion(null, choix, omsi);
+			}
+			else
+			{
+				Installer(choix);
+			}
+			return;
+		}
+		if (choix.VarianteId == installee.VarianteId)
+		{
+			Jouer();
+			return;
+		}
+		ChangerVersion(installee, choix, omsi);
+	}
+
+	/// <summary>Range la version en place et met l'autre : remise en place instantanée si elle est sur ce PC, sinon téléchargement.</summary>
+	private void ChangerVersion(Projet actuelle, Projet voulue, string omsi)
+	{
+		if (Omsi.JeuLance())
+		{
+			MessageBox.Show(this, "Fermez OMSI 2 / openOMSI avant de changer de version.", Text);
+			return;
+		}
+		try
+		{
+			if (actuelle != null)
+			{
+				if (Omsi.Desactive(sel, omsi))
+				{
+					Omsi.Basculer(sel, omsi, activer: true);
+				}
+				Omsi.RangerVersion(sel, omsi, actuelle.VarianteId);
+			}
+			if (Omsi.VersionRangee(sel, omsi, voulue.VarianteId))
+			{
+				Omsi.RestaurerVersion(sel, omsi, voulue.VarianteId);
+				MajEtat();
+				page.Invalidate();
+				Toast("✔  " + ((voulue.VarianteId.Length == 0) ? "Version normale" : voulue.VarianteNom) + " prête : lancement…", C.Vert, 4000);
+				Jouer();
+				return;
+			}
+		}
+		catch (UnauthorizedAccessException)
+		{
+			MessageBox.Show(this, "OMSI 2 est dans un dossier protégé : le changement de version demande les droits administrateur. Relancez le lanceur en tant qu'administrateur, ou réinstallez la version voulue.", Text);
+			MajEtat();
+			return;
+		}
+		catch (Exception ex)
+		{
+			MessageBox.Show(this, "Changement de version impossible : " + ex.Message, Text);
+			MajEtat();
+			return;
+		}
+		Installer(voulue);
 	}
 
 	private void Jouer()
@@ -10901,6 +10997,7 @@ internal partial class Fenetre : Form
 			try
 			{
 				int num = Omsi.Desinstaller(sel, text);
+				Omsi.OublierVersionsRangees(sel, text);
 				lAlerte.Text = sel.Nom + " désinstallé : " + num + " fichiers mis à la corbeille.";
 				lAlerte.ForeColor = C.Gris;
 				lAlerte.Visible = true;
