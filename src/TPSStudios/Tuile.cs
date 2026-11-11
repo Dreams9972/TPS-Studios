@@ -150,7 +150,7 @@ internal class Tuile : Control, ILisse
 			graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
 			graphics.SmoothingMode = SmoothingMode.AntiAlias;
 			// Liste des mods : l'image s'affiche en entier (fond flou si ses proportions diffèrent de la case).
-			Fenetre.DessinerAjuste(graphics, Img, new Rectangle(0, 0, zi.Width, zi.Height), 1.04);
+			Fenetre.DessinerAjuste(graphics, Img, new Rectangle(0, 0, zi.Width, zi.Height), 1.04, 0);
 			using LinearGradientBrush brush = new LinearGradientBrush(new Rectangle(0, zi.Bottom - Zx.P(60), base.Width, Zx.P(61)), Color.FromArgb(0, C.Carte), C.Carte, 90f);
 			graphics.FillRectangle(brush, 0, zi.Bottom - Zx.P(60), base.Width, Zx.P(61));
 		}

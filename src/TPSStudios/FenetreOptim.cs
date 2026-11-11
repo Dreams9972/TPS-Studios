@@ -78,7 +78,7 @@ internal partial class Fenetre
 	/// Image dans une case sans la zoomer à l'excès : si les proportions sont proches, elle remplit la
 	/// case (léger recadrage) ; sinon elle s'affiche en entier sur un fond flou fait de la même image.
 	/// </summary>
-	internal static void DessinerAjuste(Graphics g, Image im, Rectangle r, double tolerance = 1.22)
+	internal static void DessinerAjuste(Graphics g, Image im, Rectangle r, double tolerance = 1.22, int voileFond = 110)
 	{
 		if (im == null || r.Width < 1 || r.Height < 1 || im.Width < 1 || im.Height < 1)
 		{
@@ -113,7 +113,7 @@ internal partial class Fenetre
 			g.InterpolationMode = InterpolationMode.HighQualityBilinear;
 			g.DrawImage(petit, new Rectangle(r.X - r.Width / 20, r.Y - r.Height / 20, r.Width + r.Width / 10, r.Height + r.Height / 10), 0, 0, pw, ph, GraphicsUnit.Pixel);
 		}
-		using (SolidBrush voile = new SolidBrush(Color.FromArgb(110, 6, 8, 20)))
+		using (SolidBrush voile = new SolidBrush(Color.FromArgb(voileFond, 6, 8, 20)))
 		{
 			g.FillRectangle(voile, r);
 		}

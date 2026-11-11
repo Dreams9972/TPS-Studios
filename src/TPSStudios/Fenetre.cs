@@ -9498,7 +9498,7 @@ internal partial class Fenetre : Form
 		int num14 = Zx.P(280);
 		int num15 = Math.Max(1, (width - 2 * margeB + num13) / (num14 + num13));
 		int num16 = Math.Max(Zx.P(200), (width - 2 * margeB - (num15 - 1) * num13) / num15);
-		int num17 = (int)((double)num16 * 0.9);
+		int num17 = num16 * 3 / 4 + Zx.P(116);
 		int num18 = num11 + Zx.P(52);
 		int num19 = 0;
 		rJeuB = Rectangle.Empty;
