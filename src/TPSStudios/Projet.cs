@@ -22,6 +22,51 @@ internal class Projet
 
 	public string Date;
 
+	/// <summary>Version spéciale (ex. « alpha ») : vide pour la version normale de la page.</summary>
+	public string VarianteId = "";
+
+	/// <summary>Nom affiché de la version (« Version normale », « V1 Alpha »…).</summary>
+	public string VarianteNom = "";
+
+	/// <summary>Avertissement affiché au moment du choix (versions spéciales).</summary>
+	public string Avertissement = "";
+
+	/// <summary>Versions spéciales proposées au joueur en plus de la version normale.</summary>
+	public List<Projet> Variantes = new List<Projet>();
+
+	/// <summary>Page d'origine d'une version spéciale (null pour la version normale).</summary>
+	public Projet Principal;
+
+	/// <summary>Toutes les versions au choix : la normale puis les spéciales.</summary>
+	public List<Projet> Versions()
+	{
+		Projet p = Principal ?? this;
+		List<Projet> l = new List<Projet> { p };
+		l.AddRange(p.Variantes);
+		return l;
+	}
+
+	private static List<string[]> LireParties(Dictionary<string, object> d)
+	{
+		List<string[]> l = new List<string[]>();
+		if (d.TryGetValue("parties", out var v) && v is ArrayList)
+		{
+			foreach (object item in (ArrayList)v)
+			{
+				if (item is Dictionary<string, object> d4)
+				{
+					string url = S(d4, "url");
+					string sha = S(d4, "sha256");
+					if (url.Length > 0 && sha.Length == 64 && l.Count < 40)
+					{
+						l.Add(new string[4] { url, sha, S(d4, "taille"), S(d4, "miroir") });
+					}
+				}
+			}
+		}
+		return l;
+	}
+
 	public string Md5;
 
 	public string Zip;
@@ -431,6 +476,36 @@ internal class Projet
 			}
 		}
 		projet.Raw = d;
+		projet.VarianteNom = "Version normale";
+		if (d.TryGetValue("variantes", out var vv) && vv is ArrayList)
+		{
+			foreach (object o in (ArrayList)vv)
+			{
+				if (!(o is Dictionary<string, object> dv) || S(dv, "id").Length == 0 || projet.Variantes.Count >= 6)
+				{
+					continue;
+				}
+				Projet q = (Projet)projet.MemberwiseClone();
+				q.Variantes = new List<Projet>();
+				q.Principal = projet;
+				q.VarianteId = S(dv, "id");
+				q.VarianteNom = ((S(dv, "nom").Length > 0) ? S(dv, "nom") : S(dv, "version"));
+				q.Version = S(dv, "version");
+				q.Date = S(dv, "date");
+				q.Md5 = S(dv, "md5");
+				q.Zip = S(dv, "zip");
+				q.Sha256 = S(dv, "sha256");
+				long.TryParse(S(dv, "taille"), out var tq);
+				q.Taille = tq;
+				q.Parties = LireParties(dv);
+				q.Notes = S(dv, "notes");
+				q.Avertissement = S(dv, "avertissement");
+				if (q.Zip.Length > 0 || q.Parties.Count > 0)
+				{
+					projet.Variantes.Add(q);
+				}
+			}
+		}
 		return projet;
 	}
 }

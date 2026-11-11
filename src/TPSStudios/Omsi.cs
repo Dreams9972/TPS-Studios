@@ -131,6 +131,14 @@ internal static class Omsi
 		{
 			return false;
 		}
+		if (p.Principal == null && p.Variantes.Count > 0)
+		{
+			Projet q = VarianteDe(p, v);
+			if (q != p)
+			{
+				return Perimee(q, v);
+			}
+		}
 		string md5Inst = ((v.Length > 2) ? v[2].Trim() : "");
 		if (p.Md5.Length > 0 && md5Inst.Length > 0)
 		{
@@ -179,6 +187,182 @@ internal static class Omsi
 		return string.Join(".", parts, 0, n);
 	}
 
+	/// <summary>Quelle version de la page est installée (la normale ou une version spéciale) ?</summary>
+	public static Projet VarianteDe(Projet p, string[] v)
+	{
+		Projet principal = p.Principal ?? p;
+		if (v == null || principal.Variantes.Count == 0)
+		{
+			return principal;
+		}
+		for (int i = 3; i < v.Length; i++)
+		{
+			string l = v[i].Trim();
+			if (l.StartsWith("variante:"))
+			{
+				string id = l.Substring(9).Trim();
+				Projet q = principal.Variantes.Find((Projet x) => x.VarianteId == id);
+				return q ?? principal;
+			}
+		}
+		string md5 = ((v.Length > 2) ? v[2].Trim() : "");
+		if (md5.Length > 0)
+		{
+			Projet q2 = principal.Variantes.Find((Projet x) => string.Equals(x.Md5, md5, StringComparison.OrdinalIgnoreCase));
+			if (q2 != null)
+			{
+				return q2;
+			}
+		}
+		return principal;
+	}
+
+	private static string DossierVersion(Projet p, string omsi, string varianteId)
+	{
+		return Path.Combine(RacineOff(omsi), (p.Principal ?? p).Id + "@" + ((varianteId.Length > 0) ? varianteId : "normale"));
+	}
+
+	/// <summary>Cette version a-t-elle été rangée de côté (remise en place instantanée, sans téléchargement) ?</summary>
+	public static bool VersionRangee(Projet p, string omsi, string varianteId)
+	{
+		return omsi != null && File.Exists(Path.Combine(DossierVersion(p, omsi, varianteId), "fichiers.txt"));
+	}
+
+	/// <summary>
+	/// Range la version installée hors du jeu (même disque, déplacement instantané) pour laisser la place
+	/// à une autre version ; elle pourra être remise en place sans rien retélécharger.
+	/// </summary>
+	public static void RangerVersion(Projet p, string omsi, string varianteId)
+	{
+		Projet principal = p.Principal ?? p;
+		string dossier = DossierVersion(principal, omsi, varianteId);
+		string liste = Path.Combine(omsi, principal.Liste);
+		string fVersion = Path.Combine(omsi, principal.FichierVersion);
+		if (!File.Exists(liste))
+		{
+			throw new Exception("liste des fichiers installés introuvable : réinstallez ce mod");
+		}
+		string open = DetecteOpen(omsi);
+		string racine = Path.GetFullPath(omsi).TrimEnd('\\');
+		Directory.CreateDirectory(dossier);
+		List<string> paires = new List<string>();
+		try
+		{
+			foreach (string ligne in File.ReadAllLines(liste))
+			{
+				string f = ligne.Trim();
+				if (f.Length == 0 || !File.Exists(f))
+				{
+					continue;
+				}
+				string plein = Path.GetFullPath(f);
+				if (string.Equals(plein, Path.GetFullPath(fVersion), StringComparison.OrdinalIgnoreCase) || string.Equals(plein, Path.GetFullPath(liste), StringComparison.OrdinalIgnoreCase))
+				{
+					continue;
+				}
+				string rel = (Sous(plein, omsi) ? ("jeu\\" + plein.Substring(racine.Length + 1)) : ((open != null && Sous(plein, open)) ? ("openOMSI\\" + plein.Substring(Path.GetFullPath(open).TrimEnd('\\').Length + 1)) : null));
+				if (rel == null)
+				{
+					continue;
+				}
+				string cible = Path.Combine(dossier, rel);
+				Directory.CreateDirectory(Path.GetDirectoryName(cible));
+				if (File.Exists(cible))
+				{
+					File.Delete(cible);
+				}
+				File.Move(plein, cible);
+				paires.Add(plein + "|" + cible);
+			}
+		}
+		finally
+		{
+			File.WriteAllLines(Path.Combine(dossier, "fichiers.txt"), paires.ToArray(), Encoding.UTF8);
+			File.Copy(liste, Path.Combine(dossier, "liste.txt"), overwrite: true);
+			if (File.Exists(fVersion))
+			{
+				File.Copy(fVersion, Path.Combine(dossier, "version.txt"), overwrite: true);
+				File.Delete(fVersion);
+			}
+			File.Delete(liste);
+		}
+	}
+
+	/// <summary>Supprime les versions rangées de côté d'une page (désinstallation complète).</summary>
+	public static void OublierVersionsRangees(Projet p, string omsi)
+	{
+		if (omsi == null)
+		{
+			return;
+		}
+		foreach (Projet q in (p.Principal ?? p).Versions())
+		{
+			string d = DossierVersion(p, omsi, q.VarianteId);
+			if (Directory.Exists(d))
+			{
+				try
+				{
+					FileSystem.DeleteDirectory(d, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
+				}
+				catch (Exception e)
+				{
+					Journal.Une("version-rangee", e);
+				}
+			}
+		}
+	}
+
+	/// <summary>Remet en place une version rangée par RangerVersion.</summary>
+	public static void RestaurerVersion(Projet p, string omsi, string varianteId)
+	{
+		Projet principal = p.Principal ?? p;
+		string dossier = DossierVersion(principal, omsi, varianteId);
+		string fp = Path.Combine(dossier, "fichiers.txt");
+		if (!File.Exists(fp))
+		{
+			throw new Exception("cette version n'a pas été rangée sur ce PC");
+		}
+		foreach (string ligne in File.ReadAllLines(fp))
+		{
+			int k = ligne.IndexOf('|');
+			if (k <= 0)
+			{
+				continue;
+			}
+			string orig = ligne.Substring(0, k);
+			string cible = ligne.Substring(k + 1);
+			if (!File.Exists(cible))
+			{
+				continue;
+			}
+			Directory.CreateDirectory(Path.GetDirectoryName(orig));
+			if (File.Exists(orig))
+			{
+				File.SetAttributes(orig, FileAttributes.Normal);
+				File.Delete(orig);
+			}
+			File.Move(cible, orig);
+		}
+		string l2 = Path.Combine(dossier, "liste.txt");
+		if (File.Exists(l2))
+		{
+			File.Copy(l2, Path.Combine(omsi, principal.Liste), overwrite: true);
+		}
+		string v2 = Path.Combine(dossier, "version.txt");
+		if (File.Exists(v2))
+		{
+			File.Copy(v2, Path.Combine(omsi, principal.FichierVersion), overwrite: true);
+		}
+		try
+		{
+			Directory.Delete(dossier, recursive: true);
+		}
+		catch (Exception e)
+		{
+			Journal.Une("version-rangee", e);
+		}
+	}
+
 	/// <summary>Après une installation : le fichier de version reprend la version et l'empreinte du catalogue.</summary>
 	private static void EcrireVersion(Projet p, string omsi, List<string> installes)
 	{
@@ -194,7 +378,7 @@ internal static class Omsi
 			string date = ((ancien != null && ancien[1].Trim().Length > 0) ? ancien[1].Trim() : DateTime.Now.ToString("dd/MM/yyyy HH:mm"));
 			string md5 = ((p.Md5.Length > 0) ? p.Md5 : ((ancien != null) ? ancien[2] : ""));
 			Directory.CreateDirectory(Path.GetDirectoryName(f));
-			File.WriteAllText(f, version.Trim() + "\r\n" + date + "\r\n" + md5.Trim() + "\r\n", Encoding.UTF8);
+			File.WriteAllText(f, version.Trim() + "\r\n" + date + "\r\n" + md5.Trim() + "\r\nvariante:" + p.VarianteId + "\r\n", Encoding.UTF8);
 			if (installes != null && !installes.Exists((string x) => string.Equals(x, f, StringComparison.OrdinalIgnoreCase)))
 			{
 				installes.Add(f);

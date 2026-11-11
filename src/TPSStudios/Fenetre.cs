@@ -10107,7 +10107,7 @@ internal partial class Fenetre : Form
 		else
 		{
 			etat = E.AJour;
-			lEtat.Text = "✔  " + ((array[0].Length > 0) ? array[0] : sel.Version) + " installée et à jour" + ((array[1].Length > 0) ? ("\ndu " + array[1]) : "");
+			lEtat.Text = "✔  " + ((array[0].Length > 0) ? array[0] : sel.Version) + " installée et à jour" + ((sel.Variantes.Count > 0) ? ("\n" + (sel.Variantes.Count + 1) + " versions au choix : cliquez sur JOUER") : ((array[1].Length > 0) ? ("\ndu " + array[1]) : ""));
 		}
 		if (flag && etat != 0 && etat != E.SansJeu)
 		{
@@ -10186,15 +10186,102 @@ internal partial class Fenetre : Form
 			{
 				OuvrirAchat(sel);
 			}
+			else if (sel.Variantes.Count > 0 && (etat == E.AJour || etat == E.Rien))
+			{
+				ChoisirVersion();
+			}
 			else if (etat == E.AJour)
 			{
 				Jouer();
 			}
-			else if (etat == E.Rien || etat == E.MAJ)
+			else if (etat == E.MAJ)
+			{
+				string om = Omsi.DetecteOmsi();
+				Installer(Omsi.VarianteDe(sel, Omsi.Installee(sel, om)));
+			}
+			else if (etat == E.Rien)
 			{
 				Installer(sel);
 			}
 		}
+	}
+
+	/// <summary>Page avec versions spéciales : le joueur choisit la version à jouer (ou à installer).</summary>
+	private void ChoisirVersion()
+	{
+		string omsi = Omsi.DetecteOmsi();
+		string[] v = Omsi.Installee(sel, omsi);
+		Projet installee = ((v != null) ? Omsi.VarianteDe(sel, v) : null);
+		Projet choix;
+		using (FenChoixVariante f = new FenChoixVariante(sel, installee, omsi, installee == null))
+		{
+			if (f.Afficher(this) != DialogResult.OK || f.Choix == null)
+			{
+				return;
+			}
+			choix = f.Choix;
+		}
+		if (installee == null)
+		{
+			if (Omsi.VersionRangee(sel, omsi, choix.VarianteId))
+			{
+				ChangerVersion(null, choix, omsi);
+			}
+			else
+			{
+				Installer(choix);
+			}
+			return;
+		}
+		if (choix.VarianteId == installee.VarianteId)
+		{
+			Jouer();
+			return;
+		}
+		ChangerVersion(installee, choix, omsi);
+	}
+
+	/// <summary>Range la version en place et met l'autre : remise en place instantanée si elle est sur ce PC, sinon téléchargement.</summary>
+	private void ChangerVersion(Projet actuelle, Projet voulue, string omsi)
+	{
+		if (Omsi.JeuLance())
+		{
+			MessageBox.Show(this, "Fermez OMSI 2 / openOMSI avant de changer de version.", Text);
+			return;
+		}
+		try
+		{
+			if (actuelle != null)
+			{
+				if (Omsi.Desactive(sel, omsi))
+				{
+					Omsi.Basculer(sel, omsi, activer: true);
+				}
+				Omsi.RangerVersion(sel, omsi, actuelle.VarianteId);
+			}
+			if (Omsi.VersionRangee(sel, omsi, voulue.VarianteId))
+			{
+				Omsi.RestaurerVersion(sel, omsi, voulue.VarianteId);
+				MajEtat();
+				page.Invalidate();
+				Toast("✔  " + ((voulue.VarianteId.Length == 0) ? "Version normale" : voulue.VarianteNom) + " prête : lancement…", C.Vert, 4000);
+				Jouer();
+				return;
+			}
+		}
+		catch (UnauthorizedAccessException)
+		{
+			MessageBox.Show(this, "OMSI 2 est dans un dossier protégé : le changement de version demande les droits administrateur. Relancez le lanceur en tant qu'administrateur, ou réinstallez la version voulue.", Text);
+			MajEtat();
+			return;
+		}
+		catch (Exception ex)
+		{
+			MessageBox.Show(this, "Changement de version impossible : " + ex.Message, Text);
+			MajEtat();
+			return;
+		}
+		Installer(voulue);
 	}
 
 	private void Jouer()
@@ -10901,6 +10988,7 @@ internal partial class Fenetre : Form
 			try
 			{
 				int num = Omsi.Desinstaller(sel, text);
+				Omsi.OublierVersionsRangees(sel, text);
 				lAlerte.Text = sel.Nom + " désinstallé : " + num + " fichiers mis à la corbeille.";
 				lAlerte.ForeColor = C.Gris;
 				lAlerte.Visible = true;
