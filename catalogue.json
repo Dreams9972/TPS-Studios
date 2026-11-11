@@ -323,6 +323,33 @@
       "prerequis": "OMSI 2 + 3 DLC obligatoires",
       "image": "https://raw.githubusercontent.com/Dreams9972/TPS-Studios/main/images/perigueux.jpg",
       "notes": "Périgueux V1.0"
+    },
+    {
+      "id": "trottinette",
+      "nom": "Trottinette électrique",
+      "sous_titre": "Pilotable — 25 km/h, débridable jusqu'à 150 km/h",
+      "jeu": "omsi2",
+      "categorie": "bus",
+      "editeur": "· TPS Groupe",
+      "fichier_version": "TPSTrottinette_version.txt",
+      "liste": "TPSTrottinette_fichiers_installes.txt",
+      "marque": "Vehicles\\TPS Trottinette",
+      "carte": "",
+      "meteo": "",
+      "bus_defaut": "Vehicles/TPS Trottinette/TPS Trottinette.bus",
+      "hof_defaut": "",
+      "consigne": "Choisissez la trottinette dans la liste des véhicules (TPS Groupe), puis lancez sur la carte de votre choix.",
+      "description": "Une trottinette électrique à piloter dans OMSI 2 et openOMSI, modélisée de zéro par TPS Groupe.\n\n• Bridée à 25 km/h. Deux boutons tactiles sur l'écran du guidon : à gauche BRIDÉE / LIBRE, à droite le niveau de vitesse une fois débridée (1 = 50 km/h, 2 = 100 km/h, 3 = 150 km/h).\n• Écran qui affiche la vitesse, la batterie et le témoin de phare.\n• Phare, feu arrière qui brille plus fort au freinage, sonnette (touche du klaxon).\n• Elle penche dans les virages. Cabrage jusqu'à 30 km/h : touche F (pleins phares) pour lever la roue avant, F ou le frein pour la reposer.\n• Un conducteur apparaît dessus quand on conduit, et disparaît quand on la quitte.\n• Vue F1 : la route, avec regard à gauche et à droite aux flèches. Vue F2 : par-dessus le guidon, pour cliquer sur les boutons de l'écran.\n• 7 livrées : TPS, Graphite et orange, Blanc et bleu, Noir et vert, Rouge et noir, Jaune et noir, Vert menthe.\n\nCréer sa livrée : gabarit et mode d'emploi illustré à télécharger ici : https://github.com/Dreams9972/TPS-Studios/releases/download/trottinette-v1.0.0/TPSTrottinette-gabarit-livree.zip\n\nCabrage avec la touche 5 du pavé numérique : ajoutez ces 4 lignes à la fin de Inputs\\keyboard.cfg (openOMSI : C:\\Users\\<vous>\\.openomsi\\Inputs\\keyboard.cfg) : [entry] / trott_cabrage / 76 / 0 (une par ligne).\n\nPersonnage : Microsoft Rocketbox Avatar Library (licence MIT).",
+      "version": "V1.0.0",
+      "date": "12/11/2026 00:04",
+      "md5": "ba53f257d1ed0c25760f9757c43829e5",
+      "zip": "https://github.com/Dreams9972/TPS-Studios/releases/download/trottinette-v1.0.0/TPSTrottinette.zip",
+      "sha256": "6170fdea7c95e6609683b1201711cbfec2fd0c66150d8e2c5b84dcd9a4b7f05a",
+      "taille": 3401183,
+      "image": "https://raw.githubusercontent.com/Dreams9972/TPS-Studios/main/images/trottinette.jpg",
+      "notes": "Première version de la trottinette électrique.",
+      "nouveautes": "True",
+      "tags": "Trottinette"
     }
   ],
   "communaute": {
