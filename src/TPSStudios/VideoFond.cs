@@ -32,7 +32,19 @@ internal class VideoFond : Panel
 	/// <summary>Volume des bandes-annonces : 5 %, son activé au départ (bouton pour couper).</summary>
 	public const int Volume = 5;
 
-	private bool muet;
+	/// <summary>Son coupé ou non : le choix du joueur est gardé d'une vidéo à l'autre et après relance du lanceur.</summary>
+	private bool muet = Config.Lire("video_muet") == "1";
+
+	private static void RetenirMuet(bool m)
+	{
+		try
+		{
+			Config.Ecrire("video_muet", m ? "1" : "0");
+		}
+		catch
+		{
+		}
+	}
 
 	private bool abandon;
 
@@ -87,7 +99,7 @@ internal class VideoFond : Panel
 			Journal.Une("video-fond", e);
 			wmp = null;
 		}
-		bSon = new Bouton("");
+		bSon = new Bouton(muet ? "\ue74f" : "\ue767");
 		bSon.Plein = false;
 		bSon.Font = new Font("Segoe MDL2 Assets", Zx.P(12f));
 		bSon.Size = new Size(Zx.P(42), Zx.P(42));
@@ -95,6 +107,7 @@ internal class VideoFond : Panel
 		bSon.Click += delegate
 		{
 			muet = !muet;
+			RetenirMuet(muet);
 			bSon.Text = (muet ? "" : "");
 			try
 			{
@@ -302,6 +315,7 @@ internal class VideoFond : Panel
 		lecteurWeb.MuetDemande += delegate(bool m)
 		{
 			muet = m;
+			RetenirMuet(muet);
 			bSon.Text = (muet ? "\ue74f" : "\ue767");
 		};
 		web = lecteurWeb;

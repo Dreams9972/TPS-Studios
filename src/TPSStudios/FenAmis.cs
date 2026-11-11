@@ -43,6 +43,8 @@ internal class FenAmis : Form, IPage
 
 	private Point sourisL = new Point(-1, -1);
 
+	private string dernierSurvol = "";
+
 	internal static readonly Font fRub = new Font("Segoe UI Semibold", Zx.P(9f));
 
 	internal static readonly Font fNom = new Font("Segoe UI Semibold", Zx.P(10.5f));
@@ -236,15 +238,22 @@ internal class FenAmis : Form, IPage
 					sourisL = e.Location;
 				}
 				bool flag = false;
+				string sous = "";
 				foreach (KeyValuePair<Rectangle, Action> item in (zz == zr) ? clicsR : clicsL)
 				{
 					if (item.Key.Contains(e.Location))
 					{
 						flag = true;
+						sous += item.Key.ToString();
 					}
 				}
 				zz.Cursor = (flag ? Cursors.Hand : Cursors.Default);
-				zz.Invalidate();
+				string cle = ((zz == zr) ? "r" : "l") + sous;
+				if (cle != dernierSurvol)
+				{
+					dernierSurvol = cle;
+					zz.Invalidate();
+				}
 			};
 			zz.MouseLeave += delegate
 			{
@@ -256,6 +265,7 @@ internal class FenAmis : Form, IPage
 				{
 					sourisL = new Point(-1, -1);
 				}
+				dernierSurvol = "";
 				zz.Invalidate();
 			};
 			zz.MouseClick += delegate(object o, MouseEventArgs e)
@@ -537,7 +547,43 @@ internal class FenAmis : Form, IPage
 	}
 
 	/// <summary>Bannière du joueur (comme sur son profil) ; un modèle tiré de son identifiant s'il n'en a pas publié.</summary>
+	private static readonly Dictionary<string, Bitmap> cacheBan = new Dictionary<string, Bitmap>();
+
+	/// <summary>Bannière d'un joueur, dessinée une fois puis gardée en mémoire (l'accueil se redessine 60 fois par seconde).</summary>
 	internal static void DessinerBanniere(Graphics g, Ami a, Rectangle r)
+	{
+		if (r.Width < 2 || r.Height < 2)
+		{
+			return;
+		}
+		System.Text.StringBuilder sb = new System.Text.StringBuilder(a.Id).Append('|').Append(r.Width).Append('x').Append(r.Height);
+		foreach (string k in new string[7] { "banniere", "ban_type", "ban_motif", "ban_c1", "ban_c2", "ban_angle", "couleur" })
+		{
+			sb.Append('|').Append(a.Texte(k));
+		}
+		string cle = sb.ToString();
+		if (!cacheBan.TryGetValue(cle, out var bmp))
+		{
+			if (cacheBan.Count > 60)
+			{
+				foreach (Bitmap b in cacheBan.Values)
+				{
+					b.Dispose();
+				}
+				cacheBan.Clear();
+			}
+			bmp = new Bitmap(r.Width, r.Height, System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
+			using (Graphics gb = Graphics.FromImage(bmp))
+			{
+				gb.SmoothingMode = SmoothingMode.AntiAlias;
+				DessinerBanniere0(gb, a, new Rectangle(0, 0, r.Width, r.Height));
+			}
+			cacheBan[cle] = bmp;
+		}
+		g.DrawImageUnscaled(bmp, r.X, r.Y);
+	}
+
+	private static void DessinerBanniere0(Graphics g, Ami a, Rectangle r)
 	{
 		Compte c = a.EnCompte();
 		if (a.App.Count == 0)

@@ -218,7 +218,7 @@ internal class Tuile : Control, ILisse
 			tm.Tick += delegate
 			{
 				long elapsedMilliseconds = sw.ElapsedMilliseconds;
-				if (elapsedMilliseconds >= (neige ? 180 : 110) && (!neige || elapsedMilliseconds >= 650 || NeigeEnChute == null || !NeigeEnChute()))
+				if (elapsedMilliseconds >= (neige ? 160 : 40) && (!neige || elapsedMilliseconds >= 300 || NeigeEnChute == null || !NeigeEnChute()))
 				{
 					tm.Stop();
 					tm.Dispose();

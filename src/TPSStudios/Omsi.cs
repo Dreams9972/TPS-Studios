@@ -120,25 +120,90 @@ internal static class Omsi
 		return array;
 	}
 
+	/// <summary>
+	/// Le mod installé est-il plus ancien que celui du catalogue ? L'empreinte du paquet fait foi quand
+	/// elle est connue ; sinon on compare les numéros de version sans tenir compte du libellé
+	/// (« Béta V1.1.1 » = « v1.1.1 »), pour ne pas redemander une mise à jour déjà faite.
+	/// </summary>
 	public static bool Perimee(Projet p, string[] v)
 	{
 		if (v == null)
 		{
 			return false;
 		}
-		if (v[0].Trim().Length == 0)
+		string md5Inst = ((v.Length > 2) ? v[2].Trim() : "");
+		if (p.Md5.Length > 0 && md5Inst.Length > 0)
+		{
+			return !string.Equals(md5Inst, p.Md5.Trim(), StringComparison.OrdinalIgnoreCase);
+		}
+		string vInst = v[0].Trim();
+		if (vInst.Length == 0)
 		{
 			return true;
 		}
-		if (p.Md5.Length > 0 && v[2].Trim() != p.Md5)
+		if (p.Version.Length == 0)
 		{
-			return true;
+			return false;
 		}
-		if (p.Version.Length > 0)
+		string a = NumVersion(vInst);
+		string b = NumVersion(p.Version);
+		if (a.Length > 0 && b.Length > 0)
 		{
-			return v[0].Trim() != p.Version;
+			return a != b;
 		}
-		return false;
+		return !string.Equals(vInst, p.Version.Trim(), StringComparison.OrdinalIgnoreCase);
+	}
+
+	/// <summary>« Béta V1.1.1 » → « 1.1.1 » ; « V2.10.0 » → « 2.10 ».</summary>
+	public static string NumVersion(string v)
+	{
+		System.Text.RegularExpressions.Match m = System.Text.RegularExpressions.Regex.Match(v ?? "", "\\d+(\\.\\d+)*");
+		if (!m.Success)
+		{
+			return "";
+		}
+		string[] parts = m.Value.Split('.');
+		for (int i = 0; i < parts.Length; i++)
+		{
+			parts[i] = parts[i].TrimStart('0');
+			if (parts[i].Length == 0)
+			{
+				parts[i] = "0";
+			}
+		}
+		int n = parts.Length;
+		while (n > 1 && parts[n - 1] == "0")
+		{
+			n--;
+		}
+		return string.Join(".", parts, 0, n);
+	}
+
+	/// <summary>Après une installation : le fichier de version reprend la version et l'empreinte du catalogue.</summary>
+	private static void EcrireVersion(Projet p, string omsi, List<string> installes)
+	{
+		if (string.IsNullOrEmpty(p.FichierVersion))
+		{
+			return;
+		}
+		try
+		{
+			string f = Path.Combine(omsi, p.FichierVersion);
+			string[] ancien = LireV(f);
+			string version = ((p.Version.Length > 0) ? p.Version : ((ancien != null) ? ancien[0] : ""));
+			string date = ((ancien != null && ancien[1].Trim().Length > 0) ? ancien[1].Trim() : DateTime.Now.ToString("dd/MM/yyyy HH:mm"));
+			string md5 = ((p.Md5.Length > 0) ? p.Md5 : ((ancien != null) ? ancien[2] : ""));
+			Directory.CreateDirectory(Path.GetDirectoryName(f));
+			File.WriteAllText(f, version.Trim() + "\r\n" + date + "\r\n" + md5.Trim() + "\r\n", Encoding.UTF8);
+			if (installes != null && !installes.Exists((string x) => string.Equals(x, f, StringComparison.OrdinalIgnoreCase)))
+			{
+				installes.Add(f);
+			}
+		}
+		catch (Exception e)
+		{
+			Journal.Une("version", e);
+		}
 	}
 
 	public static string[] Installee(Projet p, string omsi)
@@ -439,6 +504,7 @@ internal static class Omsi
 				Nettoyes++;
 			}
 		}
+		EcrireVersion(p, omsi, list);
 		File.WriteAllLines(path, list.ToArray(), Encoding.UTF8);
 	}
 
@@ -521,7 +587,23 @@ internal static class Omsi
 		return num;
 	}
 
+	private static bool lanceCache;
+
+	private static DateTime lanceQuand = DateTime.MinValue;
+
+	/// <summary>OMSI 2 / openOMSI tourne-t-il ? (résultat gardé 1,5 s : lire la liste des processus coûte cher)</summary>
 	public static bool JeuLance()
+	{
+		if ((DateTime.Now - lanceQuand).TotalMilliseconds < 1500.0)
+		{
+			return lanceCache;
+		}
+		lanceCache = JeuLance0();
+		lanceQuand = DateTime.Now;
+		return lanceCache;
+	}
+
+	private static bool JeuLance0()
 	{
 		bool result = false;
 		string[] array = new string[2] { "openomsi", "omsi" };
