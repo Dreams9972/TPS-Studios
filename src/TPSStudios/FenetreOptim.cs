@@ -78,7 +78,7 @@ internal partial class Fenetre
 	/// Image dans une case sans la zoomer à l'excès : si les proportions sont proches, elle remplit la
 	/// case (léger recadrage) ; sinon elle s'affiche en entier sur un fond flou fait de la même image.
 	/// </summary>
-	internal static void DessinerAjuste(Graphics g, Image im, Rectangle r)
+	internal static void DessinerAjuste(Graphics g, Image im, Rectangle r, double tolerance = 1.22)
 	{
 		if (im == null || r.Width < 1 || r.Height < 1 || im.Width < 1 || im.Height < 1)
 		{
@@ -88,7 +88,7 @@ internal partial class Fenetre
 		double ri = (double)im.Width / (double)im.Height;
 		double ecart = Math.Max(rc, ri) / Math.Min(rc, ri);
 		InterpolationMode im0 = g.InterpolationMode;
-		if (ecart <= 1.22)
+		if (ecart <= tolerance)
 		{
 			double k = Math.Max((double)r.Width / (double)im.Width, (double)r.Height / (double)im.Height);
 			int w = (int)Math.Ceiling((double)im.Width * k);
@@ -149,7 +149,10 @@ internal partial class Fenetre
 		{
 			graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
 			graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
-			DessinerAjuste(graphics, im, new Rectangle(0, 0, w, h));
+			double num = Math.Max((double)w / (double)im.Width, (double)h / (double)im.Height);
+			int num2 = (int)Math.Ceiling((double)im.Width * num);
+			int num3 = (int)Math.Ceiling((double)im.Height * num);
+			graphics.DrawImage(im, (w - num2) / 2, (h - num3) / 2, num2, num3);
 		}
 		echelles[key] = value;
 		return value;

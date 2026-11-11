@@ -2680,7 +2680,7 @@ internal partial class Fenetre : Form
 			num5 = 310;
 			num4 = Math.Max(360, W - 2 * num - num3 - num5);
 		}
-		int num6 = Math.Min(Math.Max(Zx.P(300), base.ClientSize.Height - num2 - Zx.P(330)), num4 * 9 / 16);
+		int num6 = Math.Min(540, num4 * 9 / 16);
 		rVue = new Rectangle(num, num2, num4, num6);
 		List<Image> list = DiapoPage();
 		int num7 = Math.Max(1, list.Count);
@@ -2835,7 +2835,10 @@ internal partial class Fenetre : Form
 			graphics.SetClip(path, CombineMode.Intersect);
 			if (im != null)
 			{
-				DessinerAjuste(graphics, im, new Rectangle(0, 0, s.Width, s.Height));
+				double num = Math.Max((double)s.Width / (double)im.Width, (double)s.Height / (double)im.Height);
+				int num2 = (int)((double)im.Width * num);
+				int num3 = (int)((double)im.Height * num);
+				graphics.DrawImage(im, (s.Width - num2) / 2, (s.Height - num3) / 2, num2, num3);
 			}
 			else
 			{
@@ -6128,7 +6131,10 @@ internal partial class Fenetre : Form
 			graphics.SetClip(path, CombineMode.Intersect);
 			if (d.Img != null)
 			{
-				DessinerAjuste(graphics, d.Img, new Rectangle(0, 0, width, height));
+				double num = Math.Max((double)width / (double)d.Img.Width, (double)height / (double)d.Img.Height);
+				int num2 = (int)((double)d.Img.Width * num);
+				int num3 = (int)((double)d.Img.Height * num);
+				graphics.DrawImage(d.Img, (width - num2) / 2, (height - num3) / 2, num2, num3);
 			}
 			else
 			{
@@ -6222,7 +6228,10 @@ internal partial class Fenetre : Form
 		{
 			GraphicsState gstate2 = g.Save();
 			g.SetClip(rect, CombineMode.Intersect);
-			DessinerAjuste(g, d.Img, rect);
+			double num4 = Math.Max((double)rect.Width / (double)d.Img.Width, (double)rect.Height / (double)d.Img.Height);
+			int num5 = (int)((double)d.Img.Width * num4);
+			int num6 = (int)((double)d.Img.Height * num4);
+			g.DrawImage(d.Img, (W - num5) / 2, (num2 - num6) / 2, num5, num6);
 			g.Restore(gstate2);
 		}
 		else
