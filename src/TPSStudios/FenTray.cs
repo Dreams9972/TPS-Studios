@@ -258,11 +258,11 @@ internal class FenTray : Form
 		});
 		action(new Rectangle(num4 - Zx.P(25) - Zx.P(12) - Zx.P(40), num3 + Zx.P(5), Zx.P(40), Zx.P(40)), "\ue892", fG, color, arg5: false, delegate
 		{
-			Musique.Touche(177);
+			Musique.Commande("precedent");
 		});
 		action(new Rectangle(num4 + Zx.P(25) + Zx.P(12), num3 + Zx.P(5), Zx.P(40), Zx.P(40)), "\ue893", fG, color, arg5: false, delegate
 		{
-			Musique.Touche(176);
+			Musique.Commande("suivant");
 		});
 		action(new Rectangle(num4 - Zx.P(25) - Zx.P(12) - Zx.P(40) - Zx.P(14) - Zx.P(34), num3 + Zx.P(8), Zx.P(34), Zx.P(34)), "\ue8a7", fG, C.Gris, arg5: false, delegate
 		{

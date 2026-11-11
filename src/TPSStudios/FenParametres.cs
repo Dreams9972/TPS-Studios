@@ -289,11 +289,19 @@ internal class FenParametres : Form, IPage
 			cadre4.Controls.Add(value4);
 			cSuivis[list[j].Id] = value4;
 		}
-		Cadre cadre5 = Section("Musique", Zx.P(382));
-		Etiquette(cadre5, "Lecteur affiché sur l'accueil (petite pilule sous « Informations »)", Zx.P(24), Zx.P(46));
+		// MUSIQUE : 3 étapes simples (application, connexion, la pilule de l'accueil)
+		Cadre cadre5 = Section("Musique", Zx.P(470));
+		Func<string, int, Label> etape = delegate(string txt, int yy)
+		{
+			Label label = Etiquette(cadre5, txt, Zx.P(24), yy);
+			label.Font = new Font("Segoe UI Semibold", Zx.P(10.5f));
+			label.ForeColor = C.Texte;
+			return label;
+		};
+		etape("1.  Votre application de musique", Zx.P(44));
 		sgMus = new Segments();
-		sgMus.Items = new string[4] { "Automatique", "Spotify", "Apple Music", "Aucun" };
-		sgMus.Location = new Point(Zx.P(24), Zx.P(70));
+		sgMus.Items = new string[4] { "Automatique", "Spotify", "Apple Music", "Désactivée" };
+		sgMus.Location = new Point(Zx.P(24), Zx.P(72));
 		sgMus.Width = cw - Zx.P(48);
 		sgMus.Etire = true;
 		string mode = Musique.Mode;
@@ -305,22 +313,45 @@ internal class FenParametres : Form, IPage
 			_ => 0, 
 		};
 		cadre5.Controls.Add(sgMus);
-		Label lMus = Etiquette(cadre5, "", Zx.P(24), Zx.P(120));
+		Label lMus = Etiquette(cadre5, "", Zx.P(24), Zx.P(116));
 		lMus.AutoSize = false;
-		lMus.Size = new Size(cw - Zx.P(48), Zx.P(40));
+		lMus.Size = new Size(cw - Zx.P(48), Zx.P(24));
 		Action majMus = delegate
 		{
 			bool flag = Musique.Installe("spotify");
 			bool flag2 = Musique.Installe("apple");
-			lMus.Text = "Spotify : " + (flag ? "installé ✔" : "non trouvé sur ce PC") + "     ·     Apple Music : " + (flag2 ? "installé ✔" : "non trouvé sur ce PC");
-			lMus.ForeColor = ((flag || flag2) ? C.Vert : C.Gris);
+			string s = (flag ? "Spotify ✔" : "Spotify : non installé");
+			string a = (flag2 ? "Apple Music ✔" : "Apple Music : non installé");
+			switch (sgMus.Index)
+			{
+			case 1:
+				lMus.Text = flag ? "Le lanceur affiche et pilote Spotify.   ✔ installé sur ce PC" : "Spotify n'est pas installé : l'étape 2 vous guide (application ou lecteur web).";
+				lMus.ForeColor = flag ? C.Vert : C.Orange;
+				break;
+			case 2:
+				lMus.Text = flag2 ? "Le lanceur affiche et pilote Apple Music.   ✔ installé sur ce PC" : "Apple Music n'est pas installé : l'étape 2 vous guide (application ou lecteur web).";
+				lMus.ForeColor = flag2 ? C.Vert : C.Orange;
+				break;
+			case 3:
+				lMus.Text = "Pas de lecteur de musique sur l'accueil.";
+				lMus.ForeColor = C.Gris;
+				break;
+			default:
+				lMus.Text = "Le lanceur suit celui qui joue :   " + s + "     ·     " + a;
+				lMus.ForeColor = (flag || flag2) ? C.Vert : C.Gris;
+				break;
+			}
 		};
 		majMus();
-		Etiquette(cadre5, "Connectez votre compte dans l'application (une seule fois) : le lanceur pilote ensuite la lecture en cours, sans jamais voir votre mot de passe.", Zx.P(24), Zx.P(166)).MaximumSize = new Size(cw - Zx.P(48), 0);
+		sgMus.Changed += delegate
+		{
+			majMus();
+		};
+		etape("2.  Première fois : connectez votre compte", Zx.P(160));
 		Bouton bouton2 = new Bouton("Connecter Spotify");
 		bouton2.Couleur = Color.FromArgb(30, 185, 84);
 		bouton2.Size = new Size(Zx.P(210), Zx.P(40));
-		bouton2.Location = new Point(Zx.P(24), Zx.P(214));
+		bouton2.Location = new Point(Zx.P(24), Zx.P(188));
 		bouton2.Click += delegate
 		{
 			using (FenConnexionMusique f2 = new FenConnexionMusique("spotify"))
@@ -336,7 +367,7 @@ internal class FenParametres : Form, IPage
 		Bouton bouton3 = new Bouton("Connecter Apple Music");
 		bouton3.Couleur = Color.FromArgb(250, 45, 85);
 		bouton3.Size = new Size(Zx.P(230), Zx.P(40));
-		bouton3.Location = new Point(Zx.P(246), Zx.P(214));
+		bouton3.Location = new Point(Zx.P(246), Zx.P(188));
 		bouton3.Click += delegate
 		{
 			using (FenConnexionMusique f = new FenConnexionMusique("apple"))
@@ -349,8 +380,29 @@ internal class FenParametres : Form, IPage
 			majMus();
 		};
 		cadre5.Controls.Add(bouton3);
-		Etiquette(cadre5, "Chaque bouton ouvre une page qui vous accompagne : connexion au compte, application ou lecteur web, premier titre.", Zx.P(24), Zx.P(270));
-		Etiquette(cadre5, "Dans la pilule de l'accueil, le bouton à gauche ramène votre lecteur (application ou onglet déjà ouvert) pour changer de playlist.", Zx.P(24), Zx.P(306)).MaximumSize = new Size(cw - Zx.P(48), 0);
+		Etiquette(cadre5, "Une page vous guide pas à pas. Le lanceur ne voit jamais votre mot de passe.", Zx.P(24), Zx.P(236));
+		etape("3.  Sur l'accueil : la pilule Musique", Zx.P(276));
+		string[,] legende = new string[6, 2]
+		{
+			{ "\ue8a7", "Ouvrir votre lecteur" },
+			{ "\ue8b1", "Lecture aléatoire" },
+			{ "\ue892  \ue768  \ue893", "Précédent · lecture · suivant" },
+			{ "\ue767", "Volume" },
+			{ "\ue8fd", "Vos playlists" },
+			{ "", "" }
+		};
+		int colW = (cw - Zx.P(48)) / 2;
+		for (int m = 0; m < 5; m++)
+		{
+			int lx = Zx.P(24) + m % 2 * colW;
+			int ly = Zx.P(306) + m / 2 * Zx.P(30);
+			Label lg = Etiquette(cadre5, legende[m, 0], lx, ly);
+			lg.Font = new Font("Segoe MDL2 Assets", Zx.P(11f));
+			lg.ForeColor = C.Orange;
+			Etiquette(cadre5, legende[m, 1], lx + Zx.P(66), ly);
+		}
+		Label lNote = Etiquette(cadre5, "Seule la musique de Spotify ou d'Apple Music s'affiche : les bandes-annonces, vidéos et autres sons sont ignorés.", Zx.P(24), Zx.P(404));
+		lNote.MaximumSize = new Size(cw - Zx.P(48), 0);
 		Cadre c2 = Section("Données et dépannage", Zx.P(40) + 4 * Zx.P(52) + Zx.P(10));
 		bCache = Rangee(c2, 0, "Vider le cache", danger: false, delegate
 		{

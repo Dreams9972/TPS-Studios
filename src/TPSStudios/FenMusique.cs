@@ -204,11 +204,11 @@ internal class FenMusique : Form
 		});
 		Rond(g, new Rectangle(num3 - Zx.P(26) - Zx.P(18) - Zx.P(44), num2 + Zx.P(4), Zx.P(44), Zx.P(44)), "\ue892", fG, C.Jade, plein: false, delegate
 		{
-			Musique.Touche(177);
+			Musique.Commande("precedent");
 		});
 		Rond(g, new Rectangle(num3 + Zx.P(26) + Zx.P(18), num2 + Zx.P(4), Zx.P(44), Zx.P(44)), "\ue893", fG, C.Jade, plein: false, delegate
 		{
-			Musique.Touche(176);
+			Musique.Commande("suivant");
 		});
 		Rond(g, new Rectangle(num3 - Zx.P(26) - Zx.P(18) - Zx.P(44) - Zx.P(18) - Zx.P(40), num2 + Zx.P(6), Zx.P(40), Zx.P(40)), "\ue993", fG, C.Gris, plein: false, delegate
 		{

@@ -280,9 +280,18 @@ internal static class Musique
 		}
 	}
 
+	// suivant / précédent / aléatoire : envoyés à Spotify ou Apple Music seulement (jamais aux bandes-annonces ni au navigateur)
+	public static void Commande(string quoi, Action<bool> fini = null)
+	{
+		MediaWin.Demarrer();
+		MediaWin.Envoyer(quoi, fini);
+		lu = DateTime.Now.AddMilliseconds(-300.0);
+	}
+
 	public static void Basculer()
 	{
-		Touche(179);
+		MediaWin.Demarrer();
+		MediaWin.Envoyer("lecture");
 		if (cache.Length > 0)
 		{
 			cache = "";
