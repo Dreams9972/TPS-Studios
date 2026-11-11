@@ -329,7 +329,7 @@
       "nom": "Trottinette électrique",
       "sous_titre": "Pilotable — 25 km/h, débridable jusqu'à 150 km/h",
       "jeu": "omsi2",
-      "categorie": "bus",
+      "categorie": "packs_ia",
       "editeur": "· TPS Groupe",
       "fichier_version": "TPSTrottinette_version.txt",
       "liste": "TPSTrottinette_fichiers_installes.txt",
@@ -348,7 +348,7 @@
       "taille": 3401183,
       "image": "https://raw.githubusercontent.com/Dreams9972/TPS-Studios/main/images/trottinette.jpg",
       "notes": "Première version de la trottinette électrique.",
-      "nouveautes": "True",
+      "nouveautes": true,
       "tags": "Trottinette"
     }
   ],
