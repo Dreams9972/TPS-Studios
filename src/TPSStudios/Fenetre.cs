@@ -2680,7 +2680,7 @@ internal partial class Fenetre : Form
 			num5 = 310;
 			num4 = Math.Max(360, W - 2 * num - num3 - num5);
 		}
-		int num6 = Math.Min(540, num4 * 9 / 16);
+		int num6 = Math.Min(Math.Max(Zx.P(300), base.ClientSize.Height - num2 - Zx.P(330)), num4 * 9 / 16);
 		rVue = new Rectangle(num, num2, num4, num6);
 		List<Image> list = DiapoPage();
 		int num7 = Math.Max(1, list.Count);
@@ -2835,10 +2835,7 @@ internal partial class Fenetre : Form
 			graphics.SetClip(path, CombineMode.Intersect);
 			if (im != null)
 			{
-				double num = Math.Max((double)s.Width / (double)im.Width, (double)s.Height / (double)im.Height);
-				int num2 = (int)((double)im.Width * num);
-				int num3 = (int)((double)im.Height * num);
-				graphics.DrawImage(im, (s.Width - num2) / 2, (s.Height - num3) / 2, num2, num3);
+				DessinerAjuste(graphics, im, new Rectangle(0, 0, s.Width, s.Height));
 			}
 			else
 			{
@@ -3968,7 +3965,7 @@ internal partial class Fenetre : Form
 			}
 			if (snap != null)
 			{
-				Jouer(page ? 300 : 190, delegate(double p)
+				Jouer(page ? 240 : 170, delegate(double p)
 				{
 					vp = p;
 					c.Invalidate(invalidateChildren: false);
@@ -4021,7 +4018,7 @@ internal partial class Fenetre : Form
 			snap = snapFin;
 			sp = posFin;
 			ferme = true;
-			Jouer(page ? 260 : 140, delegate(double p)
+			Jouer(page ? 200 : 130, delegate(double p)
 			{
 				vp = 1.0 - p;
 				c.Invalidate(invalidateChildren: false);
@@ -4171,7 +4168,7 @@ internal partial class Fenetre : Form
 		vo.Update();
 		long derT = 0L;
 		Stopwatch swN = Stopwatch.StartNew();
-		Jouer((neigeTrans > 0) ? 520 : ((style == StyleTrans.Diagonale) ? 320 : 360), delegate(double p)
+		Jouer((neigeTrans > 0) ? 420 : ((style == StyleTrans.Diagonale) ? 260 : 280), delegate(double p)
 		{
 			if (neigeTrans > 0)
 			{
@@ -4677,7 +4674,25 @@ internal partial class Fenetre : Form
 		return panelFond;
 	}
 
+	private static readonly bool mesurePerf = Environment.GetEnvironmentVariable("TPS_PERF") == "1";
+
 	private void ShowVue(Vue v)
+	{
+		Stopwatch swPerf = (mesurePerf ? Stopwatch.StartNew() : null);
+		try
+		{
+			ShowVue0(v);
+		}
+		finally
+		{
+			if (swPerf != null)
+			{
+				Journal.Ecrire("perf", new Exception("ShowVue " + v + " : " + swPerf.ElapsedMilliseconds + " ms (capture " + StatSnap + " ms)"));
+			}
+		}
+	}
+
+	private void ShowVue0(Vue v)
 	{
 		if (v == Vue.Projet && sel == null)
 		{
@@ -6113,10 +6128,7 @@ internal partial class Fenetre : Form
 			graphics.SetClip(path, CombineMode.Intersect);
 			if (d.Img != null)
 			{
-				double num = Math.Max((double)width / (double)d.Img.Width, (double)height / (double)d.Img.Height);
-				int num2 = (int)((double)d.Img.Width * num);
-				int num3 = (int)((double)d.Img.Height * num);
-				graphics.DrawImage(d.Img, (width - num2) / 2, (height - num3) / 2, num2, num3);
+				DessinerAjuste(graphics, d.Img, new Rectangle(0, 0, width, height));
 			}
 			else
 			{
@@ -6208,12 +6220,9 @@ internal partial class Fenetre : Form
 		Rectangle rect = new Rectangle(0, 0, W, num2);
 		if (d.Img != null)
 		{
-			double num4 = Math.Max((double)rect.Width / (double)d.Img.Width, (double)rect.Height / (double)d.Img.Height);
-			int num5 = (int)((double)d.Img.Width * num4);
-			int num6 = (int)((double)d.Img.Height * num4);
 			GraphicsState gstate2 = g.Save();
 			g.SetClip(rect, CombineMode.Intersect);
-			g.DrawImage(d.Img, (W - num5) / 2, (num2 - num6) / 2, num5, num6);
+			DessinerAjuste(g, d.Img, rect);
 			g.Restore(gstate2);
 		}
 		else
