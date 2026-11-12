@@ -2662,7 +2662,7 @@ internal partial class Fenetre : Form
 
 	private int Mettre(int W)
 	{
-		int num = 40;
+		int num = Math.Max(Zx.P(16), Math.Min(Zx.P(40), W / 32));
 		_ = page.ClientSize.Height;
 		bRetour.Location = new Point(num, Zx.P(26));
 		bAccueilP.Location = new Point(num + Zx.P(56), Zx.P(26));
@@ -2671,66 +2671,44 @@ internal partial class Fenetre : Form
 		bSuivre.SetBounds(W - num - Zx.P(48), Zx.P(30), Zx.P(48), Zx.P(44));
 		bAime.SetBounds(W - num - Zx.P(48) - Zx.P(10) - Zx.P(160), Zx.P(30), Zx.P(160), Zx.P(44));
 		bSupport.SetBounds(W - num - Zx.P(48) - Zx.P(10) - Zx.P(160) - Zx.P(10) - Zx.P(140), Zx.P(30), Zx.P(140), Zx.P(44));
-		int num2 = 186;
+		int num2 = Zx.P(186);
 		int num3 = Zx.P(28);
-		int num4 = Math.Max(420, (int)((double)(W - 2 * num - num3) * 0.64));
-		int num5 = W - 2 * num - num3 - num4;
-		if (num5 < 310)
+		// fenêtre étroite (ou zoom Windows élevé) : une seule colonne, le bloc JOUER juste sous la vidéo
+		bool etroit = W - 2 * num - num3 < Zx.P(1000);
+		int num4;
+		int num5;
+		if (etroit)
 		{
-			num5 = 310;
-			num4 = Math.Max(360, W - 2 * num - num3 - num5);
+			num4 = Math.Max(Zx.P(280), W - 2 * num);
+			num5 = num4;
 		}
-		int num6 = Math.Min(540, num4 * 9 / 16);
+		else
+		{
+			num4 = (int)((double)(W - 2 * num - num3) * 0.64);
+			num5 = W - 2 * num - num3 - num4;
+			if (num5 < Zx.P(360))
+			{
+				num5 = Zx.P(360);
+				num4 = W - 2 * num - num3 - num5;
+			}
+		}
+		int num6 = Math.Min(etroit ? Math.Max(Zx.P(220), Math.Min(Zx.P(420), page.ClientSize.Height * 46 / 100)) : Zx.P(540), num4 * 9 / 16);
 		rVue = new Rectangle(num, num2, num4, num6);
 		List<Image> list = DiapoPage();
 		int num7 = Math.Max(1, list.Count);
 		rMini.Clear();
-		int num9 = num2 + num6 + Zx.P(12);
-		int num11 = num9 + Zx.P(8);
-		bOngDesc.SetBounds(num, num11, Zx.P(190), Zx.P(36));
-		bOngNotes.SetBounds(num + Zx.P(200), num11, Zx.P(230), Zx.P(36));
-		bOngGal.Visible = false;
-		galP.Visible = false;
-		bool avecComs = sel != null && sel.Commentaires;
-		comP.Visible = avecComs;
-		rEtoiles = new Rectangle(num + num4 - Zx.P(186), num11 + Zx.P(4), Zx.P(186), Zx.P(28));
-		rTelP = new Rectangle(bOngNotes.Right + Zx.P(14), num11, Math.Max(Zx.P(150), Math.Min(Zx.P(240), rEtoiles.X - Zx.P(14) - bOngNotes.Right - Zx.P(14))), Zx.P(36));
-		int largeurTexte = (avecComs ? ((num4 - Zx.P(28)) * 54 / 100) : num4);
-		int width = Math.Max(Zx.P(240), largeurTexte - Zx.P(44));
-		lDesc.MaximumSize = new Size(width, 0);
-		lDesc.AutoSize = true;
-		lNotes.MaximumSize = new Size(width, 0);
-		lNotes.AutoSize = true;
-		descP.AutoScroll = false;
-		notesP.AutoScroll = false;
-		int num12 = num11 + Zx.P(36) + Zx.P(18);
-		int hDesc = Math.Max(lDesc.Height, Lang.MeasureText(lDesc.Text, lDesc.Font, new Size(width, 0), TextFormatFlags.WordBreak).Height);
-		int hNotes = Math.Max(lNotes.Height, Lang.MeasureText(lNotes.Text, lNotes.Font, new Size(width, 0), TextFormatFlags.WordBreak).Height);
-		lDesc.AutoSize = false;
-		lNotes.AutoSize = false;
-		lDesc.MaximumSize = Size.Empty;
-		lNotes.MaximumSize = Size.Empty;
-		lDesc.Size = new Size(width, hDesc + Zx.P(4));
-		lNotes.Size = new Size(width, hNotes + Zx.P(4));
-		descP.SetBounds(num, num12, largeurTexte, Math.Max(Zx.P(140), hDesc + Zx.P(44)));
-		notesP.SetBounds(num, num12, largeurTexte, Math.Max(Zx.P(140), hNotes + Zx.P(44)));
-		int largeurComs = num4 - largeurTexte - Zx.P(28);
-		RecalcCom(largeurComs);
-		comP.SetBounds(num + largeurTexte + Zx.P(28), num12, Math.Max(Zx.P(200), largeurComs), HautCom + Zx.P(140) + comH);
-		PlacerCom();
-		int val = num12 + Math.Max(comP.Visible ? comP.Height : 0, notesP.Visible ? notesP.Height : descP.Height);
-		int num13 = num + num4 + num3;
+		int num13 = (etroit ? num : (num + num4 + num3));
+		int ya = (etroit ? (num2 + num6 + Zx.P(16)) : num2);
 		int num14 = Zx.P(20);
 		int num15 = num5 - 2 * num14;
-		Zx.P(16);
 		lEtat.BackColor = C.Carte;
 		lProg.BackColor = C.Carte;
 		lAlerte.BackColor = C.Carte;
-		lEtat.Location = new Point(num13 + num14, num2 + Zx.P(66));
+		lEtat.Location = new Point(num13 + num14, ya + Zx.P(66));
 		lEtat.Size = new Size(num15, Zx.P(46));
-		bAction.Location = new Point(num13 + num14, num2 + Zx.P(120));
+		bAction.Location = new Point(num13 + num14, ya + Zx.P(120));
 		bAction.Size = new Size(num15, Zx.P(56));
-		int num16 = num2 + Zx.P(120) + Zx.P(56) + Zx.P(10);
+		int num16 = ya + Zx.P(120) + Zx.P(56) + Zx.P(10);
 		bCode.Visible = modeAchat;
 		bCode.SetBounds(num13 + num14, num16, num15, Zx.P(36));
 		if (modeAchat)
@@ -2756,11 +2734,11 @@ internal partial class Fenetre : Form
 			lAlerte.Size = new Size(num15, Zx.P(40));
 			num16 += Zx.P(50);
 		}
-		rAchat = new Rectangle(num13, num2, num5, num16 + Zx.P(20) - num2);
+		rAchat = new Rectangle(num13, ya, num5, num16 + Zx.P(20) - ya);
 		rPhotosP = Rectangle.Empty;
 		if (list.Count > 1)
 		{
-			int num30 = 3;
+			int num30 = (etroit ? Math.Max(3, Math.Min(6, num5 / Zx.P(170))) : 3);
 			int num31 = Zx.P(8);
 			int num32 = (num5 - 2 * num14 - (num30 - 1) * num31) / num30;
 			int num33 = num32 * 9 / 16;
@@ -2771,6 +2749,63 @@ internal partial class Fenetre : Form
 				rMini.Add(new Rectangle(num13 + num14 + i % num30 * (num32 + num31), rPhotosP.Y + Zx.P(50) + i / num30 * (num33 + num31), num32, num33));
 			}
 		}
+		int num9 = (etroit ? ((rPhotosP.IsEmpty ? rAchat.Bottom : rPhotosP.Bottom) + Zx.P(8)) : (num2 + num6 + Zx.P(12)));
+		int num11 = num9 + Zx.P(8);
+		int lOng1 = Math.Min(Zx.P(190), (num4 - Zx.P(10)) * 45 / 100);
+		int lOng2 = Math.Min(Zx.P(230), num4 - lOng1 - Zx.P(10));
+		bOngDesc.SetBounds(num, num11, lOng1, Zx.P(36));
+		bOngNotes.SetBounds(num + lOng1 + Zx.P(10), num11, lOng2, Zx.P(36));
+		// pas la place pour les onglets, le compteur et les étoiles sur une ligne : étoiles et compteur en dessous
+		bool deuxLignes = num4 < lOng1 + lOng2 + Zx.P(10 + 14 + 150 + 14 + 186);
+		bOngGal.Visible = false;
+		galP.Visible = false;
+		bool avecComs = sel != null && sel.Commentaires;
+		comP.Visible = avecComs;
+		if (deuxLignes)
+		{
+			int y2 = num11 + Zx.P(46);
+			rEtoiles = new Rectangle(num + num4 - Zx.P(186), y2 + Zx.P(4), Zx.P(186), Zx.P(28));
+			rTelP = new Rectangle(num, y2, Math.Max(Zx.P(150), Math.Min(Zx.P(240), rEtoiles.X - Zx.P(14) - num)), Zx.P(36));
+		}
+		else
+		{
+			rEtoiles = new Rectangle(num + num4 - Zx.P(186), num11 + Zx.P(4), Zx.P(186), Zx.P(28));
+			rTelP = new Rectangle(bOngNotes.Right + Zx.P(14), num11, Math.Max(Zx.P(150), Math.Min(Zx.P(240), rEtoiles.X - Zx.P(14) - bOngNotes.Right - Zx.P(14))), Zx.P(36));
+		}
+		// commentaires à droite du texte s'il y a la place, sinon en dessous
+		bool comsDessous = avecComs && num4 < Zx.P(760);
+		int largeurTexte = ((avecComs && !comsDessous) ? ((num4 - Zx.P(28)) * 54 / 100) : num4);
+		int width = Math.Max(Zx.P(240), largeurTexte - Zx.P(44));
+		lDesc.MaximumSize = new Size(width, 0);
+		lDesc.AutoSize = true;
+		lNotes.MaximumSize = new Size(width, 0);
+		lNotes.AutoSize = true;
+		descP.AutoScroll = false;
+		notesP.AutoScroll = false;
+		int num12 = num11 + Zx.P(36) + Zx.P(18) + (deuxLignes ? Zx.P(46) : 0);
+		int hDesc = Math.Max(lDesc.Height, Lang.MeasureText(lDesc.Text, lDesc.Font, new Size(width, 0), TextFormatFlags.WordBreak).Height);
+		int hNotes = Math.Max(lNotes.Height, Lang.MeasureText(lNotes.Text, lNotes.Font, new Size(width, 0), TextFormatFlags.WordBreak).Height);
+		lDesc.AutoSize = false;
+		lNotes.AutoSize = false;
+		lDesc.MaximumSize = Size.Empty;
+		lNotes.MaximumSize = Size.Empty;
+		lDesc.Size = new Size(width, hDesc + Zx.P(4));
+		lNotes.Size = new Size(width, hNotes + Zx.P(4));
+		descP.SetBounds(num, num12, largeurTexte, Math.Max(Zx.P(140), hDesc + Zx.P(44)));
+		notesP.SetBounds(num, num12, largeurTexte, Math.Max(Zx.P(140), hNotes + Zx.P(44)));
+		int largeurComs = (comsDessous ? num4 : (num4 - largeurTexte - Zx.P(28)));
+		RecalcCom(largeurComs);
+		int hTexte = (notesP.Visible ? notesP.Height : descP.Height);
+		if (comsDessous)
+		{
+			comP.SetBounds(num, num12 + hTexte + Zx.P(20), Math.Max(Zx.P(200), largeurComs), HautCom + Zx.P(140) + comH);
+		}
+		else
+		{
+			comP.SetBounds(num + largeurTexte + Zx.P(28), num12, Math.Max(Zx.P(200), largeurComs), HautCom + Zx.P(140) + comH);
+		}
+		PlacerCom();
+		int val = (comsDessous ? ((comP.Visible ? comP.Bottom : (num12 + hTexte))) : (num12 + Math.Max(comP.Visible ? comP.Height : 0, hTexte)));
 		PlacerVideoPage();
 		int num18 = ((sel != null) ? LignesInfo(sel).Count : 8);
 		int num19 = ((sel != null) ? sel.Liens.Count : 0);
@@ -2787,8 +2822,8 @@ internal partial class Fenetre : Form
 			}
 		}
 		int num22 = num20 - num21;
-		rInfo = new Rectangle(num13, (rPhotosP.IsEmpty ? rAchat.Bottom : rPhotosP.Bottom) + Zx.P(16), num5, Zx.P(54) + num18 * Zx.P(30) + Zx.P(10) + ((num19 > 0) ? (Zx.P(34) + num19 * Zx.P(36)) : 0) + ((num21 > 0) ? (Zx.P(34) + num21 * Zx.P(32)) : 0) + ((num22 > 0) ? (Zx.P(34) + num22 * Zx.P(32)) : 0));
-		return Math.Max(val, rInfo.Bottom) + 40;
+		rInfo = new Rectangle(num13, (etroit ? val : (rPhotosP.IsEmpty ? rAchat.Bottom : rPhotosP.Bottom)) + Zx.P(16), num5, Zx.P(54) + num18 * Zx.P(30) + Zx.P(10) + ((num19 > 0) ? (Zx.P(34) + num19 * Zx.P(36)) : 0) + ((num21 > 0) ? (Zx.P(34) + num21 * Zx.P(32)) : 0) + ((num22 > 0) ? (Zx.P(34) + num22 * Zx.P(32)) : 0));
+		return Math.Max(val, rInfo.Bottom) + Zx.P(40);
 	}
 
 	private void Disposer()
