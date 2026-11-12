@@ -10232,9 +10232,19 @@ internal partial class Fenetre : Form
 		}
 		if (installee == null)
 		{
-			if (Omsi.VersionRangee(sel, omsi, choix.VarianteId))
+			if (Omsi.VersionRangee(sel, omsi, choix.VarianteId) && Omsi.Touches(sel, omsi, choix.VarianteId) == null)
 			{
 				ChangerVersion(null, choix, omsi);
+			}
+			else if (choix.Complement)
+			{
+				// un complément se pose sur la version normale : on installe d'abord celle-ci
+				Projet c = choix;
+				apresInstallation = delegate
+				{
+					Installer(c);
+				};
+				Installer(c.Principal ?? sel);
 			}
 			else
 			{
@@ -10266,13 +10276,37 @@ internal partial class Fenetre : Form
 				{
 					Omsi.Basculer(sel, omsi, activer: true);
 				}
-				Omsi.RangerVersion(sel, omsi, actuelle.VarianteId);
+				if (voulue.Complement && !Omsi.VersionRangee(sel, omsi, voulue.VarianteId))
+				{
+					if (actuelle.VarianteId.Length == 0)
+					{
+						// premier passage : le complément est téléchargé puis posé sur la version normale
+						Installer(voulue);
+						return;
+					}
+					Projet c = voulue;
+					apresInstallation = delegate
+					{
+						Installer(c);
+					};
+					voulue = voulue.Principal ?? sel;
+				}
+				// entre la normale et un complément, seuls les fichiers du complément changent de place
+				HashSet<string> touches = Omsi.Touches(sel, omsi, voulue.VarianteId);
+				Omsi.RangerVersion(sel, omsi, actuelle.VarianteId, touches);
 			}
 			if (Omsi.VersionRangee(sel, omsi, voulue.VarianteId))
 			{
 				Omsi.RestaurerVersion(sel, omsi, voulue.VarianteId);
 				MajEtat();
 				page.Invalidate();
+				Action suite = apresInstallation;
+				apresInstallation = null;
+				if (suite != null)
+				{
+					suite();
+					return;
+				}
 				Toast("✔  " + ((voulue.VarianteId.Length == 0) ? "Version normale" : voulue.VarianteNom) + " prête : lancement…", C.Vert, 4000);
 				Jouer();
 				return;
@@ -10280,12 +10314,14 @@ internal partial class Fenetre : Form
 		}
 		catch (UnauthorizedAccessException)
 		{
+			apresInstallation = null;
 			MessageBox.Show(this, "OMSI 2 est dans un dossier protégé : le changement de version demande les droits administrateur. Relancez le lanceur en tant qu'administrateur, ou réinstallez la version voulue.", Text);
 			MajEtat();
 			return;
 		}
 		catch (Exception ex)
 		{
+			apresInstallation = null;
 			MessageBox.Show(this, "Changement de version impossible : " + ex.Message, Text);
 			MajEtat();
 			return;
@@ -10458,6 +10494,9 @@ internal partial class Fenetre : Form
 		return result;
 	}
 
+	/// <summary>Installation à enchaîner après la suivante (complément posé sur la version normale).</summary>
+	private Action apresInstallation;
+
 	private void Installer(Projet p)
 	{
 		if (Maintenance && !Comptes.EstAdmin)
@@ -10625,6 +10664,12 @@ internal partial class Fenetre : Form
 				lAlerte.Visible = true;
 			}
 			MajEtat();
+			Action suite = apresInstallation;
+			apresInstallation = null;
+			if (err == null && suite != null)
+			{
+				BeginInvoke(suite);
+			}
 		};
 		Action extraire = delegate
 		{
@@ -10666,7 +10711,7 @@ internal partial class Fenetre : Form
 					{
 						list.Add(item3[2]);
 					}
-					Omsi.Installer(p, list.ToArray(), omsi, open, delegate(double v, string f)
+					Progres suivi = delegate(double v, string f)
 					{
 						if (!((DateTime.Now - der).TotalMilliseconds < 80.0) || !(v < 1.0))
 						{
@@ -10678,7 +10723,15 @@ internal partial class Fenetre : Form
 								lProg.Text = "Installation " + (int)(v * 100.0) + " %  ·  " + Path.GetFileName(f);
 							});
 						}
-					});
+					};
+					if (p.Complement)
+					{
+						Omsi.InstallerComplement(p, list.ToArray(), omsi, open, suivi);
+					}
+					else
+					{
+						Omsi.Installer(p, list.ToArray(), omsi, open, suivi);
+					}
 					foreach (string[] item4 in morceaux)
 					{
 						try

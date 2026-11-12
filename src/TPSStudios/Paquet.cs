@@ -16,7 +16,7 @@ internal static class Paquet
 {
 	public const long TAILLE_PARTIE = 250L * 1024 * 1024;
 
-	public const int MAX_PARTIES = 40;
+	public const int MAX_PARTIES = 80;
 
 	private const long MAX_FICHIER = 1800L * 1024 * 1024;
 
@@ -79,6 +79,10 @@ internal static class Paquet
 			long taille = new FileInfo(f).Length;
 			if (taille > MAX_FICHIER)
 			{
+				if (rel.EndsWith(".zip", StringComparison.OrdinalIgnoreCase) || rel.EndsWith(".rar", StringComparison.OrdinalIgnoreCase) || rel.EndsWith(".7z", StringComparison.OrdinalIgnoreCase))
+				{
+					throw new Exception("« " + rel + " » est une archive : décompressez-la, puis choisissez le dossier décompressé (celui qui contient maps\\, Vehicles\\…), sans l'archive dedans");
+				}
 				throw new Exception("le fichier « " + rel + " » est trop gros (" + taille / 1048576 + " Mo, 1800 Mo maximum par fichier)");
 			}
 			list.Add(new Fichier

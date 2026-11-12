@@ -31,6 +31,11 @@ internal class FenPaquet : Form
 
 	private Champ tAvert;
 
+	private Option cComplement;
+
+	/// <summary>Version spéciale envoyée en complément : seulement ce qui diffère de la version normale installée.</summary>
+	private bool complement;
+
 	/// <summary>Version spéciale (ex. « V1 Alpha ») : publiée à côté de la version normale, au choix du joueur.</summary>
 	private bool speciale;
 
@@ -61,7 +66,7 @@ internal class FenPaquet : Form
 		this.id = id;
 		this.nom = nom;
 		Text = "Publier le paquet de " + nom;
-		base.ClientSize = new Size(Zx.P(700), Zx.P(770));
+		base.ClientSize = new Size(Zx.P(700), Zx.P(840));
 		base.FormBorderStyle = FormBorderStyle.FixedDialog;
 		base.MaximizeBox = false;
 		base.MinimizeBox = false;
@@ -115,22 +120,28 @@ internal class FenPaquet : Form
 		tAvert.Indice = "Avertissement montré au moment du choix (ex. version non maintenue, bugs possibles)";
 		tAvert.Enabled = false;
 		base.Controls.Add(tAvert);
+		cComplement = new Option("Seulement ce qui change", "Compare avec la version normale installée sur ce PC : seuls les fichiers nouveaux ou modifiés sont envoyés, puis posés par-dessus chez le joueur.", val: true);
+		cComplement.Location = new Point(Zx.P(18), Zx.P(428));
+		cComplement.Width = Zx.P(664);
+		cComplement.Enabled = false;
+		base.Controls.Add(cComplement);
 		cSpeciale.Changed += delegate
 		{
 			tAvert.Enabled = cSpeciale.Checked;
+			cComplement.Enabled = cSpeciale.Checked;
 		};
-		Lb("Notes de version (affichées aux joueurs)", Zx.P(30), Zx.P(432), Zx.P(640), Zx.P(22), new Font("Segoe UI Semibold", Zx.P(10.5f)), C.Texte);
+		Lb("Notes de version (affichées aux joueurs)", Zx.P(30), Zx.P(502), Zx.P(640), Zx.P(22), new Font("Segoe UI Semibold", Zx.P(10.5f)), C.Texte);
 		tNotes = new Champ(multi: true, Zx.P(130));
-		tNotes.Location = new Point(Zx.P(28), Zx.P(458));
+		tNotes.Location = new Point(Zx.P(28), Zx.P(528));
 		tNotes.Width = Zx.P(644);
 		tNotes.Text = notes.Replace("\r\n", "\n").Replace("\n", "\r\n");
 		base.Controls.Add(tNotes);
 		barre = new Barre();
-		barre.Location = new Point(Zx.P(28), Zx.P(606));
+		barre.Location = new Point(Zx.P(28), Zx.P(676));
 		barre.Size = new Size(Zx.P(644), Zx.P(8));
 		barre.Visible = false;
 		base.Controls.Add(barre);
-		lEtat = Lb("", Zx.P(30), Zx.P(622), Zx.P(640), Zx.P(54), new Font("Segoe UI", Zx.P(9.5f)), C.Gris);
+		lEtat = Lb("", Zx.P(30), Zx.P(692), Zx.P(640), Zx.P(54), new Font("Segoe UI", Zx.P(9.5f)), C.Gris);
 		Panel panel = new Panel
 		{
 			Dock = DockStyle.Bottom,
@@ -259,6 +270,7 @@ internal class FenPaquet : Form
 		string notes = tNotes.Text.Trim().Replace("\r\n", "\n");
 		speciale = cSpeciale.Checked;
 		avertissement = tAvert.Text.Trim();
+		complement = speciale && cComplement.Checked;
 		if (fichiers == null)
 		{
 			return;
@@ -389,6 +401,17 @@ internal class FenPaquet : Form
 			"jeu/" + fListe.Replace('\\', '/')
 		};
 		liste = liste.FindAll((Paquet.Fichier f) => !exclus.Contains(f.Entree));
+		int identiques = 0;
+		if (complement)
+		{
+			int avant = liste.Count;
+			liste = Differences(liste, fListe, fVersion);
+			identiques = avant - liste.Count;
+			if (liste.Count == 0)
+			{
+				throw new Exception("aucune différence avec la version normale installée sur ce PC : rien à envoyer");
+			}
+		}
 		long total = 0L;
 		foreach (Paquet.Fichier f2 in liste)
 		{
@@ -507,6 +530,14 @@ internal class FenPaquet : Form
 			dv["id"] = vid;
 			dv["nom"] = version;
 			dv["avertissement"] = avertissement;
+			if (complement)
+			{
+				dv["base"] = "normale";
+			}
+			else
+			{
+				dv.Remove("base");
+			}
 			page["variantes"] = vars;
 			page = dv;
 		}
@@ -538,7 +569,130 @@ internal class FenPaquet : Form
 			page["parties"] = arrayList;
 		}
 		GitHub.EcrireCatalogue(cat, sha2, "Paquet " + nom + " " + version + " publié depuis le lanceur par " + ((Comptes.Actif != null) ? Comptes.Actif.Pseudo : "admin") + " (" + parties.Count + " partie(s), " + Taille(tailleTotale) + ")");
-		return "✔  " + nom + " " + version + " est en ligne (" + parties.Count + " partie(s), " + Taille(tailleTotale) + ").\n\nLes joueurs verront « METTRE À JOUR ». Aucun fichier du paquet n'est resté sur ce PC : vous pouvez supprimer vos anciennes archives ZIP de " + nom + ".";
+		return "✔  " + nom + " " + version + " est en ligne (" + parties.Count + " partie(s), " + Taille(tailleTotale) + ")." + (complement ? ("\n\nSeuls les fichiers nouveaux ou modifiés ont été envoyés (" + liste.Count.ToString("N0") + ") ; " + identiques.ToString("N0") + " fichier(s) identique(s) à la version normale ont été laissés de côté.") : "") + "\n\nLes joueurs verront « METTRE À JOUR ». Aucun fichier du paquet n'est resté sur ce PC : vous pouvez supprimer vos anciennes archives ZIP de " + nom + ".";
+	}
+
+	/// <summary>
+	/// Ne garde que les fichiers qui diffèrent de la version normale installée dans OMSI 2 sur ce PC
+	/// (fichier absent de la normale, ou contenu différent).
+	/// </summary>
+	private List<Paquet.Fichier> Differences(List<Paquet.Fichier> liste, string fListe, string fVersion)
+	{
+		string omsi = Omsi.DetecteOmsi();
+		if (omsi == null)
+		{
+			throw new Exception("dossier d'OMSI 2 introuvable : la version normale doit être installée sur ce PC pour comparer");
+		}
+		string open = Omsi.DetecteOpen(omsi);
+		string pListe = Path.Combine(omsi, fListe);
+		if (!File.Exists(pListe))
+		{
+			throw new Exception("la version normale de " + nom + " n'est pas installée sur ce PC : installez-la avec le lanceur, puis recommencez (elle sert de référence)");
+		}
+		string[] v = Omsi.LireVersionInstallee(Path.Combine(omsi, fVersion));
+		if (v != null)
+		{
+			for (int i = 3; i < v.Length; i++)
+			{
+				string l = v[i].Trim();
+				if (l.StartsWith("variante:") && l.Length > 9)
+				{
+					throw new Exception("une version spéciale de " + nom + " est en place sur ce PC : remettez la version normale (JOUER › Version normale), puis recommencez");
+				}
+			}
+		}
+		HashSet<string> normale = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+		foreach (string l2 in File.ReadAllLines(pListe))
+		{
+			if (l2.Trim().Length > 0)
+			{
+				try
+				{
+					normale.Add(Path.GetFullPath(l2.Trim()));
+				}
+				catch
+				{
+				}
+			}
+		}
+		long total = 0L;
+		foreach (Paquet.Fichier f in liste)
+		{
+			total += f.Taille;
+		}
+		long fait = 0L;
+		List<Paquet.Fichier> res = new List<Paquet.Fichier>();
+		foreach (Paquet.Fichier f2 in liste)
+		{
+			if (annule)
+			{
+				throw new OperationCanceledException();
+			}
+			fait += f2.Taille;
+			Etat("Comparaison avec la version normale… " + fait * 100 / Math.Max(1L, total) + " %", (double)fait / (double)Math.Max(1L, total) * 0.1);
+			string c = Omsi.Cible(f2.Entree, omsi, open);
+			if (c == null || !normale.Contains(c) || !MemeContenu(f2.Chemin, c))
+			{
+				res.Add(f2);
+			}
+		}
+		return res;
+	}
+
+	private static bool MemeContenu(string a, string b)
+	{
+		try
+		{
+			FileInfo fa = new FileInfo(a);
+			FileInfo fb = new FileInfo(b);
+			if (!fb.Exists || fa.Length != fb.Length)
+			{
+				return false;
+			}
+			byte[] ba = new byte[1048576];
+			byte[] bb = new byte[1048576];
+			using FileStream sa = new FileStream(a, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, FileOptions.SequentialScan);
+			using FileStream sb = new FileStream(b, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, FileOptions.SequentialScan);
+			while (true)
+			{
+				int na = Lire(sa, ba);
+				int nb = Lire(sb, bb);
+				if (na != nb)
+				{
+					return false;
+				}
+				if (na == 0)
+				{
+					return true;
+				}
+				for (int i = 0; i < na; i++)
+				{
+					if (ba[i] != bb[i])
+					{
+						return false;
+					}
+				}
+			}
+		}
+		catch
+		{
+			return false;
+		}
+	}
+
+	private static int Lire(Stream s, byte[] buf)
+	{
+		int n = 0;
+		while (n < buf.Length)
+		{
+			int k = s.Read(buf, n, buf.Length - n);
+			if (k <= 0)
+			{
+				break;
+			}
+			n += k;
+		}
+		return n;
 	}
 
 	/// <summary>« V1 Alpha » → « v1_alpha » (identifiant d'une version spéciale).</summary>

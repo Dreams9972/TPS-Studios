@@ -31,6 +31,9 @@ internal class Projet
 	/// <summary>Avertissement affiché au moment du choix (versions spéciales).</summary>
 	public string Avertissement = "";
 
+	/// <summary>Version spéciale « complément » : seuls les fichiers qui diffèrent de la version normale, posés par-dessus.</summary>
+	public bool Complement;
+
 	/// <summary>Versions spéciales proposées au joueur en plus de la version normale.</summary>
 	public List<Projet> Variantes = new List<Projet>();
 
@@ -500,6 +503,7 @@ internal class Projet
 				q.Parties = LireParties(dv);
 				q.Notes = S(dv, "notes");
 				q.Avertissement = S(dv, "avertissement");
+				q.Complement = S(dv, "base") == "normale";
 				if (q.Zip.Length > 0 || q.Parties.Count > 0)
 				{
 					projet.Variantes.Add(q);
