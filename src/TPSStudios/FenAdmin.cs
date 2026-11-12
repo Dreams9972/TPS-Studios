@@ -2322,6 +2322,7 @@ internal class FenAdmin : Form, IPage
 				};
 				f.TopLevel = false;
 				f.FormBorderStyle = FormBorderStyle.None;
+				f.AdapterLargeur(zoneOnglet.ClientSize.Width - SystemInformation.VerticalScrollBarWidth - Zx.P(8));
 				zoneOnglet.Controls.Add(f);
 				f.Location = new Point(Math.Max(0, (zoneOnglet.ClientSize.Width - f.Width) / 2), Zx.P(8));
 				f.Show();
