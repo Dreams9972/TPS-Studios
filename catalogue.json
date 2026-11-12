@@ -323,7 +323,83 @@
       "prerequis": "OMSI 2 + 3 DLC obligatoires",
       "image": "https://raw.githubusercontent.com/Dreams9972/TPS-Studios/main/images/perigueux.jpg",
       "notes": "Périgueux V1.0",
-      "statut": "masque"
+      "variantes": [
+        {
+          "id": "alpha_v1_0",
+          "nom": "Alpha V1.0",
+          "avertissement": "Version alpha : en cours de développement, des bugs et des objets manquants sont possibles. La version normale (V1.0) reste disponible à tout moment.",
+          "base": "normale",
+          "version": "Alpha V1.0",
+          "date": "12/11/2026 01:48",
+          "md5": "9e4992af0318736cd77aaa36dec60fc5",
+          "taille": 3208892356,
+          "zip": "",
+          "sha256": "",
+          "parties": [
+            {
+              "url": "https://github.com/Dreams9972/TPS-Studios/releases/download/perigueux-alpha-v1.0/Perigueux_alpha_v1_0_partie1.zip",
+              "sha256": "91116825083e7c0a3d2436ba7063de76c9470274b2f37d52659901ff7ebd515a",
+              "taille": 262595205
+            },
+            {
+              "url": "https://github.com/Dreams9972/TPS-Studios/releases/download/perigueux-alpha-v1.0/Perigueux_alpha_v1_0_partie2.zip",
+              "sha256": "c773d39476f3970b23d12ea058f6773c94e1a7c1c70a2a924628efa065dab6c3",
+              "taille": 262261684
+            },
+            {
+              "url": "https://github.com/Dreams9972/TPS-Studios/releases/download/perigueux-alpha-v1.0/Perigueux_alpha_v1_0_partie3.zip",
+              "sha256": "f8370b473f45038fdd09cbcabfcf6525c641157bc7162ef3f5e2b6f1bc29a358",
+              "taille": 271494161
+            },
+            {
+              "url": "https://github.com/Dreams9972/TPS-Studios/releases/download/perigueux-alpha-v1.0/Perigueux_alpha_v1_0_partie4.zip",
+              "sha256": "3f090f4053bcf92b3fb8413990ce8e07500e5e94a2cb1b0dfb53d610951d1f45",
+              "taille": 263746904
+            },
+            {
+              "url": "https://github.com/Dreams9972/TPS-Studios/releases/download/perigueux-alpha-v1.0/Perigueux_alpha_v1_0_partie5.zip",
+              "sha256": "e744e7ea5050f51ddfc420cd20a40dea4168450fd930bf708440d4c093f2d564",
+              "taille": 262490367
+            },
+            {
+              "url": "https://github.com/Dreams9972/TPS-Studios/releases/download/perigueux-alpha-v1.0/Perigueux_alpha_v1_0_partie6.zip",
+              "sha256": "72f6adeac9c210d994c9ebae870e8a2c88eb2a3cd7cc0b6093c852f7f6b76063",
+              "taille": 344887461
+            },
+            {
+              "url": "https://github.com/Dreams9972/TPS-Studios/releases/download/perigueux-alpha-v1.0/Perigueux_alpha_v1_0_partie7.zip",
+              "sha256": "3e6174c114ac626eb8cef1b68c6c3db80efef34873042c70adf7cb569c4f8482",
+              "taille": 262867474
+            },
+            {
+              "url": "https://github.com/Dreams9972/TPS-Studios/releases/download/perigueux-alpha-v1.0/Perigueux_alpha_v1_0_partie8.zip",
+              "sha256": "249a08a67cee3669e0721289c0494e0fe15caf462c1f320e966745a8abe7c242",
+              "taille": 262903490
+            },
+            {
+              "url": "https://github.com/Dreams9972/TPS-Studios/releases/download/perigueux-alpha-v1.0/Perigueux_alpha_v1_0_partie9.zip",
+              "sha256": "09441da80ed658e9de5b6688958ea259d7ddf9f95c5f4218531b7202ab33b048",
+              "taille": 262645902
+            },
+            {
+              "url": "https://github.com/Dreams9972/TPS-Studios/releases/download/perigueux-alpha-v1.0/Perigueux_alpha_v1_0_partie10.zip",
+              "sha256": "9c7991c650feb2c8dbd53112ab4540d8eb934c92a3e0cdaceca300a11fe2dd32",
+              "taille": 263004158
+            },
+            {
+              "url": "https://github.com/Dreams9972/TPS-Studios/releases/download/perigueux-alpha-v1.0/Perigueux_alpha_v1_0_partie11.zip",
+              "sha256": "dc965121f1762b21855753904f6bda7078fd2e4fe8b0e20597ed1551740fe8c6",
+              "taille": 354389773
+            },
+            {
+              "url": "https://github.com/Dreams9972/TPS-Studios/releases/download/perigueux-alpha-v1.0/Perigueux_alpha_v1_0_partie12.zip",
+              "sha256": "4011edd903155fa765877d6f8c0338af6b046ba8a3c207908b8d052362434d0d",
+              "taille": 135605777
+            }
+          ],
+          "notes": "Alpha V1.0 : nouveaux objets et bâtiments, nouvelles routes (CreativeStreets, SimpleStreets), textures de la carte, horaires (Chrono, TTData) et tuiles mis à jour."
+        }
+      ]
     },
     {
       "id": "trottinette",
