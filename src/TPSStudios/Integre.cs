@@ -66,9 +66,9 @@ internal static class Integre
 		b.Tag = i;
 		Action<Control> dec = delegate(Control c)
 		{
-			if (c != b && c != i && c.Top < b.Bottom && c.Bottom > b.Top && c.Left >= b.Right && c.Left < b.Right + 64)
+			if (c != b && c != i && c.Top < b.Bottom && c.Bottom > b.Top && c.Left >= b.Right && c.Left < b.Right + Zx.P(64))
 			{
-				c.Left += 56;
+				c.Left += Zx.P(56);
 			}
 		};
 		foreach (Control control in parent.Controls)

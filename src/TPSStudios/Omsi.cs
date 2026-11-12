@@ -106,6 +106,11 @@ internal static class Omsi
 		return null;
 	}
 
+	public static string[] LireVersionInstallee(string f)
+	{
+		return LireV(f);
+	}
+
 	private static string[] LireV(string f)
 	{
 		if (!File.Exists(f))
@@ -232,7 +237,7 @@ internal static class Omsi
 	/// Range la version installée hors du jeu (même disque, déplacement instantané) pour laisser la place
 	/// à une autre version ; elle pourra être remise en place sans rien retélécharger.
 	/// </summary>
-	public static void RangerVersion(Projet p, string omsi, string varianteId)
+	public static void RangerVersion(Projet p, string omsi, string varianteId, HashSet<string> seulement = null)
 	{
 		Projet principal = p.Principal ?? p;
 		string dossier = DossierVersion(principal, omsi, varianteId);
@@ -248,7 +253,8 @@ internal static class Omsi
 		List<string> paires = new List<string>();
 		try
 		{
-			foreach (string ligne in File.ReadAllLines(liste))
+			IEnumerable<string> lignes = ((seulement != null) ? ((IEnumerable<string>)seulement) : ((IEnumerable<string>)File.ReadAllLines(liste)));
+			foreach (string ligne in lignes)
 			{
 				string f = ligne.Trim();
 				if (f.Length == 0 || !File.Exists(f))
@@ -278,6 +284,15 @@ internal static class Omsi
 		finally
 		{
 			File.WriteAllLines(Path.Combine(dossier, "fichiers.txt"), paires.ToArray(), Encoding.UTF8);
+			string fTouches = Path.Combine(dossier, "touches.txt");
+			if (seulement != null)
+			{
+				File.WriteAllLines(fTouches, new List<string>(seulement).ToArray(), Encoding.UTF8);
+			}
+			else if (File.Exists(fTouches))
+			{
+				File.Delete(fTouches);
+			}
 			File.Copy(liste, Path.Combine(dossier, "liste.txt"), overwrite: true);
 			if (File.Exists(fVersion))
 			{
@@ -286,6 +301,127 @@ internal static class Omsi
 			}
 			File.Delete(liste);
 		}
+	}
+
+	/// <summary>
+	/// Fichiers concernés par un complément (version spéciale posée par-dessus la normale), lus dans la
+	/// version rangée : passer de l'une à l'autre ne déplace que ces fichiers. null si la version a été rangée entière.
+	/// </summary>
+	public static HashSet<string> Touches(Projet p, string omsi, string varianteId)
+	{
+		if (omsi == null)
+		{
+			return null;
+		}
+		string f = Path.Combine(DossierVersion(p.Principal ?? p, omsi, varianteId), "touches.txt");
+		if (!File.Exists(f) || !File.Exists(Path.Combine(DossierVersion(p.Principal ?? p, omsi, varianteId), "fichiers.txt")))
+		{
+			return null;
+		}
+		HashSet<string> t = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+		foreach (string l in File.ReadAllLines(f))
+		{
+			if (l.Trim().Length > 0)
+			{
+				t.Add(l.Trim());
+			}
+		}
+		return t;
+	}
+
+	/// <summary>Où s'installe une entrée de paquet (jeu/…, plugins/…, fonts/…) ; null si elle est ignorée.</summary>
+	public static string Cible(string entree, string omsi, string open)
+	{
+		string e = entree.Replace('/', '\\');
+		string c = null;
+		if (e.StartsWith("jeu\\"))
+		{
+			c = Path.Combine(omsi, e.Substring(4));
+			return Sous(c, omsi) ? Path.GetFullPath(c) : null;
+		}
+		if (open != null && e.StartsWith("plugins\\"))
+		{
+			c = Path.Combine(open, "plugins", e.Substring(8));
+		}
+		else if (open != null && e.StartsWith("fonts\\"))
+		{
+			c = Path.Combine(open, "Fonts", e.Substring(6));
+		}
+		return (c != null && Sous(c, open)) ? Path.GetFullPath(c) : null;
+	}
+
+	/// <summary>
+	/// Installe une version spéciale « complément » par-dessus la version normale : les fichiers de la normale
+	/// qu'il remplace sont rangés de côté (retour instantané), le reste de la normale ne bouge pas.
+	/// </summary>
+	public static void InstallerComplement(Projet p, string[] zips, string omsi, string open, Progres pr)
+	{
+		Projet principal = p.Principal ?? p;
+		if (Desactive(principal, omsi))
+		{
+			Basculer(principal, omsi, activer: true);
+		}
+		string liste = Path.Combine(omsi, principal.Liste);
+		if (!File.Exists(liste))
+		{
+			throw new Exception("installez d'abord la version normale de " + principal.Nom);
+		}
+		List<string> avant = new List<string>();
+		foreach (string l in File.ReadAllLines(liste))
+		{
+			if (l.Trim().Length > 0)
+			{
+				avant.Add(l.Trim());
+			}
+		}
+		Projet installee = VarianteDe(principal, Installee(principal, omsi));
+		if (installee.VarianteId == p.VarianteId)
+		{
+			// mise à jour du complément déjà en place : on pose les nouveaux fichiers sans rien retirer
+			File.Delete(liste);
+		}
+		else
+		{
+			if (installee.VarianteId.Length > 0)
+			{
+				throw new Exception("revenez d'abord à la version normale");
+			}
+			HashSet<string> t = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+			foreach (string z in zips)
+			{
+				using ZipArchive a = ZipFile.OpenRead(z);
+				foreach (ZipArchiveEntry en in a.Entries)
+				{
+					if (!en.FullName.EndsWith("/"))
+					{
+						string c = Cible(en.FullName, omsi, open);
+						if (c != null)
+						{
+							t.Add(c);
+						}
+					}
+				}
+			}
+			RangerVersion(principal, omsi, "", t);
+		}
+		Installer(p, zips, omsi, open, pr);
+		HashSet<string> vu = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+		List<string> tout = new List<string>();
+		foreach (string l2 in avant)
+		{
+			if (vu.Add(l2))
+			{
+				tout.Add(l2);
+			}
+		}
+		foreach (string l3 in File.ReadAllLines(liste))
+		{
+			if (l3.Trim().Length > 0 && vu.Add(l3.Trim()))
+			{
+				tout.Add(l3.Trim());
+			}
+		}
+		File.WriteAllLines(liste, tout.ToArray(), Encoding.UTF8);
 	}
 
 	/// <summary>Supprime les versions rangées de côté d'une page (désinstallation complète).</summary>

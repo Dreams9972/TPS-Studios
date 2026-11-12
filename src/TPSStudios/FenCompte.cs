@@ -315,7 +315,7 @@ internal class FenCompte : Form, IPage
 		}
 		base.ClientSize = Integre.Hote;
 		BackColor = C.Fond;
-		CW = Math.Max(Zx.P(900), Math.Min(base.ClientSize.Width - Zx.P(48), Zx.P(2200)));
+		CW = Math.Max(Math.Min(Zx.P(900), base.ClientSize.Width - Zx.P(16)), Math.Min(base.ClientSize.Width - Zx.P(48), Zx.P(2200)));
 		X0 = (base.ClientSize.Width - CW) / 2;
 		Panel panel = new Panel();
 		panel.Dock = DockStyle.Bottom;
@@ -364,10 +364,11 @@ internal class FenCompte : Form, IPage
 		contenu.BackColor = C.Fond;
 		base.Controls.Add(contenu);
 		contenu.BringToFront();
-		int num = base.ClientSize.Height - 78 - 70;
-		int num2 = 360;
-		int num3 = X0 + 24 + num2 + 24;
-		int num4 = CW - 48 - num2 - 24;
+		int num = base.ClientSize.Height - Zx.P(78) - Zx.P(70);
+		// la carte de profil rétrécit dans une petite fenêtre pour laisser de la place aux réglages
+		int num2 = Math.Max(Zx.P(240), Math.Min(Zx.P(360), CW * 26 / 100));
+		int num3 = X0 + Zx.P(24) + num2 + Zx.P(24);
+		int num4 = CW - Zx.P(48) - num2 - Zx.P(24);
 		apercu = new ZoneDessin();
 		apercu.Location = new Point(X0 + Zx.P(24), Zx.P(4));
 		apercu.Size = new Size(num2, Math.Min(num - Zx.P(18), Zx.P(590)));
@@ -381,7 +382,10 @@ internal class FenCompte : Form, IPage
 		tabs.BackColor = C.Fond;
 		contenu.Controls.Add(tabs);
 		pages = new Panel[6];
-		int num5 = (num4 - 2 * Zx.P(16)) / 3;
+		// fenêtre étroite : Informations et Couleurs l'une sous l'autre (défilement), bannières à droite
+		bool serre = (num4 - 2 * Zx.P(16)) / 3 < Zx.P(300);
+		int sb = SystemInformation.VerticalScrollBarWidth + Zx.P(4);
+		int num5 = (serre ? ((num4 - Zx.P(16) - sb) * 56 / 100) : ((num4 - 2 * Zx.P(16)) / 3));
 		for (int i = 0; i < 6; i++)
 		{
 			Panel panel3 = new Panel();
@@ -394,16 +398,16 @@ internal class FenCompte : Form, IPage
 			Theme.Sombre(panel3);
 			pages[i] = panel3;
 		}
-		pages[0].Width = 2 * num5 + Zx.P(16);
+		pages[0].Width = (serre ? (num5 + sb) : (2 * num5 + Zx.P(16)));
 		pages[0].AutoScroll = true;
-		pages[1].Location = new Point(num3 + 2 * num5 + Zx.P(32), Zx.P(52));
-		pages[1].Width = num4 - 2 * num5 - Zx.P(32);
+		pages[1].Location = new Point(num3 + pages[0].Width + Zx.P(16), Zx.P(52));
+		pages[1].Width = num4 - pages[0].Width - Zx.P(16);
 		Cadre cadre = new Cadre();
 		cadre.Titre = "Informations";
 		cadre.Location = new Point(0, 0);
 		cadre.Size = new Size(num5, Zx.P(396));
 		pages[0].Controls.Add(cadre);
-		int num6 = (num5 - 48 - 16) / 2;
+		int num6 = (num5 - Zx.P(48) - Zx.P(16)) / 2;
 		tPseudo = ChampBloc(cadre, "Pseudo", Zx.P(24), Zx.P(44), num6, Zx.P(36), multi: false, 20, a.Pseudo);
 		tStatut = ChampBloc(cadre, "Statut (60 caractères maximum)", Zx.P(24) + num6 + Zx.P(16), Zx.P(44), num6, Zx.P(36), multi: false, 60, a.Statut);
 		tBio = ChampBloc(cadre, "Bio (240 caractères maximum)", Zx.P(24), Zx.P(112), num5 - Zx.P(48), Zx.P(90), multi: true, 240, a.Bio);
@@ -568,10 +572,10 @@ internal class FenCompte : Form, IPage
 		cadre2.Height = bouton5.Bottom + Zx.P(18);
 		Cadre cadre3 = new Cadre();
 		cadre3.Titre = "Couleurs";
-		cadre3.Location = new Point(num5 + Zx.P(16), 0);
+		cadre3.Location = (serre ? new Point(0, cadre.Bottom + Zx.P(16)) : new Point(num5 + Zx.P(16), 0));
 		cadre3.Size = new Size(num5, Zx.P(390));
 		pages[0].Controls.Add(cadre3);
-		int width = num5 - 48;
+		int width = num5 - Zx.P(48);
 		int x = Zx.P(24);
 		oAuto = new Option("Couleurs d'après ma photo", "Avatar et bannière suivent la photo.", a.AutoCouleurs);
 		oAuto.Location = new Point(Zx.P(8), Zx.P(38));
@@ -613,9 +617,17 @@ internal class FenCompte : Form, IPage
 			lb.Invalidate();
 		};
 		cadre3.Height = selAvatar.Bottom + Zx.P(20);
-		int num40 = Math.Max(cadre.Height, cadre3.Height);
-		cadre.Height = num40;
-		cadre3.Height = num40;
+		if (serre)
+		{
+			cadre.Height = bouton2.Bottom + Zx.P(24);
+			cadre3.Top = cadre.Bottom + Zx.P(16);
+		}
+		else
+		{
+			int num40 = Math.Max(cadre.Height, cadre3.Height);
+			cadre.Height = num40;
+			cadre3.Height = num40;
+		}
 		apercu.Height = Math.Min(num - Zx.P(18), Zx.P(590));
 		Progression.Init(a);
 		Progression.Verifier(a);
