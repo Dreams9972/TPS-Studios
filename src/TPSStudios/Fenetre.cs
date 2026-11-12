@@ -8628,20 +8628,28 @@ internal partial class Fenetre : Form
 			int num13 = Math.Min(num5, (int)((double)num11 * 0.42) + Zx.P(120));
 			int num14 = num3 + num13 + Zx.P(46);
 			int num15 = Math.Min(num4 - num14, Zx.P(110));
-			rCarte = new Rectangle(num12, num3, num11, num13 + ((num15 >= Zx.P(84)) ? (Zx.P(46) + num15) : 0));
+			int hCarte = num13 + ((num15 >= Zx.P(84)) ? (Zx.P(46) + num15) : 0);
+			if (num15 >= Zx.P(84))
+			{
+				// la pilule Musique (16 + 44) doit tenir sous la case, dans la fenêtre
+				hCarte = Math.Max(num13, Math.Min(hCarte, num4 - Zx.P(60) - num3));
+			}
+			rCarte = new Rectangle(num12, num3, num11, hCarte);
 			rInfos = Rectangle.Empty;
 			rPilule = ((num15 >= Zx.P(84)) ? new Rectangle(rCarte.X, rCarte.Bottom + Zx.P(16), rCarte.Width, Zx.P(44)) : Rectangle.Empty);
 		}
 		rBandeau = new Rectangle(num9, num + Zx.P(202), num7, Zx.P(36));
 		rMajA = (MajAAfficher ? new Rectangle(num9, num + Zx.P(198), num7, Zx.P(48)) : Rectangle.Empty);
 		ThemeBase.Cartes = (rInfos.IsEmpty ? new Rectangle[2] { rProfil, rCarte } : new Rectangle[3] { rProfil, rCarte, rInfos });
-		rDiscord = new Rectangle(Zx.P(24), height - Zx.P(24) - Zx.P(48), Zx.P(286), Zx.P(48));
+		// à gauche des tuiles : la case amis et le bouton Discord rétrécissent si la fenêtre est étroite
+		int largeurGauche = Math.Max(Zx.P(200), Math.Min(Zx.P(300), num9 - num - Zx.P(18)));
+		rDiscord = new Rectangle(Zx.P(24), height - Zx.P(24) - Zx.P(48), Math.Min(Zx.P(286), Math.Max(Zx.P(200), num9 - Zx.P(24) - Zx.P(18))), Zx.P(48));
 		int num16 = Math.Max((int)((double)height * 0.37), rProfil.Y + Zx.P(452) + Zx.P(20));
 		if (rDiscord.Y - Zx.P(44) - num16 < Zx.P(220))
 		{
 			num16 = Math.Max(rProfil.Bottom + Zx.P(70), rDiscord.Y - Zx.P(44) - Zx.P(220));
 		}
-		rAmisA = new Rectangle(num, num16, Zx.P(300), Math.Max(0, Math.Min(Zx.P(560), rDiscord.Y - Zx.P(44) - num16)));
+		rAmisA = new Rectangle(num, num16, largeurGauche, Math.Max(0, Math.Min(Zx.P(560), rDiscord.Y - Zx.P(44) - num16)));
 		rCloche = new Rectangle(width - num - Zx.P(44), num + Zx.P(6), Zx.P(44), Zx.P(44));
 		rMusique = Rectangle.Empty;
 		ThemeBase.ZoneLibre = new Rectangle(num, rProfil.Bottom + Zx.P(16), Math.Max(Zx.P(200), rAmisA.Width), Math.Max(0, rAmisA.Y - rProfil.Bottom - Zx.P(32)));
