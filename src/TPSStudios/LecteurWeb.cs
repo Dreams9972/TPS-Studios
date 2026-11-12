@@ -242,7 +242,7 @@ internal class LecteurWeb : Panel
 		h.Append("f.src='https://www.youtube-nocookie.com/embed/'+encodeURIComponent(id)+'?autoplay=1&mute=0&controls=0&loop=1&playlist='+encodeURIComponent(id)+'&modestbranding=1&rel=0&playsinline=1&iv_load_policy=3&disablekb=1&fs=0&enablejsapi=1&origin='+encodeURIComponent(location.origin);");
 		h.Append("document.body.insertBefore(f,document.body.firstChild);");
 		h.Append("f.addEventListener('load',function(){try{f.contentWindow.postMessage(JSON.stringify({event:'listening',id:1}),'*');}catch(e){}});");
-		h.Append("function taille(){var w=innerWidth,hh=innerHeight,W=Math.max(w,hh*16/9),H=W*9/16;f.style.width=W+'px';f.style.height=H+'px';f.style.left=((w-W)/2)+'px';f.style.top=((hh-H)/2)+'px';}");
+		h.Append("function taille(){var w=innerWidth,hh=innerHeight,W=Math.max(w,hh*16/9)*1.24,H=W*9/16;f.style.width=W+'px';f.style.height=H+'px';f.style.left=((w-W)/2)+'px';f.style.top=((hh-H)/2)+'px';}");
 		h.Append("addEventListener('resize',taille);taille();");
 		h.Append("setInterval(function(){cmd('setVolume',[" + VideoFond.Volume + "]);},700);}");
 		h.Append("ui();</script></body></html>");

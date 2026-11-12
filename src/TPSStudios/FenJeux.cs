@@ -276,7 +276,59 @@ internal class FenJeux : Form
 			Valider();
 		};
 		panel.Controls.Add(bouton7);
+		boutonPublier = bouton7;
 		Remplir(0);
+	}
+
+	private Bouton boutonPublier;
+
+	/// <summary>
+	/// Fenêtre étroite (petit écran, zoom Windows) : la colonne de droite (catégories, fiche « À propos »)
+	/// passe sous la colonne du milieu au lieu d'être coupée.
+	/// </summary>
+	public void AdapterLargeur(int largeur)
+	{
+		int seuil = Zx.P(860);
+		if (largeur >= base.ClientSize.Width || largeur < Zx.P(400))
+		{
+			return;
+		}
+		List<Control> droite = new List<Control>();
+		int basMilieu = 0;
+		int hautDroite = int.MaxValue;
+		int basDroite = 0;
+		foreach (Control c in base.Controls)
+		{
+			if (c.Dock != DockStyle.None)
+			{
+				continue;
+			}
+			if (c.Left >= seuil)
+			{
+				droite.Add(c);
+				hautDroite = Math.Min(hautDroite, c.Top);
+				basDroite = Math.Max(basDroite, c.Bottom);
+			}
+			else if (c.Left >= Zx.P(280))
+			{
+				basMilieu = Math.Max(basMilieu, c.Bottom);
+			}
+		}
+		if (droite.Count == 0)
+		{
+			return;
+		}
+		int dx = Zx.P(296) - (seuil + Zx.P(10));
+		int dy = basMilieu + Zx.P(28) - hautDroite;
+		foreach (Control c2 in droite)
+		{
+			c2.Location = new Point(Math.Max(Zx.P(296), c2.Left + dx), c2.Top + dy);
+		}
+		base.ClientSize = new Size(seuil, basDroite + dy + Zx.P(24) + Zx.P(56));
+		if (boutonPublier != null)
+		{
+			boutonPublier.Left = base.ClientSize.Width - Zx.P(28) - boutonPublier.Width;
+		}
 	}
 
 	private Label Lb(string t, int x, int y, int w, int h, Font f, Color c)

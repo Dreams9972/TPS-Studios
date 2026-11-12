@@ -365,7 +365,7 @@ internal partial class Fenetre : Form
 				g.Restore(gs);
 			}
 		}
-		Lang.DrawText(g, t, fNote, new Point(r.Right - st.Width, r.Y + (r.Height - st.Height) / 2), C.Texte);
+		Txt.Dessiner(g, t, fNote, new Point(r.Right - st.Width, r.Y + (r.Height - st.Height) / 2), C.Texte);
 		g.SmoothingMode = sm;
 	}
 
@@ -1961,6 +1961,9 @@ internal partial class Fenetre : Form
 			Lang.DrawText(g, (comSocial.Auteur.Length > 0) ? comSocial.Auteur.Substring(0, 1).ToUpperInvariant() : "?", new Font("Segoe UI Semibold", Zx.P(15f)), rectangle, Color.White, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
 			Badge.Dessiner(g, new Rectangle(rectangle.Right - Zx.P(24), rectangle.Bottom - Zx.P(22), Zx.P(30), Zx.P(30)), comSocial.Niveau, 0.0);
 			int num4 = rectangle.Right + Zx.P(24);
+			// le statut et la date s'arrêtent avant « Supprimer » (coupés avec « … » si la place manque)
+			bool peutSuppr = comSocial.Moi || Social.PeutModerer;
+			int limiteLigne = w - Zx.P(16) - (peutSuppr ? (Lang.MeasureText("Supprimer", fPetit).Width + Zx.P(14)) : 0);
 			Size size = Lang.MeasureText(comSocial.Auteur, fComNom, new Size(Zx.P(400), Zx.P(24)), TextFormatFlags.NoPadding);
 			Lang.DrawText(g, comSocial.Auteur, fComNom, new Point(num4, num + Zx.P(12)), C.Texte);
 			int num5 = num4 + size.Width + Zx.P(10);
@@ -1979,8 +1982,12 @@ internal partial class Fenetre : Form
 				Color color2 = (comSocial.Statut.StartsWith("En jeu") ? C.Orange : C.Vert);
 				string t = "●  " + comSocial.Statut;
 				Size size2 = Lang.MeasureText(t, fPetit);
-				Lang.DrawText(g, t, fPetit, new Point(num5, num + Zx.P(15)), color2);
-				num5 += size2.Width + Zx.P(10);
+				int lStatut = Math.Min(size2.Width, limiteLigne - num5);
+				if (lStatut > Zx.P(30))
+				{
+					Lang.DrawText(g, t, fPetit, new Rectangle(num5, num + Zx.P(15), lStatut, Zx.P(18)), color2, TextFormatFlags.EndEllipsis | TextFormatFlags.NoPadding);
+				}
+				num5 += Math.Max(0, lStatut) + Zx.P(10);
 				using (SolidBrush brush4 = new SolidBrush(C.Carte))
 				{
 					g.FillEllipse(brush4, rectangle.Right - Zx.P(14), rectangle.Y - 1, Zx.P(15), Zx.P(15));
@@ -1988,7 +1995,11 @@ internal partial class Fenetre : Form
 				using SolidBrush brush5 = new SolidBrush(color2);
 				g.FillEllipse(brush5, rectangle.Right - Zx.P(12), rectangle.Y + 1, Zx.P(11), Zx.P(11));
 			}
-			Lang.DrawText(g, Depuis(comSocial.Cree), fPetit, new Point(num5, num + Zx.P(15)), C.Gris);
+			string depuis = Depuis(comSocial.Cree);
+			if (Lang.MeasureText(depuis, fPetit).Width <= limiteLigne - num5)
+			{
+				Lang.DrawText(g, depuis, fPetit, new Point(num5, num + Zx.P(15)), C.Gris);
+			}
 			Lang.DrawText(g, comSocial.Texte, fComTxt, new Rectangle(num4, num + Zx.P(40), w - num4 - Zx.P(24), num3 - Zx.P(40) - Zx.P(40)), Color.FromArgb(205, 214, 228), TextFormatFlags.WordBreak | TextFormatFlags.NoPadding);
 			string text9 = (comSocial.Aime ? "♥" : "♡") + "  " + comSocial.Likes;
 			Size size9 = Lang.MeasureText(text9, fPetit);
@@ -2005,7 +2016,7 @@ internal partial class Fenetre : Form
 			Lang.DrawText(g, text9, fPetit, rectangle9, comSocial.Aime ? C.Orange : Color.FromArgb(200, 208, 228), TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
 			rLikeCom.Add(Rectangle.Inflate(rectangle9, Zx.P(4), Zx.P(4)));
 			idLikeCom.Add(comSocial.Id);
-			if (comSocial.Moi || Social.PeutModerer)
+			if (peutSuppr)
 			{
 				Size size3 = Lang.MeasureText("Supprimer", fPetit);
 				Rectangle rectangle2 = new Rectangle(w - Zx.P(16) - size3.Width, num + Zx.P(12), size3.Width, Zx.P(18));
@@ -6924,7 +6935,8 @@ internal partial class Fenetre : Form
 			using Pen pen = new Pen(Color.FromArgb(150, C.Jade));
 			g.DrawPath(pen, p);
 		}
-		Lang.DrawText(g, t, fNote, rTelP, C.Texte, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+		// Txt : respecte le défilement de la page (sinon le texte est dessiné hors de la pastille sous Windows)
+		Txt.Dessiner(g, t, fNote, rTelP, C.Texte, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
 		g.SmoothingMode = sm;
 	}
 

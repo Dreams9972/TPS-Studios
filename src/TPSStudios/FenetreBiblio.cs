@@ -344,9 +344,17 @@ internal partial class Fenetre
 		int num = Zx.P(40);
 		int y = Zx.P(132);
 		int num2 = Zx.P(28);
-		int num3 = Math.Max(Zx.P(560), (int)((double)(width - 2 * num - num2) * 0.58));
+		// la flèche « Les Mods » garde toujours sa place au bord droit, même dans une petite fenêtre
+		int reserveFleche = Zx.P(30) + Zx.P(18);
+		int num3 = Math.Max(Zx.P(480), (int)((double)(width - 2 * num - num2) * 0.58));
+		int wD = Math.Min((int)((double)(width - 2 * num - num3 - num2) * 0.82), width - num - num3 - num2 - reserveFleche);
+		if (wD < Zx.P(300))
+		{
+			wD = Zx.P(300);
+			num3 = Math.Max(Zx.P(360), width - num - num2 - reserveFleche - wD);
+		}
 		rPageG = new Rectangle(num, y, num3, 0);
-		rPageD = new Rectangle(num + num3 + num2, y, Math.Max(Zx.P(360), (int)((double)(width - 2 * num - num3 - num2) * 0.82)), 0);
+		rPageD = new Rectangle(num + num3 + num2, y, wD, 0);
 		int num4 = HauteurHero();
 		int num5 = y + num4 + Zx.P(18);
 		bJouerJeu.Text = (web ? "▶  JOUER" : "▶  JOUER");

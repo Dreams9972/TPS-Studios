@@ -379,6 +379,15 @@ internal static class Omsi
 		{
 			// mise à jour du complément déjà en place : on pose les nouveaux fichiers sans rien retirer
 			File.Delete(liste);
+			try
+			{
+				Installer(p, zips, omsi, open, pr);
+			}
+			catch
+			{
+				File.WriteAllLines(liste, avant.ToArray(), Encoding.UTF8);
+				throw;
+			}
 		}
 		else
 		{
@@ -403,8 +412,37 @@ internal static class Omsi
 				}
 			}
 			RangerVersion(principal, omsi, "", t);
+			try
+			{
+				Installer(p, zips, omsi, open, pr);
+			}
+			catch
+			{
+				// échec en cours de route : on retire ce qui a été posé et on remet la version normale telle quelle
+				try
+				{
+					foreach (string c2 in t)
+					{
+						if (File.Exists(c2))
+						{
+							File.SetAttributes(c2, FileAttributes.Normal);
+							File.Delete(c2);
+						}
+					}
+					string fv = Path.Combine(omsi, principal.FichierVersion);
+					if (File.Exists(fv))
+					{
+						File.Delete(fv);
+					}
+					RestaurerVersion(principal, omsi, "");
+				}
+				catch (Exception e2)
+				{
+					Journal.Une("complement", e2);
+				}
+				throw;
+			}
 		}
-		Installer(p, zips, omsi, open, pr);
 		HashSet<string> vu = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 		List<string> tout = new List<string>();
 		foreach (string l2 in avant)
