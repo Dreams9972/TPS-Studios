@@ -322,7 +322,8 @@
       "dlc": "1475580 | OMSI 2 Add-on Grand Paris-Moulon\n434066 | OMSI 2 Add-On MAN Citybus Series\n1457750 | OMSI 2 Add-on Saint-Servan",
       "prerequis": "OMSI 2 + 3 DLC obligatoires",
       "image": "https://raw.githubusercontent.com/Dreams9972/TPS-Studios/main/images/perigueux.jpg",
-      "notes": "Périgueux V1.0"
+      "notes": "Périgueux V1.0",
+      "statut": "masque"
     },
     {
       "id": "trottinette",
