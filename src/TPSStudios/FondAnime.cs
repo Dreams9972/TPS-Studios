@@ -210,12 +210,13 @@ internal class FondAnime
 
 	private static readonly Color[] meshCouleurs = new Color[6]
 	{
-		Color.FromArgb(205, 60, 50, 175),
-		Color.FromArgb(160, 118, 52, 178),
-		Color.FromArgb(165, 32, 92, 205),
-		Color.FromArgb(78, 220, 110, 45),
-		Color.FromArgb(82, 22, 150, 150),
-		Color.FromArgb(120, 70, 40, 140)
+		// uniquement des nuances du bleu du logo TPS (#283375)
+		Color.FromArgb(210, 56, 72, 168),
+		Color.FromArgb(185, 40, 51, 135),
+		Color.FromArgb(150, 66, 86, 190),
+		Color.FromArgb(130, 40, 51, 117),
+		Color.FromArgb(140, 30, 40, 100),
+		Color.FromArgb(120, 50, 64, 150)
 	};
 
 	private void Tache(Graphics g, int w, int h, int i, double t)
@@ -287,7 +288,7 @@ internal class FondAnime
 			}
 			using (Graphics gp = Graphics.FromImage(meshPetit))
 			{
-				gp.Clear(Color.FromArgb(10, 12, 30));
+				gp.Clear(Color.FromArgb(8, 11, 30));
 				gp.SmoothingMode = SmoothingMode.AntiAlias;
 				for (int i = 0; i < meshCouleurs.Length; i++)
 				{
