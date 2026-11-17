@@ -722,7 +722,7 @@ internal partial class Fenetre : Form
 
 	private List<KeyValuePair<Rectangle, Annonce>> rAnnonces = new List<KeyValuePair<Rectangle, Annonce>>();
 
-	private static readonly string[] NouveautesLanceur = new string[3] { "Compteur de téléchargements et note lisibles", "Commentaires et vidéos mieux affichés", "Petites fenêtres : bibliothèque et admin" };
+	private static readonly string[] NouveautesLanceur = new string[3] { "Bibliothèque ⇄ Mods : la page se tourne comme un livre", "Animations visibles sur tous les PC", "Réglage Animations dans Affichage" };
 
 	private static readonly Font fAnT2 = new Font("Segoe UI Semibold", Zx.P(11f));
 
@@ -4217,7 +4217,7 @@ internal partial class Fenetre : Form
 		vo.Update();
 		long derT = 0L;
 		Stopwatch swN = Stopwatch.StartNew();
-		Jouer((neigeTrans > 0) ? 420 : ((style == StyleTrans.Diagonale) ? 260 : 280), delegate(double p)
+		Jouer((neigeTrans > 0) ? 420 : ((style == StyleTrans.PageAvance || style == StyleTrans.PageRetour) ? 540 : ((style == StyleTrans.Diagonale) ? 260 : 280)), delegate(double p)
 		{
 			if (neigeTrans > 0)
 			{
@@ -5027,9 +5027,16 @@ internal partial class Fenetre : Form
 		return tuile;
 	}
 
+	/// <summary>
+	/// Animations du lanceur (bannières animées, décors des fêtes, transitions). Elles ne dépendent plus de l'option
+	/// Windows « Afficher les animations » (souvent coupée sur les PC réglés « meilleures performances », ce qui
+	/// figeait tout chez ces joueurs) : seul le réglage du lanceur compte, activé par défaut.
+	/// </summary>
+	public static bool AnimationsCoupees = Config.Lire("animations") == "0";
+
 	private static bool AnimationActive()
 	{
-		return SystemInformation.UIEffectsEnabled;
+		return !AnimationsCoupees;
 	}
 
 	private PanelFond PanelVisible()

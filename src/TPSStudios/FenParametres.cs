@@ -28,6 +28,7 @@ internal class FenParametres : Form, IPage
 
 	private Option cSons;
 
+
 	private Option cNotifWin;
 
 	private List<Option> cNotif = new List<Option>();
@@ -148,7 +149,7 @@ internal class FenParametres : Form, IPage
 		Theme.Sombre(contenu);
 		cw = num2 - SystemInformation.VerticalScrollBarWidth - Zx.P(2);
 		y = 0;
-		Cadre cadre = Section("Affichage", Zx.P(472));
+		Cadre cadre = Section("Affichage", Zx.P(536));
 		cSons = Opt(cadre, 0, "Sons de l'interface", "Un léger son à chaque clic sur un bouton ou un onglet.", Sons.Actifs);
 		Etiquette(cadre, "Page affichée au démarrage", Zx.P(24), Zx.P(116));
 		sgPage = new Segments();
@@ -227,6 +228,10 @@ internal class FenParametres : Form, IPage
 		sgTaille.MinW = Zx.P(40);
 		sgTaille.Index = Math.Max(0, Array.IndexOf(Zx.Ids, Config.Lire("taille_interface") ?? "auto"));
 		cadre.Controls.Add(sgTaille);
+		cAnim = new Option("Animations", "Bannières animées, décors des fêtes et transitions. Désactivez-les seulement sur un PC peu puissant.", !Fenetre.AnimationsCoupees);
+		cAnim.Location = new Point(Zx.P(8), Zx.P(466));
+		cAnim.Width = cw - Zx.P(16);
+		cadre.Controls.Add(cAnim);
 		Cadre cadre2 = Section("Mises à jour", Zx.P(40) + Zx.P(62) + 2 * Zx.P(62) + Zx.P(4));
 		Bouton bouton = new Bouton("⟳  Rechercher les mises à jour");
 		bouton.Plein = versionDispo != null;
@@ -602,6 +607,8 @@ internal class FenParametres : Form, IPage
 		Config.Ecrire("reduire", cRed.Checked ? "1" : "0");
 		Config.Ecrire("fermer_reduit", cFerme.Checked ? "1" : "0");
 		Config.Ecrire("sons", cSons.Checked ? "1" : "0");
+		Config.Ecrire("animations", cAnim.Checked ? "1" : "0");
+		Fenetre.AnimationsCoupees = !cAnim.Checked;
 		for (int i = 0; i < cNotif.Count; i++)
 		{
 			Config.Ecrire("notif_" + Notifs.Types[i], cNotif[i].Checked ? "1" : "0");
