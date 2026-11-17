@@ -20,7 +20,11 @@ internal partial class Fenetre
 		Cercle,
 		Volet,
 		Monte,
-		Descend
+		Descend,
+		/// <summary>Page qui se tourne depuis le bord droit (bibliothèque → mods).</summary>
+		PageAvance,
+		/// <summary>Page qui se tourne depuis le bord gauche (mods → bibliothèque).</summary>
+		PageRetour
 	}
 
 	private StyleTrans dernierStyle = StyleTrans.Diagonale;
@@ -44,6 +48,10 @@ internal partial class Fenetre
 		g.PixelOffsetMode = PixelOffsetMode.HighSpeed;
 		switch (style)
 		{
+		case StyleTrans.PageAvance:
+		case StyleTrans.PageRetour:
+			TournerPage(g, avant, apres, vp, style == StyleTrans.PageRetour);
+			break;
 		case StyleTrans.Monte:
 		{
 			int num20 = (int)Math.Round((double)height * (1.0 - vp));
@@ -170,6 +178,140 @@ internal partial class Fenetre
 			break;
 		}
 		}
+	}
+
+	/// <summary>
+	/// Page qui se tourne : la page actuelle se replie le long d'une ligne de pli légèrement inclinée
+	/// (le coin du bas part en premier), on voit le dos de la page replié et son ombre, la nouvelle page apparaît dessous.
+	/// </summary>
+	private static void TournerPage(Graphics g, Bitmap avant, Bitmap apres, double vp, bool depuisGauche)
+	{
+		int W = apres.Width;
+		int H = apres.Height;
+		double e = Math.Max(0.0, Math.Min(1.0, vp));
+		g.DrawImageUnscaled(apres, 0, 0);
+		if (e >= 0.999)
+		{
+			return;
+		}
+		double incl = (double)H * 0.28 * Math.Sin(Math.PI * e);
+		double c = (depuisGauche ? ((double)W * e) : ((double)W * (1.0 - e)));
+		// pli : en bas il est plus avancé qu'en haut (le coin du bas se soulève d'abord)
+		float xb = (float)(depuisGauche ? (c + incl / 2.0) : (c - incl / 2.0));
+		float xt = (float)(depuisGauche ? (c - incl / 2.0) : (c + incl / 2.0));
+		PointF[] reste = (depuisGauche ? new PointF[4]
+		{
+			new PointF(xt, 0f),
+			new PointF(W, 0f),
+			new PointF(W, H),
+			new PointF(xb, H)
+		} : new PointF[4]
+		{
+			new PointF(0f, 0f),
+			new PointF(xt, 0f),
+			new PointF(xb, H),
+			new PointF(0f, H)
+		});
+		PointF[] tournee = (depuisGauche ? new PointF[4]
+		{
+			new PointF(0f, 0f),
+			new PointF(xt, 0f),
+			new PointF(xb, H),
+			new PointF(0f, H)
+		} : new PointF[4]
+		{
+			new PointF(xt, 0f),
+			new PointF(W, 0f),
+			new PointF(W, H),
+			new PointF(xb, H)
+		});
+		// ombre portée sur la nouvelle page, du côté où la page est déjà partie
+		int lo = (int)((float)Zx.P(46) * (float)Math.Sin(Math.PI * Math.Min(1.0, e * 1.2)) + (float)Zx.P(6));
+		using (GraphicsPath po = new GraphicsPath())
+		{
+			float s = (depuisGauche ? (-1f) : 1f);
+			po.AddPolygon(new PointF[4]
+			{
+				new PointF(xt, 0f),
+				new PointF(xt + s * (float)lo, 0f),
+				new PointF(xb + s * (float)lo, H),
+				new PointF(xb, H)
+			});
+			float x0 = Math.Min(Math.Min(xt, xb), Math.Min(xt, xb) + s * (float)lo) - 1f;
+			float x1 = Math.Max(Math.Max(xt, xb), Math.Max(xt, xb) + s * (float)lo) + 1f;
+			using LinearGradientBrush lg = new LinearGradientBrush(new RectangleF(x0, 0f, Math.Max(2f, x1 - x0), H), Color.FromArgb(depuisGauche ? 0 : 150, 0, 0, 8), Color.FromArgb(depuisGauche ? 150 : 0, 0, 0, 8), 0f);
+			g.FillPath(lg, po);
+		}
+		// la partie encore à plat de l'ancienne page
+		GraphicsState st = g.Save();
+		using (GraphicsPath pr = new GraphicsPath())
+		{
+			pr.AddPolygon(reste);
+			g.SetClip(pr);
+			g.DrawImageUnscaled(avant, 0, 0);
+		}
+		g.Restore(st);
+		// réflexion autour de la ligne de pli : le dos de la partie tournée
+		double dx = xt - xb;
+		double dy = -H;
+		double n = Math.Sqrt(dx * dx + dy * dy);
+		dx /= n;
+		dy /= n;
+		float a = (float)(dx * dx - dy * dy);
+		float b = (float)(2.0 * dx * dy);
+		float px = xb;
+		float py = H;
+		Func<PointF, PointF> refl = (PointF q) => new PointF(a * (q.X - px) + b * (q.Y - py) + px, b * (q.X - px) - a * (q.Y - py) + py);
+		PointF[] rabat = Array.ConvertAll(tournee, (PointF q) => refl(q));
+		GraphicsState st2 = g.Save();
+		using (GraphicsPath pf = new GraphicsPath())
+		{
+			pf.AddPolygon(rabat);
+			using Region rg = new Region(pf);
+			rg.Intersect(new Rectangle(0, 0, W, H));
+			// ombre douce du rabat sur la page restante
+			using (Matrix mo = new Matrix())
+			{
+				mo.Translate(depuisGauche ? Zx.P(6) : (-Zx.P(6)), Zx.P(4));
+				using GraphicsPath pf2 = (GraphicsPath)pf.Clone();
+				pf2.Transform(mo);
+				using SolidBrush so = new SolidBrush(Color.FromArgb(70, 0, 0, 8));
+				GraphicsState st3 = g.Save();
+				using (GraphicsPath pr2 = new GraphicsPath())
+				{
+					pr2.AddPolygon(reste);
+					g.SetClip(pr2);
+				}
+				g.FillPath(so, pf2);
+				g.Restore(st3);
+			}
+			g.SetClip(rg, CombineMode.Replace);
+			using (Matrix m = new Matrix(a, b, b, 0f - a, px - (a * px + b * py), py - (b * px - a * py)))
+			{
+				GraphicsState st4 = g.Save();
+				g.MultiplyTransform(m);
+				g.DrawImageUnscaled(avant, 0, 0);
+				g.Restore(st4);
+			}
+			// dos de la page : contenu estompé, plus sombre près du pli
+			using (SolidBrush dos = new SolidBrush(Color.FromArgb(170, C.Carte)))
+			{
+				g.FillRectangle(dos, 0, 0, W, H);
+			}
+			float fx0 = Math.Min(xt, xb);
+			float fx1 = Math.Max(xt, xb);
+			float largeur = Math.Max(Zx.P(60), (float)((double)W * 0.35));
+			RectangleF rb = (depuisGauche ? new RectangleF(fx0, 0f, fx1 - fx0 + largeur, H) : new RectangleF(fx0 - largeur, 0f, fx1 - fx0 + largeur, H));
+			using (LinearGradientBrush ls = new LinearGradientBrush(rb, Color.FromArgb(depuisGauche ? 110 : 0, 0, 0, 12), Color.FromArgb(depuisGauche ? 0 : 110, 0, 0, 12), 0f))
+			{
+				g.FillRectangle(ls, rb);
+			}
+			using (Pen bord = new Pen(Color.FromArgb(90, 200, 210, 255), 1f))
+			{
+				g.DrawPolygon(bord, rabat);
+			}
+		}
+		g.Restore(st2);
 	}
 
 	private static double Dist(Point p, int x, int y)

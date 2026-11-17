@@ -4217,7 +4217,7 @@ internal partial class Fenetre : Form
 		vo.Update();
 		long derT = 0L;
 		Stopwatch swN = Stopwatch.StartNew();
-		Jouer((neigeTrans > 0) ? 420 : ((style == StyleTrans.Diagonale) ? 260 : 280), delegate(double p)
+		Jouer((neigeTrans > 0) ? 420 : ((style == StyleTrans.PageAvance || style == StyleTrans.PageRetour) ? 540 : ((style == StyleTrans.Diagonale) ? 260 : 280)), delegate(double p)
 		{
 			if (neigeTrans > 0)
 			{

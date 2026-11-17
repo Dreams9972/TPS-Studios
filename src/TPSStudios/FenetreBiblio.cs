@@ -204,7 +204,7 @@ internal partial class Fenetre
 		RemplirBiblio();
 		if (bitmap != null)
 		{
-			Transition(bitmap, versMods ? StyleTrans.Pousse : StyleTrans.Retour);
+			Transition(bitmap, versMods ? StyleTrans.PageAvance : StyleTrans.PageRetour);
 		}
 		RetirerCouvercle();
 		SuspendreVideos(s: false);
@@ -212,34 +212,40 @@ internal partial class Fenetre
 
 	private void PlacerFleche()
 	{
-		if (bFlecheMods != null)
+		if (bFlecheMods == null)
 		{
-			int num = pBiblio.ClientSize.Width;
-			if (pBiblio.AutoScrollMinSize.Height > pBiblio.ClientSize.Height)
-			{
-				num -= SystemInformation.VerticalScrollBarWidth;
-			}
-			int lf = bFlecheMods.LargeurFleche;
-			int w = lf;
-			bFlecheMods.Libelle = ((ongletB == 0) ? "Les Mods" : "");
-			if (ongletB == 0)
-			{
-				int wt = Lang.MeasureText("Les Mods", FlecheBord.PoliceLibelle).Width + Zx.P(12);
-				int place = num - lf - Zx.P(6) - (rPageD.Right + Zx.P(12));
-				if (rPageD.Width > 0 && place >= wt)
-				{
-					w = lf + wt;
-				}
-			}
-			if (bFlecheMods.Width != w)
-			{
-				bFlecheMods.Width = w;
-				bFlecheMods.Invalidate();
-			}
-			int x = ((ongletB == 0) ? (num - bFlecheMods.Width - Zx.P(6)) : Zx.P(14));
-			bFlecheMods.Location = new Point(x, Math.Max(Zx.P(132), (pBiblio.ClientSize.Height - bFlecheMods.Height) / 2));
-			bFlecheMods.BringToFront();
+			return;
 		}
+		int num = pBiblio.ClientSize.Width;
+		if (pBiblio.AutoScrollMinSize.Height > pBiblio.ClientSize.Height)
+		{
+			num -= SystemInformation.VerticalScrollBarWidth;
+		}
+		int haut = Zx.P(110);
+		int h = Math.Max(Zx.P(110), pBiblio.ClientSize.Height - haut - Zx.P(30));
+		bFlecheMods.Libelle = ((ongletB == 0) ? "Les Mods" : "");
+		int x;
+		int w;
+		if (ongletB == 0)
+		{
+			// toute la bande à droite de la colonne « Mes Cartes » sert de bouton
+			x = ((rPageD.Width > 0) ? (rPageD.Right + Zx.P(12)) : (num - Zx.P(60)));
+			w = Math.Max(bFlecheMods.LargeurFleche + Zx.P(16), num - x);
+			x = num - w;
+		}
+		else
+		{
+			// page Mods : la bande de gauche ramène à la page du jeu
+			x = 0;
+			w = Zx.P(52);
+		}
+		Rectangle r = new Rectangle(x, haut, w, h);
+		if (bFlecheMods.Bounds != r)
+		{
+			bFlecheMods.Bounds = r;
+			bFlecheMods.Invalidate();
+		}
+		bFlecheMods.BringToFront();
 	}
 
 	private void JouerJeuCourant()
@@ -345,7 +351,8 @@ internal partial class Fenetre
 		int y = Zx.P(132);
 		int num2 = Zx.P(28);
 		// la flèche « Les Mods » garde toujours sa place au bord droit, même dans une petite fenêtre
-		int reserveFleche = Zx.P(30) + Zx.P(18);
+		// bande cliquable « Les Mods » à droite : flèche + texte
+		int reserveFleche = Zx.P(30) + Zx.P(26) + Lang.MeasureText("Les Mods", FlecheBord.PoliceLibelle).Width + Zx.P(20);
 		int num3 = Math.Max(Zx.P(480), (int)((double)(width - 2 * num - num2) * 0.58));
 		int wD = Math.Min((int)((double)(width - 2 * num - num3 - num2) * 0.82), width - num - num3 - num2 - reserveFleche);
 		if (wD < Zx.P(300))
