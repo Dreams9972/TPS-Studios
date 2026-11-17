@@ -253,7 +253,8 @@ internal class ThemeNoel : ThemeBase
 		string text = Environment.GetEnvironmentVariable("TPS_THEME");
 		if (string.IsNullOrEmpty(text))
 		{
-			text = Config.Lire("theme") ?? "auto";
+			// thèmes de fête retirés du lanceur
+			return false;
 		}
 		if (text == "noel")
 		{

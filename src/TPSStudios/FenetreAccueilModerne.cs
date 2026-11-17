@@ -178,7 +178,82 @@ internal partial class Fenetre
 
 	private NavRail rail;
 
-	/// <summary>Éléments de la barre de navigation commune (selon les droits et les options du catalogue).</summary>
+	/// <summary>Largeur du menu latéral (0 s'il est caché).</summary>
+	internal int LargeurMenu => (rail != null && rail.Visible) ? rail.Width : 0;
+
+	/// <summary>Place disponible pour une page intégrée (Réglages, Profil…) : à droite du menu.</summary>
+	internal Size TailleHote => new Size(Math.Max(Zx.P(600), base.ClientSize.Width - LargeurMenu), base.ClientSize.Height);
+
+	/// <summary>Action à faire une fois les pages intégrées fermées (clic dans le menu pendant qu'une page est ouverte).</summary>
+	private Action apresCouches;
+
+	/// <summary>Type de la page intégrée affichée (null si aucune).</summary>
+	private Type CoucheOuverte()
+	{
+		if (couches.Count == 0)
+		{
+			return null;
+		}
+		foreach (Control ctl in couches[couches.Count - 1].Controls)
+		{
+			if (ctl is Form)
+			{
+				return ctl.GetType();
+			}
+		}
+		return null;
+	}
+
+	/// <summary>Navigation depuis le menu : si une page intégrée est ouverte, on la ferme d'abord, puis on y va.</summary>
+	private void Naviguer(Action a, Type pageCible = null)
+	{
+		if (couches.Count == 0)
+		{
+			a();
+			return;
+		}
+		if (pageCible != null && CoucheOuverte() == pageCible)
+		{
+			return;
+		}
+		apresCouches = a;
+		foreach (PanelFond c in couches.ToArray())
+		{
+			foreach (Control ctl in c.Controls)
+			{
+				if (ctl is Form fm && !fm.IsDisposed && fm.DialogResult == DialogResult.None)
+				{
+					fm.DialogResult = DialogResult.Cancel;
+				}
+			}
+		}
+	}
+
+	/// <summary>Liste des mods (page Mods / Bibliothèque) avec le filtre voulu : 0 tous les mods, 1 mods téléchargés.</summary>
+	private void AllerListeMods(int f)
+	{
+		bool deja = vue == Vue.Biblio && ongletB == 1;
+		filtre = f;
+		if (deja)
+		{
+			RemplirBiblio();
+			pBiblio.Invalidate();
+		}
+		else if (vue == Vue.Biblio)
+		{
+			BasculerMods(versMods: true);
+		}
+		else
+		{
+			ongletB = 1;
+			ShowVue(Vue.Biblio);
+		}
+		rail?.Invalidate();
+	}
+
+	private bool PageListe => couches.Count == 0 && vue == Vue.Biblio && ongletB == 1;
+
+	/// <summary>Éléments du menu latéral (selon les droits et les options du catalogue).</summary>
 	private void MajRail()
 	{
 		if (rail == null)
@@ -192,64 +267,54 @@ internal partial class Fenetre
 			Libelle = "Accueil",
 			Action = delegate
 			{
-				ShowVue(Vue.Accueil);
+				Naviguer(delegate
+				{
+					ShowVue(Vue.Accueil);
+				});
 			},
-			Actif = () => vue == Vue.Accueil
+			Actif = () => couches.Count == 0 && vue == Vue.Accueil
 		});
 		l.Add(new NavRail.Element
 		{
 			Glyphe = "\ue7fc",
 			Libelle = "Jeux",
-			Bulle = "Choisir un jeu",
+			Bulle = "Vos jeux et leurs informations",
 			Action = delegate
 			{
-				ShowVue(Vue.Jeux);
+				Naviguer(delegate
+				{
+					ShowVue(Vue.Jeux);
+				});
 			},
-			Actif = () => vue == Vue.Jeux
+			Actif = () => couches.Count == 0 && (vue == Vue.Jeux || (vue == Vue.Biblio && ongletB == 0))
 		});
 		l.Add(new NavRail.Element
 		{
 			Glyphe = "\ue8f1",
 			Libelle = "Bibliothèque",
-			Bulle = "Bibliothèque du jeu",
+			Bulle = "Vos mods téléchargés",
 			Action = delegate
 			{
-				if (vue == Vue.Biblio)
+				Naviguer(delegate
 				{
-					if (ongletB == 1)
-					{
-						BasculerMods(versMods: false);
-					}
-				}
-				else
-				{
-					ongletB = 0;
-					ShowVue(Vue.Biblio);
-				}
+					AllerListeMods(1);
+				});
 			},
-			Actif = () => vue == Vue.Biblio && ongletB == 0
+			Actif = () => PageListe && filtre == 1
 		});
 		l.Add(new NavRail.Element
 		{
 			Glyphe = "\ue74c",
 			Libelle = "Mods",
-			Bulle = "Tous les mods du jeu",
+			Bulle = "Tous les mods à télécharger",
 			Action = delegate
 			{
-				if (vue == Vue.Biblio)
+				Naviguer(delegate
 				{
-					if (ongletB == 0)
-					{
-						BasculerMods(versMods: true);
-					}
-				}
-				else
-				{
-					ongletB = 1;
-					ShowVue(Vue.Biblio);
-				}
+					AllerListeMods(0);
+				});
 			},
-			Actif = () => (vue == Vue.Biblio && ongletB == 1) || vue == Vue.Projet
+			Actif = () => (PageListe && filtre != 1) || (couches.Count == 0 && vue == Vue.Projet)
 		});
 		if (Opt("boutique") != "0")
 		{
@@ -260,8 +325,9 @@ internal partial class Fenetre
 				Bulle = "DLC et cosmétiques TPS Groupe",
 				Action = delegate
 				{
-					Boutique();
-				}
+					Naviguer(Boutique, typeof(FenBoutique));
+				},
+				Actif = () => CoucheOuverte() == typeof(FenBoutique)
 			});
 		}
 		l.Add(new NavRail.Element
@@ -271,8 +337,9 @@ internal partial class Fenetre
 			Bulle = "Vos amis TPS Groupe",
 			Action = delegate
 			{
-				OuvrirAmis();
-			}
+				Naviguer(OuvrirAmis, typeof(FenAmis));
+			},
+			Actif = () => CoucheOuverte() == typeof(FenAmis)
 		});
 		l.Add(new NavRail.Element
 		{
@@ -281,8 +348,9 @@ internal partial class Fenetre
 			Bulle = "Affichage, mises à jour, dossiers, Discord",
 			Action = delegate
 			{
-				Parametres();
-			}
+				Naviguer(Parametres, typeof(FenParametres));
+			},
+			Actif = () => CoucheOuverte() == typeof(FenParametres)
 		});
 		if (Comptes.EstAdmin)
 		{
@@ -293,8 +361,9 @@ internal partial class Fenetre
 				Bulle = "Pages du catalogue",
 				Action = delegate
 				{
-					Admin();
-				}
+					Naviguer(Admin, typeof(FenAdmin));
+				},
+				Actif = () => CoucheOuverte() == typeof(FenAdmin)
 			});
 		}
 		l.Add(new NavRail.Element

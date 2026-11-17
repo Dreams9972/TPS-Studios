@@ -3829,7 +3829,9 @@ internal partial class Fenetre : Form
 		}
 		PanelFond c = new PanelFond();
 		c.BackColor = C.Fond;
-		c.Bounds = new Rectangle(0, 0, base.ClientSize.Width, base.ClientSize.Height);
+		// à droite du menu latéral, qui reste visible et cliquable
+		int lr = LargeurMenu;
+		c.Bounds = new Rectangle(lr, 0, base.ClientSize.Width - lr, base.ClientSize.Height);
 		c.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
 		c.Peindre = delegate(Graphics g, int d)
 		{
@@ -4013,7 +4015,9 @@ internal partial class Fenetre : Form
 		base.Controls.Add(c);
 		couches.Add(c);
 		c.BringToFront();
+		rail?.BringToFront();
 		barreTitre?.BringToFront();
+		rail?.Invalidate();
 		c.Controls.Add(f);
 		if (anim && bg != null)
 		{
@@ -4105,6 +4109,13 @@ internal partial class Fenetre : Form
 			base.Controls.Remove(c);
 		}
 		c.Dispose();
+		rail?.Invalidate();
+		if (couches.Count == 0 && apresCouches != null && !base.IsDisposed)
+		{
+			Action suite = apresCouches;
+			apresCouches = null;
+			BeginInvoke(suite);
+		}
 		if (VersAccueil && couches.Count == 0)
 		{
 			VersAccueil = false;
@@ -5261,8 +5272,10 @@ internal partial class Fenetre : Form
 		}
 		if (ongletB == 1)
 		{
-			Size size0 = Lang.MeasureText("Mods", fTitre);
-			Lang.DrawText(g, "Mods", fTitre, new Point((pBiblio.ClientSize.Width - size0.Width) / 2, Zx.P(30) + dy), C.Texte, TextFormatFlags.NoPadding);
+			// liste des mods : « Bibliothèque » (mods téléchargés) ou « Mods » (tout le catalogue)
+			string titreListe = ((filtre == 1) ? "Bibliothèque" : "Mods");
+			Size size0 = Lang.MeasureText(titreListe, fTitre);
+			Lang.DrawText(g, titreListe, fTitre, new Point((pBiblio.ClientSize.Width - size0.Width) / 2, Zx.P(30) + dy), C.Texte, TextFormatFlags.NoPadding);
 		}
 		else
 		{
@@ -9086,6 +9099,8 @@ internal partial class Fenetre : Form
 		{
 			filtre = f;
 			RemplirBiblio();
+			rail?.Invalidate();
+			pBiblio.Invalidate();
 		});
 		bouton.Size = new Size(Zx.P(130), Zx.P(32));
 		return bouton;

@@ -245,7 +245,7 @@ internal partial class Fenetre
 		// la forme en diagonale occupe toute la hauteur de l'interface
 		int haut = 0;
 		int h = pBiblio.ClientSize.Height - Zx.P(36);
-		bFlecheMods.Libelle = ((ongletB == 0) ? "Les Mods" : "Bibliothèque");
+		bFlecheMods.Libelle = ((ongletB == 0) ? "Les Mods" : NomJeu(jeuId));
 		int x;
 		int w;
 		if (ongletB == 0)
