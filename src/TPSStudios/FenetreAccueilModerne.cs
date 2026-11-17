@@ -73,64 +73,51 @@ internal partial class Fenetre
 		rRail = Rectangle.Empty;
 		ThemeBase.Tuiles = new Rectangle[0];
 		etatsTuiles = new int[0];
-		int marge = Zx.P(32);
+		int marge = Zx.P(40);
 		int xMain = R + marge;
-		int rc = Math.Max(Zx.P(290), Math.Min(Zx.P(370), (int)((double)width * 0.24)));
-		int xRC = width - marge - rc;
-		int mainW = xRC - Zx.P(28) - xMain;
-		if (mainW < Zx.P(480))
-		{
-			rc = Math.Max(Zx.P(250), width - xMain - marge - Zx.P(28) - Zx.P(480));
-			xRC = width - marge - rc;
-			mainW = Math.Max(Zx.P(300), xRC - Zx.P(28) - xMain);
-		}
+		int mainW = Math.Max(Zx.P(300), width - xMain - marge);
 		CalculerMajAccueil();
 		bool flag0 = MajAAfficher || Opt("alerte").Length > 0 || Maintenance;
-		rEnTeteA = new Rectangle(xMain, Zx.P(28), mainW, Zx.P(64));
+		// en-tête : bienvenue à gauche ; cloche et profil (compact) à droite
+		int lp = Math.Min(Zx.P(240), mainW / 3);
+		rProfil = new Rectangle(xMain + mainW - lp, Zx.P(28), lp, Zx.P(60));
+		rCloche = new Rectangle(rProfil.X - Zx.P(56), Zx.P(36), Zx.P(44), Zx.P(44));
+		rEnTeteA = new Rectangle(xMain, Zx.P(28), Math.Max(Zx.P(200), rCloche.X - Zx.P(16) - xMain), Zx.P(64));
 		rHorloge = rEnTeteA;
-		rCloche = new Rectangle(xMain + mainW - Zx.P(44), Zx.P(36), Zx.P(44), Zx.P(44));
-		int y0 = Zx.P(112);
+		int y0 = Zx.P(116);
 		rBandeau = new Rectangle(xMain, y0, mainW, Zx.P(36));
 		rMajA = (MajAAfficher ? new Rectangle(xMain, y0 - Zx.P(4), mainW, Zx.P(48)) : Rectangle.Empty);
 		if (flag0)
 		{
 			y0 += Zx.P(60);
 		}
-		// bannière : grande, mais en laissant la place à la rangée « Continuer à jouer »
-		int hHero = Math.Max(Zx.P(200), Math.Min((int)((double)mainW * 0.42), height - y0 - Zx.P(250)));
+		// grande bannière (nouveaux mods et actualités du site)
+		int hHero = Math.Max(Zx.P(220), Math.Min((int)((double)mainW * 0.40), height - y0 - Zx.P(280)));
 		rHero = new Rectangle(xMain, y0, mainW, hHero);
 		ChoisirProjetsAccueil();
-		int yT = rHero.Bottom + Zx.P(22);
+		int yT = rHero.Bottom + Zx.P(26);
 		Size st = Lang.MeasureText("Tout voir  ›", fCarteSous);
 		rToutVoir = new Rectangle(xMain + mainW - st.Width - Zx.P(4), yT + Zx.P(6), st.Width + Zx.P(8), st.Height + Zx.P(6));
 		int yC = yT + Zx.P(40);
-		int nC = ((mainW >= Zx.P(760)) ? 4 : 3);
-		int gap = Zx.P(16);
+		int nC = ((mainW >= Zx.P(1150)) ? 5 : ((mainW >= Zx.P(760)) ? 4 : 3));
+		int gap = Zx.P(18);
 		int cw = (mainW - (nC - 1) * gap) / nC;
-		int ch = Math.Max(Zx.P(90), Math.Min(cw * 56 / 100 + Zx.P(54), height - yC - Zx.P(24)));
+		int ch = Math.Max(Zx.P(90), Math.Min(cw * 56 / 100 + Zx.P(54), height - yC - Zx.P(28)));
 		rContinuer.Clear();
 		List<Projet> cont = ProjetsContinuer(nC);
 		for (int j = 0; j < cont.Count; j++)
 		{
 			rContinuer.Add(new KeyValuePair<Rectangle, Projet>(new Rectangle(xMain + j * (cw + gap), yC, cw, ch), cont[j]));
 		}
-		// colonne de droite
-		int num2 = Math.Max(Zx.P(64), Math.Min(Zx.P(74), (int)((double)height * 0.07)));
-		rProfil = new Rectangle(xRC, Zx.P(28), rc, num2);
-		int hCarte = Math.Max(Zx.P(200), Math.Min(Zx.P(330), (int)((double)rc * 0.92)));
-		rCarte = new Rectangle(xRC, rProfil.Bottom + Zx.P(48), rc, hCarte);
+		// plus de colonne de droite : actualités dans la bannière, amis / Discord / musique dans le menu
+		rCarte = Rectangle.Empty;
 		rInfos = Rectangle.Empty;
-		rPilule = new Rectangle(xRC, rCarte.Bottom + Zx.P(14), rc, Zx.P(44));
-		rDiscord = new Rectangle(xRC, height - Zx.P(40) - Zx.P(48), rc, Zx.P(48));
-		int yAmis = rPilule.Bottom + Zx.P(44);
-		rAmisA = new Rectangle(xRC, yAmis, rc, Math.Max(0, Math.Min(Zx.P(420), rDiscord.Y - Zx.P(20) - yAmis)));
-		if (rAmisA.Height < Zx.P(110))
-		{
-			rAmisA = Rectangle.Empty;
-		}
+		rPilule = Rectangle.Empty;
+		rDiscord = Rectangle.Empty;
+		rAmisA = Rectangle.Empty;
 		rMusique = Rectangle.Empty;
-		ThemeBase.Cartes = new Rectangle[2] { rProfil, rCarte };
-		ThemeBase.ZoneLibre = new Rectangle(xMain + mainW / 2, Zx.P(16), Math.Max(Zx.P(100), mainW / 2 - Zx.P(70)), Zx.P(90));
+		ThemeBase.Cartes = new Rectangle[1] { rProfil };
+		ThemeBase.ZoneLibre = Rectangle.Empty;
 		DemarrerDefilementHero();
 		DemarrerMesh();
 		pAccueil.Invalidate();
@@ -368,6 +355,28 @@ internal partial class Fenetre
 		}
 		l.Add(new NavRail.Element
 		{
+			Glyphe = "\ue8bd",
+			Libelle = "Discord",
+			Bulle = "Rejoindre le Discord TPS Groupe",
+			EnBas = true,
+			Action = delegate
+			{
+				OuvrirDiscord();
+			}
+		});
+		l.Add(new NavRail.Element
+		{
+			Glyphe = "\ue8d6",
+			Libelle = "Musique",
+			Bulle = "Ouvrir votre lecteur de musique",
+			EnBas = true,
+			Action = delegate
+			{
+				Musique.AfficherLecteur();
+			}
+		});
+		l.Add(new NavRail.Element
+		{
 			Glyphe = "\ue7e8",
 			Libelle = "Quitter",
 			Bulle = "Fermer le lanceur",
@@ -391,7 +400,7 @@ internal partial class Fenetre
 		}
 		List<Projet> l = cat.Projets.FindAll((Projet p) => p.StatutEffectif != "masque" && p.Installable);
 		l.Sort((Projet a, Projet b) => DateMod(b).CompareTo(DateMod(a)));
-		for (int i = 0; i < l.Count && heroProjets.Count < 5; i++)
+		for (int i = 0; i < l.Count && heroProjets.Count < 3; i++)
 		{
 			heroProjets.Add(l[i]);
 		}
@@ -470,11 +479,11 @@ internal partial class Fenetre
 			tHero.Interval = 1000;
 			tHero.Tick += delegate
 			{
-				if (heroProjets.Count < 2 || !pAccueil.Visible || couches.Count > 0 || survolAccueil == -1 || (DateTime.Now - heroDepuis).TotalSeconds < 8.0)
+				if (NbHero < 2 || !pAccueil.Visible || couches.Count > 0 || survolAccueil == -1 || (DateTime.Now - heroDepuis).TotalSeconds < 8.0)
 				{
 					return;
 				}
-				AllerHero((heroIdx + 1) % heroProjets.Count);
+				AllerHero((heroIdx + 1) % NbHero);
 			};
 			tHero.Start();
 		}
@@ -482,7 +491,7 @@ internal partial class Fenetre
 
 	private void AllerHero(int i)
 	{
-		if (i == heroIdx || i < 0 || i >= heroProjets.Count)
+		if (i == heroIdx || i < 0 || i >= NbHero)
 		{
 			return;
 		}
@@ -537,19 +546,46 @@ internal partial class Fenetre
 		return ImageProjet(p);
 	}
 
+	/// <summary>Articles du site affichés dans la bannière (2 au plus), après les nouveaux mods.</summary>
+	private List<Diapo> NewsHero()
+	{
+		List<Diapo> l = new List<Diapo>();
+		foreach (Diapo d in diapos)
+		{
+			if (d.Lien.Length > 0 && l.Count < 2)
+			{
+				l.Add(d);
+			}
+		}
+		return l;
+	}
+
+	private int NbHero => heroProjets.Count + NewsHero().Count;
+
 	private Projet HeroCourant => (heroIdx >= 0 && heroIdx < heroProjets.Count) ? heroProjets[heroIdx] : null;
+
+	private Diapo NewsCourante
+	{
+		get
+		{
+			int k = heroIdx - heroProjets.Count;
+			List<Diapo> l = NewsHero();
+			return (k >= 0 && k < l.Count) ? l[k] : null;
+		}
+	}
 
 	/// <summary>Zone cliquable de l'accueil moderne sous la souris : -1 bannière, 0..n carte, 100+i point de la bannière, 200 « Tout voir », -2 rien.</summary>
 	private int ZoneAccueil(Point p)
 	{
-		for (int i = 0; i < heroProjets.Count && heroProjets.Count > 1; i++)
+		int nh = NbHero;
+		for (int i = 0; i < nh && nh > 1; i++)
 		{
 			if (Rectangle.Inflate(PointHero(i), Zx.P(5), Zx.P(6)).Contains(p))
 			{
 				return 100 + i;
 			}
 		}
-		if (!rHero.IsEmpty && rHero.Contains(p) && HeroCourant != null)
+		if (!rHero.IsEmpty && rHero.Contains(p) && (HeroCourant != null || NewsCourante != null))
 		{
 			return -1;
 		}
@@ -569,7 +605,7 @@ internal partial class Fenetre
 
 	private Rectangle PointHero(int i)
 	{
-		int n = heroProjets.Count;
+		int n = NbHero;
 		int d = Zx.P(8);
 		int g = Zx.P(8);
 		int large = Zx.P(22);
@@ -628,6 +664,10 @@ internal partial class Fenetre
 		else if (z == 200)
 		{
 			ShowVue(Vue.Biblio);
+		}
+		else if (z == -1 && NewsCourante != null)
+		{
+			NewsCourante.Ouvrir?.Invoke();
 		}
 		else
 		{
@@ -698,21 +738,22 @@ internal partial class Fenetre
 			return;
 		}
 		Projet p = HeroCourant;
+		Diapo dn = ((p == null) ? NewsCourante : null);
 		int rayon = Zx.P(18);
 		using (GraphicsPath path = Bouton.Rond(rHero, rayon))
 		{
 			using SolidBrush b0 = new SolidBrush(C.Carte);
 			g.FillPath(b0, path);
 		}
-		if (p == null)
+		if (p == null && dn == null)
 		{
 			Lang.DrawText(g, "Chargement des nouveautés…", fAccHeroSous, rHero, C.Gris, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
 			return;
 		}
-		Image im = ImageHeroAcc(p);
-		if (heroFondu < 1.0 && heroPrec >= 0 && heroPrec < heroProjets.Count)
+		Image im = ((dn != null) ? dn.Img : ImageHeroAcc(p));
+		if (heroFondu < 1.0 && heroPrec >= 0 && heroPrec < NbHero)
 		{
-			Image ip = ImageHeroAcc(heroProjets[heroPrec]);
+			Image ip = ((heroPrec < heroProjets.Count) ? ImageHeroAcc(heroProjets[heroPrec]) : null);
 			if (ip != null)
 			{
 				DessinerArrondi(g, ip, rHero, rayon);
@@ -759,7 +800,7 @@ internal partial class Fenetre
 		int x = rHero.X + Zx.P(32);
 		int largeur = Math.Min(rHero.Width * 55 / 100, Zx.P(560));
 		// étiquette
-		string etiq = (heroIdx == 0) ? "NOUVEAUTÉ" : "À DÉCOUVRIR";
+		string etiq = ((dn != null) ? "ACTUALITÉ" : ((heroIdx == 0) ? "NOUVEAUTÉ" : "À DÉCOUVRIR"));
 		Size se = Lang.MeasureText(etiq, fAccHeroPetit);
 		Rectangle re = new Rectangle(x, rHero.Y + Zx.P(26), se.Width + Zx.P(20), Zx.P(24));
 		using (GraphicsPath pe = Bouton.Rond(re, Zx.P(12)))
@@ -770,11 +811,11 @@ internal partial class Fenetre
 		Txt.Dessiner(g, etiq, fAccHeroPetit, re, Color.White, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
 		// titre, sous-titre, informations
 		int yb = rHero.Bottom - Zx.P(34);
-		string info = Categories.Nom(p.Categorie) + ((p.Version.Length > 0) ? ("  ·  " + p.Version) : "") + "  ·  " + NomJeu(JeuDe(p));
+		string info = ((dn != null) ? dn.Detail : (Categories.Nom(p.Categorie) + ((p.Version.Length > 0) ? ("  ·  " + p.Version) : "") + "  ·  " + NomJeu(JeuDe(p))));
 		Size si = Lang.MeasureText(info, fCarteSous);
 		yb -= si.Height;
 		Lang.DrawText(g, info, fCarteSous, new Point(x, yb), Color.FromArgb(170, 182, 214), TextFormatFlags.NoPadding);
-		string sous = p.SousTitre ?? "";
+		string sous = ((dn != null) ? dn.Sous : (p.SousTitre ?? ""));
 		if (sous.Length > 0)
 		{
 			Size ss = Lang.MeasureText(sous, fAccHeroSous, new Size(largeur, Zx.P(60)), TextFormatFlags.WordBreak | TextFormatFlags.NoPadding);
@@ -782,11 +823,12 @@ internal partial class Fenetre
 			yb -= hs + Zx.P(8);
 			Lang.DrawText(g, sous, fAccHeroSous, new Rectangle(x, yb, largeur, hs), Color.FromArgb(222, 228, 242), TextFormatFlags.WordBreak | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPadding);
 		}
-		Size sn = Lang.MeasureText(p.Nom, fAccHeroTitre);
+		string titre = ((dn != null) ? dn.Titre : p.Nom);
+		Size sn = Lang.MeasureText(titre, fAccHeroTitre);
 		yb -= sn.Height + Zx.P(4);
-		Lang.DrawText(g, p.Nom, fAccHeroTitre, new Rectangle(x, yb, largeur, sn.Height + Zx.P(4)), Color.White, TextFormatFlags.EndEllipsis | TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
+		Lang.DrawText(g, titre, fAccHeroTitre, new Rectangle(x, yb, largeur, sn.Height + Zx.P(4)), Color.White, TextFormatFlags.EndEllipsis | TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
 		// bouton « Découvrir »
-		string bt = "Découvrir  ›";
+		string bt = ((dn != null) ? "Lire  ›" : "Découvrir  ›");
 		Size sb = Lang.MeasureText(bt, fCarteNom);
 		Rectangle rb = new Rectangle(rHero.Right - Zx.P(32) - sb.Width - Zx.P(36), rHero.Y + Zx.P(24), sb.Width + Zx.P(36), Zx.P(38));
 		using (GraphicsPath pb = Bouton.Rond(rb, Zx.P(19)))
@@ -796,9 +838,9 @@ internal partial class Fenetre
 		}
 		Txt.Dessiner(g, bt, fCarteNom, rb, Color.FromArgb(14, 18, 40), TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
 		// points du défilement
-		if (heroProjets.Count > 1)
+		if (NbHero > 1)
 		{
-			for (int i = 0; i < heroProjets.Count; i++)
+			for (int i = 0; i < NbHero; i++)
 			{
 				Rectangle rp = PointHero(i);
 				using GraphicsPath pp = Bouton.Rond(rp, rp.Height / 2);
