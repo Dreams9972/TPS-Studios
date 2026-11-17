@@ -124,7 +124,7 @@ internal partial class Fenetre : IMessageFilter
 			return;
 		}
 		ThemeBase tb = ((p == pAccueil) ? noel : ((p == pJeux) ? themeJeux : null));
-		string cle = p.Name + "|" + p.GetHashCode() + "|" + p.ClientSize + "|" + r + "|" + ((tb != null && tb.ATeinte) ? tb.Id : "") + "|" + fond.Pret;
+		string cle = p.Name + "|" + p.GetHashCode() + "|" + p.ClientSize + "|" + r + "|" + ((tb != null && tb.ATeinte) ? tb.Id : "") + "|" + fond.Pret + "|" + fond.TempsMesh.ToString("0.000");
 		if (fondBarre == null || cle != cleFondBarre)
 		{
 			fondBarre?.Dispose();

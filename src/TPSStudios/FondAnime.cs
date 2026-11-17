@@ -194,10 +194,139 @@ internal class FondAnime
 		}
 	}
 
+	/// <summary>Fond « mesh » : grandes taches de couleur floues qui se déplacent lentement (activé par défaut).</summary>
+	public static bool Mesh = true;
+
+	/// <summary>Temps de l'animation mesh (avancé seulement quand une page entière est redessinée).</summary>
+	public double TempsMesh = 12.0;
+
+	private Bitmap meshPetit;
+
+	private Bitmap meshGrand;
+
+	private double meshT = -1.0;
+
+	private Size meshTaille = Size.Empty;
+
+	private static readonly Color[] meshCouleurs = new Color[6]
+	{
+		Color.FromArgb(205, 60, 50, 175),
+		Color.FromArgb(160, 118, 52, 178),
+		Color.FromArgb(165, 32, 92, 205),
+		Color.FromArgb(78, 220, 110, 45),
+		Color.FromArgb(82, 22, 150, 150),
+		Color.FromArgb(120, 70, 40, 140)
+	};
+
+	private void Tache(Graphics g, int w, int h, int i, double t)
+	{
+		double cx;
+		double cy;
+		double r;
+		switch (i)
+		{
+		case 0:
+			cx = 0.14 + 0.12 * Math.Sin(t * 0.13);
+			cy = 0.22 + 0.14 * Math.Cos(t * 0.11);
+			r = 0.62;
+			break;
+		case 1:
+			cx = 0.80 + 0.12 * Math.Cos(t * 0.09 + 0.7);
+			cy = 0.20 + 0.12 * Math.Sin(t * 0.12);
+			r = 0.55;
+			break;
+		case 2:
+			cx = 0.55 + 0.18 * Math.Sin(t * 0.07 + 1.0);
+			cy = 0.88 + 0.08 * Math.Cos(t * 0.10);
+			r = 0.60;
+			break;
+		case 3:
+			cx = 0.93 + 0.05 * Math.Sin(t * 0.15);
+			cy = 0.92 + 0.06 * Math.Cos(t * 0.13 + 0.4);
+			r = 0.36;
+			break;
+		case 4:
+			cx = 0.08 + 0.08 * Math.Cos(t * 0.12 + 2.0);
+			cy = 0.86 + 0.08 * Math.Sin(t * 0.09);
+			r = 0.40;
+			break;
+		default:
+			cx = 0.42 + 0.20 * Math.Cos(t * 0.05 + 3.0);
+			cy = 0.45 + 0.16 * Math.Sin(t * 0.06 + 1.5);
+			r = 0.48;
+			break;
+		}
+		float rr = (float)(r * (double)Math.Max(w, h));
+		float x = (float)(cx * (double)w);
+		float y = (float)(cy * (double)h);
+		using GraphicsPath p = new GraphicsPath();
+		p.AddEllipse(x - rr, y - rr * 0.8f, rr * 2f, rr * 1.6f);
+		using PathGradientBrush b = new PathGradientBrush(p);
+		b.CenterPoint = new PointF(x, y);
+		b.CenterColor = meshCouleurs[i];
+		b.SurroundColors = new Color[1] { Color.FromArgb(0, meshCouleurs[i]) };
+		Blend bl = new Blend(3);
+		bl.Factors = new float[3] { 0f, 0.55f, 1f };
+		bl.Positions = new float[3] { 0f, 0.5f, 1f };
+		b.Blend = bl;
+		g.FillPath(b, p);
+	}
+
+	/// <summary>Fond mesh : rendu en très basse résolution (taches très floues), agrandi et gardé en cache.</summary>
+	private void PeindreMesh(Graphics g, Rectangle dest)
+	{
+		Size taille = dest.Size;
+		if (meshGrand == null || meshTaille != taille || Math.Abs(meshT - TempsMesh) > 1E-06)
+		{
+			int sw = Math.Max(48, taille.Width / 14);
+			int sh = Math.Max(30, taille.Height / 14);
+			if (meshPetit == null || meshPetit.Width != sw || meshPetit.Height != sh)
+			{
+				meshPetit?.Dispose();
+				meshPetit = new Bitmap(sw, sh, PixelFormat.Format32bppPArgb);
+			}
+			using (Graphics gp = Graphics.FromImage(meshPetit))
+			{
+				gp.Clear(Color.FromArgb(10, 12, 30));
+				gp.SmoothingMode = SmoothingMode.AntiAlias;
+				for (int i = 0; i < meshCouleurs.Length; i++)
+				{
+					Tache(gp, sw, sh, i, TempsMesh);
+				}
+				// voile sombre léger : le texte reste bien lisible
+				using SolidBrush v = new SolidBrush(Color.FromArgb(70, 6, 8, 20));
+				gp.FillRectangle(v, 0, 0, sw, sh);
+			}
+			if (meshGrand == null || meshGrand.Size != taille)
+			{
+				meshGrand?.Dispose();
+				meshGrand = new Bitmap(Math.Max(1, taille.Width), Math.Max(1, taille.Height), PixelFormat.Format32bppPArgb);
+			}
+			using (Graphics gg = Graphics.FromImage(meshGrand))
+			{
+				gg.CompositingMode = CompositingMode.SourceCopy;
+				gg.InterpolationMode = InterpolationMode.HighQualityBilinear;
+				gg.PixelOffsetMode = PixelOffsetMode.Half;
+				gg.DrawImage(meshPetit, new Rectangle(0, 0, taille.Width, taille.Height), 0.5f, 0.5f, (float)sw - 1f, (float)sh - 1f, GraphicsUnit.Pixel);
+			}
+			meshTaille = taille;
+			meshT = TempsMesh;
+		}
+		CompositingMode cm = g.CompositingMode;
+		g.CompositingMode = CompositingMode.SourceCopy;
+		g.DrawImageUnscaled(meshGrand, dest.X, dest.Y);
+		g.CompositingMode = cm;
+	}
+
 	public void Peindre(Graphics g, Rectangle dest)
 	{
 		if (dest.Width <= 0 || dest.Height <= 0)
 		{
+			return;
+		}
+		if (Mesh)
+		{
+			PeindreMesh(g, dest);
 			return;
 		}
 		if (!pret)

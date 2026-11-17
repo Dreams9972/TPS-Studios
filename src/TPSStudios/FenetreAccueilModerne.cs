@@ -148,7 +148,46 @@ internal partial class Fenetre
 		ThemeBase.Cartes = new Rectangle[2] { rProfil, rCarte };
 		ThemeBase.ZoneLibre = new Rectangle(xMain + mainW / 2, Zx.P(16), Math.Max(Zx.P(100), mainW / 2 - Zx.P(70)), Zx.P(90));
 		DemarrerDefilementHero();
+		DemarrerMesh();
 		pAccueil.Invalidate();
+	}
+
+	private Timer tMesh;
+
+	private System.Diagnostics.Stopwatch swMesh;
+
+	/// <summary>
+	/// Anime le fond mesh (~30 images/s) quand l'accueil ou la page Jeux est affiché sans thème de fête,
+	/// fenêtre active, sans transition ni page par-dessus. Ailleurs le fond reste figé (aucun coût).
+	/// </summary>
+	private void DemarrerMesh()
+	{
+		if (tMesh != null)
+		{
+			return;
+		}
+		swMesh = System.Diagnostics.Stopwatch.StartNew();
+		long dernier = 0L;
+		tMesh = new Timer();
+		tMesh.Interval = 33;
+		tMesh.Tick += delegate
+		{
+			long ms = swMesh.ElapsedMilliseconds;
+			double dt = Math.Min(0.1, (double)(ms - dernier) / 1000.0);
+			dernier = ms;
+			if (!FondAnime.Mesh || !Fluide || ModeCapture || !base.Visible || base.WindowState == FormWindowState.Minimized || couches.Count > 0 || enTransition || Form.ActiveForm != this || (page != null && page.Visible))
+			{
+				return;
+			}
+			PanelFond p = PanelVisible();
+			if ((p == pAccueil && !themeNoel) || (p == pJeux && themeJeux == null))
+			{
+				fond.TempsMesh += dt;
+				p.Invalidate();
+				barreTitre?.Invalidate();
+			}
+		};
+		tMesh.Start();
 	}
 
 	/// <summary>Les derniers mods publiés, pour la bannière.</summary>
