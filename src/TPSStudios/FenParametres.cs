@@ -24,6 +24,8 @@ internal class FenParametres : Form, IPage
 
 	private Option cAnim;
 
+	private Option cBarre;
+
 	private Option cDisc;
 
 	private Option cSons;
@@ -149,7 +151,7 @@ internal class FenParametres : Form, IPage
 		Theme.Sombre(contenu);
 		cw = num2 - SystemInformation.VerticalScrollBarWidth - Zx.P(2);
 		y = 0;
-		Cadre cadre = Section("Affichage", Zx.P(536));
+		Cadre cadre = Section("Affichage", Zx.P(600));
 		cSons = Opt(cadre, 0, "Sons de l'interface", "Un léger son à chaque clic sur un bouton ou un onglet.", Sons.Actifs);
 		Etiquette(cadre, "Page affichée au démarrage", Zx.P(24), Zx.P(116));
 		sgPage = new Segments();
@@ -232,6 +234,10 @@ internal class FenParametres : Form, IPage
 		cAnim.Location = new Point(Zx.P(8), Zx.P(466));
 		cAnim.Width = cw - Zx.P(16);
 		cadre.Controls.Add(cAnim);
+		cBarre = new Option("Barre de titre intégrée", "Boutons réduire, agrandir et fermer au style du lanceur. Désactivez-la pour retrouver la barre Windows classique (au prochain démarrage).", Config.Lire("barre_classique") != "1");
+		cBarre.Location = new Point(Zx.P(8), Zx.P(528));
+		cBarre.Width = cw - Zx.P(16);
+		cadre.Controls.Add(cBarre);
 		Cadre cadre2 = Section("Mises à jour", Zx.P(40) + Zx.P(62) + 2 * Zx.P(62) + Zx.P(4));
 		Bouton bouton = new Bouton("⟳  Rechercher les mises à jour");
 		bouton.Plein = versionDispo != null;
@@ -608,6 +614,7 @@ internal class FenParametres : Form, IPage
 		Config.Ecrire("fermer_reduit", cFerme.Checked ? "1" : "0");
 		Config.Ecrire("sons", cSons.Checked ? "1" : "0");
 		Config.Ecrire("animations", cAnim.Checked ? "1" : "0");
+		Config.Ecrire("barre_classique", cBarre.Checked ? "0" : "1");
 		Fenetre.AnimationsCoupees = !cAnim.Checked;
 		for (int i = 0; i < cNotif.Count; i++)
 		{
