@@ -224,7 +224,7 @@ internal partial class Fenetre
 		// la forme en diagonale occupe toute la hauteur de l'interface
 		int haut = 0;
 		int h = pBiblio.ClientSize.Height;
-		bFlecheMods.Libelle = ((ongletB == 0) ? "Les Mods" : "");
+		bFlecheMods.Libelle = ((ongletB == 0) ? "Les Mods" : "Bibliothèque");
 		int x;
 		int w;
 		if (ongletB == 0)
@@ -353,7 +353,7 @@ internal partial class Fenetre
 		int num2 = Zx.P(28);
 		// la flèche « Les Mods » garde toujours sa place au bord droit, même dans une petite fenêtre
 		// bande cliquable « Les Mods » à droite : flèche + texte
-		int reserveFleche = Math.Max(Zx.P(190), Zx.P(30) + Zx.P(26) + Lang.MeasureText("Les Mods", FlecheBord.PoliceLibelle).Width + Zx.P(20));
+		int reserveFleche = Zx.P(190);
 		int num3 = Math.Max(Zx.P(480), (int)((double)(width - 2 * num - num2) * 0.58));
 		int wD = Math.Min((int)((double)(width - 2 * num - num3 - num2) * 0.82), width - num - num3 - num2 - reserveFleche);
 		if (wD < Zx.P(300))

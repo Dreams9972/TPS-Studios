@@ -19,7 +19,7 @@ internal class FlecheBord : Control
 	/// <summary>Largeur de la pastille de la flèche.</summary>
 	public int LargeurFleche = Zx.P(24);
 
-	public static readonly Font PoliceLibelle = new Font("Segoe UI Semibold", Zx.P(11f));
+	public static readonly Font PoliceLibelle = new Font("Segoe UI Semibold", Zx.P(12f));
 
 	private bool survol;
 
@@ -165,48 +165,41 @@ internal class FlecheBord : Control
 			float k = (Droite ? Zx.P(4) : (-Zx.P(4)));
 			g.DrawLine(ombre, d0.X + k, d0.Y, d1.X + k, d1.Y);
 		}
-		// flèche et texte : au milieu, ou plus bas si la diagonale y est trop étroite pour le texte
-		int lf = LargeurFleche;
-		int besoin = lf + Zx.P(10) + Zx.P(22) + (string.IsNullOrEmpty(Libelle) ? 0 : Lang.MeasureText(Libelle, PoliceLibelle).Width);
-		int cy = h / 2;
-		while (cy < h * 86 / 100 && LargeurA(cy) < (float)besoin)
+		// tranche du livre : fines lignes parallèles au bord, comme les pages empilées
+		for (int n = 1; n <= 5; n++)
 		{
-			cy += Zx.P(8);
+			float k = (float)(n * Zx.P(5)) * (Droite ? 1f : (-1f));
+			using Pen pl = new Pen(Color.FromArgb(Math.Max(0, (int)((50f + 60f * s) * (1f - (float)n / 6f))), 190, 200, 255), 1f);
+			g.DrawLine(pl, d0.X + k * 0.35f, d0.Y, d1.X + k, d1.Y);
 		}
-		float wm = LargeurA(cy);
-		int ph = Zx.P(96);
-		int marge = Zx.P(10);
-		int decal = (int)((float)Zx.P(5) * s) * (Droite ? 1 : -1);
-		Rectangle r = new Rectangle((Droite ? (w - lf - marge) : marge) + decal, cy - ph / 2, lf - 1, ph - 1);
+		// le texte seul, écrit le long du bord (comme sur la tranche d'un livre), à la hauteur où la forme est assez large
 		if (!string.IsNullOrEmpty(Libelle))
 		{
-			Size st = Lang.MeasureText(Libelle, PoliceLibelle);
-			int place = (int)wm - lf - marge - Zx.P(18);
-			if (place >= st.Width)
+			string t = Lang.T(Libelle);
+			System.Drawing.Text.TextRenderingHint th = g.TextRenderingHint;
+			g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
+			SizeF st = g.MeasureString(t, PoliceLibelle);
+			int cy = h / 2;
+			float besoin = st.Height + (float)Zx.P(22);
+			while (cy < h * 86 / 100 && LargeurA(cy) < besoin)
 			{
-				Rectangle rt = (Droite ? new Rectangle(r.X - Zx.P(10) - st.Width, cy - st.Height / 2, st.Width + 2, st.Height + 2) : new Rectangle(r.Right + Zx.P(10), cy - st.Height / 2, st.Width + 2, st.Height + 2));
-				Lang.DrawText(g, Libelle, PoliceLibelle, rt, Color.FromArgb((int)(210f + 45f * s), 255, 255, 255), TextFormatFlags.VerticalCenter | TextFormatFlags.SingleLine | TextFormatFlags.NoPadding);
+				cy += Zx.P(8);
 			}
+			float bandeX = (Droite ? ((float)w - (float)Zx.P(16) - st.Height / 2f) : ((float)Zx.P(16) + st.Height / 2f));
+			float decal = (float)Zx.P(4) * s * (Droite ? 1f : (-1f));
+			GraphicsState gs = g.Save();
+			g.TranslateTransform(bandeX + decal, cy);
+			g.RotateTransform(-90f);
+			using (SolidBrush ombre = new SolidBrush(Color.FromArgb(120, 0, 0, 10)))
+			{
+				g.DrawString(t, PoliceLibelle, ombre, 0f - st.Width / 2f + 1f, 0f - st.Height / 2f + 1f);
+			}
+			using (SolidBrush bt = new SolidBrush(Color.FromArgb((int)(205f + 50f * s), 255, 255, 255)))
+			{
+				g.DrawString(t, PoliceLibelle, bt, 0f - st.Width / 2f, 0f - st.Height / 2f);
+			}
+			g.Restore(gs);
+			g.TextRenderingHint = th;
 		}
-		// pas de pastille : la diagonale entière est le bouton, seule la flèche est dessinée
-		int cx = r.X + r.Width / 2;
-		int k3 = Zx.P(7);
-		int k4 = Zx.P(13);
-		Point[] points = (Droite ? new Point[3]
-		{
-			new Point(cx - k3 / 2 - 1, cy - k4),
-			new Point(cx + k3, cy),
-			new Point(cx - k3 / 2 - 1, cy + k4)
-		} : new Point[3]
-		{
-			new Point(cx + k3 / 2 + 1, cy - k4),
-			new Point(cx - k3, cy),
-			new Point(cx + k3 / 2 + 1, cy + k4)
-		});
-		using Pen pen2 = new Pen(Color.FromArgb((int)(200f + 55f * s), 255, 255, 255), Zx.P(3f));
-		pen2.StartCap = LineCap.Round;
-		pen2.EndCap = LineCap.Round;
-		pen2.LineJoin = LineJoin.Round;
-		g.DrawLines(pen2, points);
 	}
 }
