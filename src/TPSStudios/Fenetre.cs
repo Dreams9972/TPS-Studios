@@ -722,7 +722,7 @@ internal partial class Fenetre : Form
 
 	private List<KeyValuePair<Rectangle, Annonce>> rAnnonces = new List<KeyValuePair<Rectangle, Annonce>>();
 
-	private static readonly string[] NouveautesLanceur = new string[2] { "Nouveau bord de page Bibliothèque ⇄ Mods, façon livre", "Il reste en place quand on fait défiler" };
+	private static readonly string[] NouveautesLanceur = new string[2] { "Bord de page Bibliothèque ⇄ Mods bien droit", "Page qui se tourne plus fluide" };
 
 	private static readonly Font fAnT2 = new Font("Segoe UI Semibold", Zx.P(11f));
 
@@ -5226,6 +5226,12 @@ internal partial class Fenetre : Form
 	private void PeintBiblio(Graphics g, int dy)
 	{
 		FondPeint(g, pBiblio);
+		// animation du bord de page (survol) : seule la bande change, inutile de redessiner tout le contenu
+		if (bFlecheMods != null && bFlecheMods.SeulementBord(g.ClipBounds))
+		{
+			bFlecheMods.Dessiner(g);
+			return;
+		}
 		if (ongletB == 1)
 		{
 			Size size0 = Lang.MeasureText("Mods", fTitre);
