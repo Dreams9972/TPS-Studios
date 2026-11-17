@@ -526,7 +526,7 @@ internal class ThemeFete : ThemeBase
 			}
 			}
 		}
-		g.DrawImageUnscaled(scene, 0, h - sh0);
+		g.DrawImageUnscaled(Doux(ref sceneDoux, ref sceneDouxSrc, scene), 0, h - sh0);
 	}
 
 	private void HautJeux(Graphics g, int w, int h, double t)
@@ -1520,6 +1520,42 @@ internal class ThemeFete : ThemeBase
 		}
 	}
 
+	private Bitmap decorDoux;
+
+	private Bitmap decorDouxSrc;
+
+	private Bitmap sceneDoux;
+
+	private Bitmap sceneDouxSrc;
+
+	/// <summary>Opacité des décors de sol des thèmes (sacs, étagères…) : discrets, le fond bleu reste visible.</summary>
+	public static float OpaciteDecor = 0.42f;
+
+	/// <summary>Version atténuée (gardée en cache) d'un décor de sol.</summary>
+	private static Bitmap Doux(ref Bitmap doux, ref Bitmap src, Bitmap b)
+	{
+		if (b == null)
+		{
+			return null;
+		}
+		if (doux != null && src == b)
+		{
+			return doux;
+		}
+		doux?.Dispose();
+		doux = new Bitmap(b.Width, b.Height, PixelFormat.Format32bppPArgb);
+		using (Graphics g = Graphics.FromImage(doux))
+		{
+			ColorMatrix cm = new ColorMatrix();
+			cm.Matrix33 = OpaciteDecor;
+			using ImageAttributes ia = new ImageAttributes();
+			ia.SetColorMatrix(cm);
+			g.DrawImage(b, new Rectangle(0, 0, b.Width, b.Height), 0, 0, b.Width, b.Height, GraphicsUnit.Pixel, ia);
+		}
+		src = b;
+		return doux;
+	}
+
 	public override void PeindreFond(Graphics g, int w, int h)
 	{
 		if (w < 10 || h < 10)
@@ -1534,7 +1570,7 @@ internal class ThemeFete : ThemeBase
 			Hl = h;
 			Ciel(g, w, h, temps);
 			Construire(w, h);
-			g.DrawImageUnscaled(decor, 0, h - dh);
+			g.DrawImageUnscaled(Doux(ref decorDoux, ref decorDouxSrc, decor), 0, h - dh);
 			SceneAccueil(g, w, h, temps);
 			Acteur(g, w, h, temps);
 			if (id == "paques")
@@ -1953,7 +1989,8 @@ internal class ThemeFete : ThemeBase
 	{
 		InterpolationMode interpolationMode = g.InterpolationMode;
 		g.InterpolationMode = InterpolationMode.Bilinear;
-		for (int i = 0; i < 12; i++)
+		// décors plus discrets : quelques étiquettes seulement
+		for (int i = 0; i < 5; i++)
 		{
 			float num = 16f + 18f * H(i, 905);
 			float num2 = Mod((double)(H(i, 906) * (float)w) + (double)Zx.P(30) * Math.Sin(t * 0.7 + (double)i), w + 80) - (float)Zx.P(40);

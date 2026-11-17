@@ -68,27 +68,11 @@ internal partial class Fenetre
 		}
 		int width = pAccueil.ClientSize.Width;
 		int height = pAccueil.ClientSize.Height;
-		int R = Zx.P(84);
-		rRail = new Rectangle(0, 0, R, height);
-		// barre de navigation : les boutons en colonne, « Quitter » en bas
-		int hi = Zx.P(62);
-		int yi = Zx.P(92);
-		List<Rectangle> list = new List<Rectangle>();
-		for (int i = 0; i < tuilesA.Count; i++)
-		{
-			Tuile t = tuilesA[i];
-			bool dernier = i == tuilesA.Count - 1;
-			int y = (dernier ? (height - Zx.P(20) - hi) : yi);
-			t.SetBounds(0, y, R, hi);
-			t.IndiceDecor = i;
-			list.Add(t.Bounds);
-			if (!dernier)
-			{
-				yi += hi + Zx.P(4);
-			}
-		}
-		ThemeBase.Tuiles = list.ToArray();
-		etatsTuiles = new int[list.Count];
+		// la barre de navigation est commune (NavRail, hors de la page)
+		int R = 0;
+		rRail = Rectangle.Empty;
+		ThemeBase.Tuiles = new Rectangle[0];
+		etatsTuiles = new int[0];
 		int marge = Zx.P(32);
 		int xMain = R + marge;
 		int rc = Math.Max(Zx.P(290), Math.Min(Zx.P(370), (int)((double)width * 0.24)));
@@ -148,7 +132,183 @@ internal partial class Fenetre
 		ThemeBase.Cartes = new Rectangle[2] { rProfil, rCarte };
 		ThemeBase.ZoneLibre = new Rectangle(xMain + mainW / 2, Zx.P(16), Math.Max(Zx.P(100), mainW / 2 - Zx.P(70)), Zx.P(90));
 		DemarrerDefilementHero();
+		DemarrerMesh();
 		pAccueil.Invalidate();
+	}
+
+	private Timer tMesh;
+
+	private System.Diagnostics.Stopwatch swMesh;
+
+	/// <summary>
+	/// Anime le fond mesh (~30 images/s) quand l'accueil ou la page Jeux est affiché sans thème de fête,
+	/// fenêtre active, sans transition ni page par-dessus. Ailleurs le fond reste figé (aucun coût).
+	/// </summary>
+	private void DemarrerMesh()
+	{
+		if (tMesh != null)
+		{
+			return;
+		}
+		swMesh = System.Diagnostics.Stopwatch.StartNew();
+		long dernier = 0L;
+		tMesh = new Timer();
+		tMesh.Interval = 33;
+		tMesh.Tick += delegate
+		{
+			long ms = swMesh.ElapsedMilliseconds;
+			double dt = Math.Min(0.1, (double)(ms - dernier) / 1000.0);
+			dernier = ms;
+			if (!FondAnime.Mesh || !Fluide || ModeCapture || !base.Visible || base.WindowState == FormWindowState.Minimized || couches.Count > 0 || enTransition || Form.ActiveForm != this || (page != null && page.Visible))
+			{
+				return;
+			}
+			PanelFond p = PanelVisible();
+			// accueil et Jeux : sauf thème de fête (qui a son propre ciel) ; bibliothèque et liste des mods : toujours
+			if (p == pAccueil || p == pJeux || p == pBiblio)
+			{
+				fond.TempsMesh += dt;
+				// seule la page est redessinée (pas ses éléments) : le fond bouge assez lentement pour rester raccord
+				p.Invalidate(invalidateChildren: false);
+				barreTitre?.Invalidate();
+			}
+		};
+		tMesh.Start();
+	}
+
+	private NavRail rail;
+
+	/// <summary>Éléments de la barre de navigation commune (selon les droits et les options du catalogue).</summary>
+	private void MajRail()
+	{
+		if (rail == null)
+		{
+			return;
+		}
+		List<NavRail.Element> l = new List<NavRail.Element>();
+		l.Add(new NavRail.Element
+		{
+			Glyphe = "\ue80f",
+			Libelle = "Accueil",
+			Action = delegate
+			{
+				ShowVue(Vue.Accueil);
+			},
+			Actif = () => vue == Vue.Accueil
+		});
+		l.Add(new NavRail.Element
+		{
+			Glyphe = "\ue7fc",
+			Libelle = "Jeux",
+			Bulle = "Choisir un jeu",
+			Action = delegate
+			{
+				ShowVue(Vue.Jeux);
+			},
+			Actif = () => vue == Vue.Jeux
+		});
+		l.Add(new NavRail.Element
+		{
+			Glyphe = "\ue8f1",
+			Libelle = "Bibliothèque",
+			Bulle = "Bibliothèque du jeu",
+			Action = delegate
+			{
+				if (vue == Vue.Biblio)
+				{
+					if (ongletB == 1)
+					{
+						BasculerMods(versMods: false);
+					}
+				}
+				else
+				{
+					ongletB = 0;
+					ShowVue(Vue.Biblio);
+				}
+			},
+			Actif = () => vue == Vue.Biblio && ongletB == 0
+		});
+		l.Add(new NavRail.Element
+		{
+			Glyphe = "\ue74c",
+			Libelle = "Mods",
+			Bulle = "Tous les mods du jeu",
+			Action = delegate
+			{
+				if (vue == Vue.Biblio)
+				{
+					if (ongletB == 0)
+					{
+						BasculerMods(versMods: true);
+					}
+				}
+				else
+				{
+					ongletB = 1;
+					ShowVue(Vue.Biblio);
+				}
+			},
+			Actif = () => (vue == Vue.Biblio && ongletB == 1) || vue == Vue.Projet
+		});
+		if (Opt("boutique") != "0")
+		{
+			l.Add(new NavRail.Element
+			{
+				Glyphe = "\ue719",
+				Libelle = "Boutique",
+				Bulle = "DLC et cosmétiques TPS Groupe",
+				Action = delegate
+				{
+					Boutique();
+				}
+			});
+		}
+		l.Add(new NavRail.Element
+		{
+			Glyphe = "\ue716",
+			Libelle = "Amis",
+			Bulle = "Vos amis TPS Groupe",
+			Action = delegate
+			{
+				OuvrirAmis();
+			}
+		});
+		l.Add(new NavRail.Element
+		{
+			Glyphe = "\ue713",
+			Libelle = "Réglages",
+			Bulle = "Affichage, mises à jour, dossiers, Discord",
+			Action = delegate
+			{
+				Parametres();
+			}
+		});
+		if (Comptes.EstAdmin)
+		{
+			l.Add(new NavRail.Element
+			{
+				Glyphe = "\ue7ef",
+				Libelle = "Admin",
+				Bulle = "Pages du catalogue",
+				Action = delegate
+				{
+					Admin();
+				}
+			});
+		}
+		l.Add(new NavRail.Element
+		{
+			Glyphe = "\ue7e8",
+			Libelle = "Quitter",
+			Bulle = "Fermer le lanceur",
+			EnBas = true,
+			Action = delegate
+			{
+				Quitter();
+			}
+		});
+		rail.Definir(l);
 	}
 
 	/// <summary>Les derniers mods publiés, pour la bannière.</summary>

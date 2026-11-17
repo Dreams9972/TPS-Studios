@@ -124,7 +124,7 @@ internal partial class Fenetre : IMessageFilter
 			return;
 		}
 		ThemeBase tb = ((p == pAccueil) ? noel : ((p == pJeux) ? themeJeux : null));
-		string cle = p.Name + "|" + p.GetHashCode() + "|" + p.ClientSize + "|" + r + "|" + ((tb != null && tb.ATeinte) ? tb.Id : "") + "|" + fond.Pret;
+		string cle = p.Name + "|" + p.GetHashCode() + "|" + p.ClientSize + "|" + r + "|" + ((tb != null && tb.ATeinte) ? tb.Id : "") + "|" + fond.Pret + "|" + fond.TempsMesh.ToString("0.000");
 		if (fondBarre == null || cle != cleFondBarre)
 		{
 			fondBarre?.Dispose();
@@ -132,7 +132,7 @@ internal partial class Fenetre : IMessageFilter
 			using (Graphics gb = Graphics.FromImage(fondBarre))
 			{
 				Rectangle dest = new Rectangle(-r.X, -r.Y, p.ClientSize.Width, p.ClientSize.Height);
-				if (tb != null && tb.ATeinte)
+				if (tb != null && tb.ATeinte && !FondAnime.Mesh)
 				{
 					fond.PeindreTeinte(gb, dest, tb.Id, tb.Teinter);
 				}
@@ -159,7 +159,7 @@ internal partial class Fenetre : IMessageFilter
 			return false;
 		}
 		Control c = Control.FromHandle(m.HWnd);
-		if (c == null || !(c is PanelFond || c is Form || c.GetType() == typeof(Panel) || c is Label) || c.TopLevelControl != this)
+		if (c == null || !(c is PanelFond || c is Form || c.GetType() == typeof(Panel) || c is Label || c is NavRail) || c.TopLevelControl != this)
 		{
 			return false;
 		}
