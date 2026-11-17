@@ -38,6 +38,13 @@ internal class Tuile : Control, ILisse
 
 	public bool Compacte;
 
+	/// <summary>Bouton de la barre de navigation (accueil) : icône et libellé courts, fond seulement au survol.</summary>
+	public bool Rail;
+
+	private static readonly Font fGRail = new Font("Segoe MDL2 Assets", Zx.P(16f));
+
+	private static readonly Font fTRail = new Font("Segoe UI Semibold", Zx.P(8.5f));
+
 	public bool Choisie;
 
 	public bool Inactive;
@@ -357,6 +364,29 @@ internal class Tuile : Control, ILisse
 		Echelle.Peindre(e.Graphics, this, ech.V, Peint, ref tampon);
 	}
 
+	private void PeintRail(Graphics g, bool survole)
+	{
+		int w = base.Width;
+		int h = base.Height;
+		Rectangle rf = new Rectangle(Zx.P(8), Zx.P(3), w - Zx.P(16), h - Zx.P(6));
+		if (survole || Choisie)
+		{
+			using GraphicsPath p = Bouton.Rond(rf, Zx.P(12));
+			using SolidBrush b = new SolidBrush(Choisie ? Color.FromArgb(46, 120, 140, 255) : Color.FromArgb(22, 255, 255, 255));
+			g.FillPath(b, p);
+		}
+		if (Choisie)
+		{
+			// repère de la page en cours
+			using GraphicsPath pr = Bouton.Rond(new Rectangle(0, h / 2 - Zx.P(12), Zx.P(4), Zx.P(24)), Zx.P(2));
+			using SolidBrush ba = new SolidBrush(C.Orange);
+			g.FillPath(ba, pr);
+		}
+		Color ci = ((Choisie || survole) ? Color.White : Color.FromArgb(178, 188, 212));
+		Lang.DrawText(g, Glyphe, fGRail, new Rectangle(0, Zx.P(9), w, Zx.P(26)), ci, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+		Lang.DrawText(g, Titre, fTRail, new Rectangle(Zx.P(2), Zx.P(38), w - Zx.P(4), Zx.P(18)), (Choisie || survole) ? Color.FromArgb(235, 240, 255) : Color.FromArgb(150, 160, 186), TextFormatFlags.HorizontalCenter | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPadding);
+	}
+
 	private void Peint(Graphics g)
 	{
 		g.SmoothingMode = SmoothingMode.AntiAlias;
@@ -368,6 +398,11 @@ internal class Tuile : Control, ILisse
 			zoneCoin = new Rectangle(base.Width - Zx.P(16) - num, base.Height - Zx.P(38), num, Zx.P(28));
 		}
 		bool flag = survol && !Inactive;
+		if (Rail)
+		{
+			PeintRail(g, flag);
+			return;
+		}
 		using (GraphicsPath graphicsPath = Bouton.Rond(r, Zx.P(10)))
 		{
 			using (SolidBrush brush = new SolidBrush(flag ? C.CarteSurvol : C.Carte))

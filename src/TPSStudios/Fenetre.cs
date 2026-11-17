@@ -6733,7 +6733,8 @@ internal partial class Fenetre : Form
 				pAccueil.Invalidate(Rectangle.Inflate(rMajA, Zx.P(4), Zx.P(4)));
 			}
 			flag2 = flag2 || flagMaj;
-			pAccueil.Cursor = ((flag || flag2 || rProfil.Contains(e.Location)) ? Cursors.Hand : Cursors.Default);
+			bool zoneModerne = SourisAccueil(e.Location);
+			pAccueil.Cursor = ((flag || flag2 || zoneModerne || rProfil.Contains(e.Location)) ? Cursors.Hand : Cursors.Default);
 			if (!rAmisA.IsEmpty && Social.Actif && rAmisA.Contains(e.Location))
 			{
 				pAccueil.Cursor = Cursors.Hand;
@@ -6786,6 +6787,7 @@ internal partial class Fenetre : Form
 		};
 		pAccueil.MouseLeave += delegate
 		{
+			SourisAccueil(new Point(-9999, -9999));
 			dSurvol = false;
 			iSurvol = false;
 			if (dcSurvol)
@@ -6798,6 +6800,10 @@ internal partial class Fenetre : Form
 		{
 			if (e.Button == MouseButtons.Left && couches.Count <= 0)
 			{
+				if (ClicAccueil(e.Location))
+				{
+					return;
+				}
 				if (!rMajA.IsEmpty && MajAAfficher && rMajA.Contains(e.Location) && Opt("alerte_type") != "important")
 				{
 					Sons.Clic();
@@ -7370,7 +7376,10 @@ internal partial class Fenetre : Form
 		});
 		T("logo", delegate
 		{
-			LogoCentre(g, pAccueil.ClientSize.Width, pAccueil.ClientSize.Height, dy);
+			PeindreRailFond(g);
+			PeindreEnTeteAccueil(g);
+			PeindreHero(g);
+			PeindreContinuer(g);
 		});
 		T("profil", delegate
 		{
@@ -8481,11 +8490,15 @@ internal partial class Fenetre : Form
 			cacheProfil.Dispose();
 			cacheProfil = null;
 		}
-		Tuile tuile = Menu("\ue768", "Jouer", "Choisir un jeu, puis une carte", delegate
+		// barre de navigation à gauche (remplace les grosses tuiles du menu)
+		Tuile tuile = Menu("\ue80f", "Accueil", "Accueil", delegate
+		{
+		});
+		tuile.Choisie = true;
+		Menu("\ue768", "Jouer", "Choisir un jeu, puis une carte", delegate
 		{
 			ShowVue(Vue.Jeux);
 		});
-		tuile.Choisie = true;
 		if (Opt("boutique") != "0")
 		{
 			Menu("\ue719", "Boutique", Social.Vip ? ("DLC et cosmétiques  ·  " + Social.Points + " points VIP") : "DLC et cosmétiques TPS Groupe", delegate
@@ -8493,13 +8506,17 @@ internal partial class Fenetre : Form
 				Boutique();
 			});
 		}
+		Menu("\ue716", "Amis", "Vos amis TPS Groupe", delegate
+		{
+			OuvrirAmis();
+		});
 		Menu("\ue713", "Réglages", "Affichage, mises à jour, dossiers, Discord", delegate
 		{
 			Parametres();
 		});
 		if (Comptes.EstAdmin)
 		{
-			Menu("\ue7ef", "Administration", "Pages du catalogue", delegate
+			Menu("\ue7ef", "Admin", "Pages du catalogue", delegate
 			{
 				Admin();
 			});
@@ -8508,6 +8525,11 @@ internal partial class Fenetre : Form
 		{
 			Quitter();
 		});
+		foreach (Tuile tr in tuilesA)
+		{
+			tr.Rail = true;
+			bulle.SetToolTip(tr, tr.Sous);
+		}
 		if (cat != null)
 		{
 			Dictionary<string, int> dictionary = new Dictionary<string, int>();
@@ -8617,85 +8639,7 @@ internal partial class Fenetre : Form
 	private void DisposerAccueil()
 	{
 		pAccueil.AutoScrollPosition = new Point(0, 0);
-		int width = pAccueil.ClientSize.Width;
-		int height = pAccueil.ClientSize.Height;
-		int num = Marge(width);
-		int width2 = Math.Max(Zx.P(230), Math.Min(Zx.P(270), (int)((double)width * 0.14)));
-		int num2 = Math.Max(Zx.P(64), Math.Min(Zx.P(78), (int)((double)height * 0.07)));
-		rProfil = new Rectangle(num, num, width2, num2);
-		CalculerMajAccueil();
-		bool flag0 = MajAAfficher || Opt("alerte").Length > 0 || Maintenance;
-		int num3 = num + (flag0 ? Zx.P(262) : Zx.P(200));
-		int num4 = height - num - Zx.P(14);
-		int num5 = Math.Max(Zx.P(220), num4 - num3);
-		int count = tuilesA.Count;
-		int num6 = Zx.P(14);
-		int num7 = Math.Max(Zx.P(340), Math.Min(Zx.P(560), (int)((double)width * 0.34)));
-		int num8 = Math.Max(Zx.P(72), Math.Min(Zx.P(140), (num5 - num6 * Math.Max(0, count - 1)) / Math.Max(1, count)));
-		if (count > 1)
-		{
-			num6 = Math.Min(Zx.P(70), Math.Max(num6, (num5 - count * num8) / (count - 1)));
-		}
-		int num9 = (width - num7) / 2;
-		int num10 = num3;
-		List<Rectangle> list = new List<Rectangle>();
-		foreach (Tuile item in tuilesA)
-		{
-			item.SetBounds(num9, num10, num7, num8);
-			item.IndiceDecor = list.Count;
-			list.Add(item.Bounds);
-			num10 += num8 + num6;
-		}
-		ThemeBase.Tuiles = list.ToArray();
-		etatsTuiles = new int[list.Count];
-		int num11 = Math.Max(Zx.P(260), Math.Min(Zx.P(400), (int)((double)width * 0.2)));
-		int num12 = width - num - num11;
-		if (num12 < num9 + num7 + Zx.P(24))
-		{
-			num12 = num9 + num7 + Zx.P(24);
-		}
-		num11 = Math.Max(Zx.P(180), Math.Min(num11, width - num - num12));
-		if (list.Count >= 4 && num6 >= Zx.P(40))
-		{
-			int num30 = height - Zx.P(14) - Zx.P(98) - Zx.P(32);
-			int num31 = Math.Min(list[3].Y + Zx.P(98), num30) - list[2].Y;
-			int basCarte = list[2].Y + Math.Max(list[2].Height, num31);
-			rCarte = new Rectangle(num12, list[0].Y, num11, basCarte - list[0].Y);
-			rInfos = Rectangle.Empty;
-			int num32 = (int)((double)num11 * 0.82);
-			rPilule = new Rectangle(num12 + (num11 - num32) / 2, rCarte.Bottom + Zx.P(32), num32, Zx.P(44));
-		}
-		else
-		{
-			int num13 = Math.Min(num5, (int)((double)num11 * 0.42) + Zx.P(120));
-			int num14 = num3 + num13 + Zx.P(46);
-			int num15 = Math.Min(num4 - num14, Zx.P(110));
-			int hCarte = num13 + ((num15 >= Zx.P(84)) ? (Zx.P(46) + num15) : 0);
-			if (num15 >= Zx.P(84))
-			{
-				// la pilule Musique (16 + 44) doit tenir sous la case, dans la fenêtre
-				hCarte = Math.Max(num13, Math.Min(hCarte, num4 - Zx.P(60) - num3));
-			}
-			rCarte = new Rectangle(num12, num3, num11, hCarte);
-			rInfos = Rectangle.Empty;
-			rPilule = ((num15 >= Zx.P(84)) ? new Rectangle(rCarte.X, rCarte.Bottom + Zx.P(16), rCarte.Width, Zx.P(44)) : Rectangle.Empty);
-		}
-		rBandeau = new Rectangle(num9, num + Zx.P(202), num7, Zx.P(36));
-		rMajA = (MajAAfficher ? new Rectangle(num9, num + Zx.P(198), num7, Zx.P(48)) : Rectangle.Empty);
-		ThemeBase.Cartes = (rInfos.IsEmpty ? new Rectangle[2] { rProfil, rCarte } : new Rectangle[3] { rProfil, rCarte, rInfos });
-		// à gauche des tuiles : la case amis et le bouton Discord rétrécissent si la fenêtre est étroite
-		int largeurGauche = Math.Max(Zx.P(200), Math.Min(Zx.P(300), num9 - num - Zx.P(18)));
-		rDiscord = new Rectangle(Zx.P(24), height - Zx.P(24) - Zx.P(48), Math.Min(Zx.P(286), Math.Max(Zx.P(200), num9 - Zx.P(24) - Zx.P(18))), Zx.P(48));
-		int num16 = Math.Max((int)((double)height * 0.37), rProfil.Y + Zx.P(452) + Zx.P(20));
-		if (rDiscord.Y - Zx.P(44) - num16 < Zx.P(220))
-		{
-			num16 = Math.Max(rProfil.Bottom + Zx.P(70), rDiscord.Y - Zx.P(44) - Zx.P(220));
-		}
-		rAmisA = new Rectangle(num, num16, largeurGauche, Math.Max(0, Math.Min(Zx.P(560), rDiscord.Y - Zx.P(44) - num16)));
-		rCloche = new Rectangle(width - num - Zx.P(44), num + Zx.P(6), Zx.P(44), Zx.P(44));
-		rMusique = Rectangle.Empty;
-		ThemeBase.ZoneLibre = new Rectangle(num, rProfil.Bottom + Zx.P(16), Math.Max(Zx.P(200), rAmisA.Width), Math.Max(0, rAmisA.Y - rProfil.Bottom - Zx.P(32)));
-		pAccueil.Invalidate();
+		DisposerAccueilModerne();
 	}
 
 	private Image CouvertureJeu(string id)
@@ -9776,6 +9720,10 @@ internal partial class Fenetre : Form
 				Sur(delegate
 				{
 					galImages[pid] = copie;
+					if (pAccueil != null && pAccueil.Visible && !rHero.IsEmpty)
+					{
+						pAccueil.Invalidate(Rectangle.Inflate(rHero, Zx.P(4), Zx.P(4)));
+					}
 					if (sel != null && sel.Id == pid)
 					{
 						RemplirGalerie();
