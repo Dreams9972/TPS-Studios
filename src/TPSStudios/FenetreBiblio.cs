@@ -31,7 +31,7 @@ internal partial class Fenetre
 
 	private int triB;
 
-	private FlecheBord bFlecheMods;
+	private BordPage bFlecheMods;
 
 	private Segments sgTri;
 
@@ -77,12 +77,8 @@ internal partial class Fenetre
 
 	private void ConstruireOngletsBiblio()
 	{
-		bFlecheMods = new FlecheBord();
-		bFlecheMods.Size = new Size(Zx.P(30), Zx.P(110));
-		bFlecheMods.Click += delegate
-		{
-			BasculerMods(ongletB == 0);
-		};
+		// bord de page (Bibliothèque ⇄ Mods) : dessiné par la page, fixe pendant le défilement
+		bFlecheMods = new BordPage(pBiblio);
 		sgTri = new Segments();
 		sgTri.Items = TrisB;
 		sgTri.MinW = Zx.P(90);
@@ -103,7 +99,6 @@ internal partial class Fenetre
 		{
 			JouerJeuCourant();
 		};
-		pBiblio.Controls.Add(bFlecheMods);
 		pBiblio.Controls.Add(sgTri);
 		pBiblio.Controls.Add(bJouerJeu);
 		if (!biblioSouris)
@@ -111,6 +106,23 @@ internal partial class Fenetre
 			biblioSouris = true;
 			pBiblio.MouseMove += delegate(object o, MouseEventArgs e)
 			{
+				bool surBord = bFlecheMods != null && vue == Vue.Biblio && bFlecheMods.Contient(e.Location);
+				bFlecheMods?.ChangerSurvol(surBord);
+				if (surBord)
+				{
+					if (survolB != null)
+					{
+						Rectangle r0 = ZoneARepeindre(survolB);
+						survolB = null;
+						if (!r0.IsEmpty)
+						{
+							pBiblio.Invalidate(r0);
+						}
+					}
+					pBiblio.Cursor = Cursors.Hand;
+					bulle.SetToolTip(pBiblio, (ongletB == 0) ? "Tous les mods du jeu" : "Retour à la bibliothèque");
+					return;
+				}
 				ZoneB zoneB = ZoneSous(e.Location);
 				if (zoneB != survolB)
 				{
@@ -142,6 +154,8 @@ internal partial class Fenetre
 			};
 			pBiblio.MouseLeave += delegate
 			{
+				bFlecheMods?.ChangerSurvol(s: false);
+				pBiblio.Cursor = Cursors.Default;
 				if (survolB != null)
 				{
 					survolB = null;
@@ -151,7 +165,13 @@ internal partial class Fenetre
 			};
 			pBiblio.MouseDown += delegate(object o, MouseEventArgs e)
 			{
-				if (e.Button == MouseButtons.Left)
+				if (e.Button == MouseButtons.Left && bFlecheMods != null && vue == Vue.Biblio && bFlecheMods.Contient(e.Location))
+				{
+					Sons.Clic();
+					bFlecheMods.ChangerSurvol(s: false);
+					BasculerMods(ongletB == 0);
+				}
+				else if (e.Button == MouseButtons.Left)
 				{
 					ZoneB zoneB2 = ZoneSous(e.Location);
 					if (zoneB2 != null && zoneB2.Clic != null)
@@ -231,7 +251,7 @@ internal partial class Fenetre
 		{
 			// toute la bande à droite de la colonne « Mes Cartes » sert de bouton
 			x = ((rPageD.Width > 0) ? (rPageD.Right + Zx.P(12)) : (num - Zx.P(60)));
-			w = Math.Max(bFlecheMods.LargeurFleche + Zx.P(16), num - x);
+			w = Math.Max(Zx.P(60), num - x);
 			x = num - w;
 		}
 		else
@@ -241,12 +261,11 @@ internal partial class Fenetre
 			w = Zx.P(56);
 		}
 		Rectangle r = new Rectangle(x, haut, w, h);
-		if (bFlecheMods.Bounds != r)
+		if (bFlecheMods.Zone != r)
 		{
-			bFlecheMods.Bounds = r;
-			bFlecheMods.Invalidate();
+			bFlecheMods.Zone = r;
+			pBiblio.Invalidate();
 		}
-		bFlecheMods.BringToFront();
 	}
 
 	private void JouerJeuCourant()
@@ -311,8 +330,6 @@ internal partial class Fenetre
 		bChangerJeu.Visible = page;
 		bAccueilB.Visible = page;
 		bFlecheMods.Droite = page;
-		bFlecheMods.Invalidate();
-		bulle.SetToolTip(bFlecheMods, page ? "Tous les mods du jeu" : "Retour à la bibliothèque");
 		PlacerFleche();
 		Control[] array = new Control[5] { tRecherche, fTous, fInst, fMaj, sgTri };
 		foreach (Control control in array)
