@@ -866,8 +866,9 @@ internal partial class Fenetre : Form
 		{
 			if (!ModeCapture && base.WindowState != FormWindowState.Minimized && !plein)
 			{
-				Size size = ((base.WindowState == FormWindowState.Normal) ? base.ClientSize : (base.RestoreBounds.Size - (base.Size - base.ClientSize)));
-				Config.Ecrire("fenetre", size.Width + "," + size.Height + "," + ((base.WindowState == FormWindowState.Maximized) ? "1" : "0"));
+				// taille extérieure de la fenêtre (sans barre Windows, la taille intérieure en dépend)
+				Size size = ((base.WindowState == FormWindowState.Normal) ? base.Size : base.RestoreBounds.Size);
+				Config.Ecrire("fenetre2", size.Width + "," + size.Height + "," + ((base.WindowState == FormWindowState.Maximized) ? "1" : "0"));
 			}
 		}
 		catch
@@ -926,6 +927,18 @@ internal partial class Fenetre : Form
 		}
 		base.ClientSize = new Size(Math.Min(val, workingArea.Width - Zx.P(40)), Math.Min(val2, workingArea.Height - Zx.P(60)));
 		base.FormBorderStyle = FormBorderStyle.Sizable;
+		try
+		{
+			string[] t2 = (Config.Lire("fenetre2") ?? "").Split(',');
+			if (t2.Length >= 2 && int.TryParse(t2[0], out var w2) && int.TryParse(t2[1], out var h2))
+			{
+				base.Size = new Size(Math.Min(Math.Max(Zx.P(1000), w2), workingArea.Width), Math.Min(Math.Max(Zx.P(640), h2), workingArea.Height));
+				flag = t2.Length > 2 && t2[2] == "1";
+			}
+		}
+		catch
+		{
+		}
 		base.MaximizeBox = true;
 		MinimumSize = new Size(Zx.P(1000), Zx.P(640));
 		Theme.Fenetre(this);
@@ -1341,6 +1354,7 @@ internal partial class Fenetre : Form
 		zone.Controls.Add(pBiblio);
 		base.Controls.Add(zone);
 		base.Controls.Add(avis);
+		InstallerBarreTitre();
 		string value3 = Config.Lire("jeu");
 		if (!string.IsNullOrEmpty(value3))
 		{
@@ -3989,6 +4003,7 @@ internal partial class Fenetre : Form
 		base.Controls.Add(c);
 		couches.Add(c);
 		c.BringToFront();
+		barreTitre?.BringToFront();
 		c.Controls.Add(f);
 		if (anim && bg != null)
 		{
@@ -8593,7 +8608,7 @@ internal partial class Fenetre : Form
 		{
 			Reapparaitre();
 		}
-		else
+		else if (!TraiterCadre(ref m))
 		{
 			base.WndProc(ref m);
 		}
@@ -9865,6 +9880,7 @@ internal partial class Fenetre : Form
 			base.WindowState = ((avantPlein != FormWindowState.Minimized) ? avantPlein : FormWindowState.Normal);
 			plein = false;
 		}
+		PlacerBarreTitre();
 	}
 
 	private void Recharger(bool manuel)
