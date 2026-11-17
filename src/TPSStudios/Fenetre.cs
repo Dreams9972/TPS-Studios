@@ -5247,6 +5247,8 @@ internal partial class Fenetre : Form
 		{
 			DessinerFicheJeu(g, new Rectangle(rJeuB.X, rJeuB.Y + dy, rJeuB.Width, rJeuB.Height));
 		}
+		// bord de page Bibliothèque ⇄ Mods : position fixe, ne suit pas le défilement
+		bFlecheMods?.Dessiner(g);
 	}
 
 	private void DessinerFicheJeu(Graphics g, Rectangle r)
