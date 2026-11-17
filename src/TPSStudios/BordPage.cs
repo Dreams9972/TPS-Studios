@@ -43,8 +43,9 @@ internal class BordPage
 	private PointF[] Forme(float leve)
 	{
 		Rectangle z = Zone;
-		float lh = Math.Min((float)LargeurHaut + leve * 0.5f, z.Width);
+		// bande bien droite : même largeur en haut et en bas ; au survol la page « sort » un peu
 		float lb = Math.Min((float)z.Width, (float)z.Width - (float)Zx.P(10) + leve);
+		float lh = lb;
 		if (Droite)
 		{
 			return new PointF[4]
@@ -62,6 +63,21 @@ internal class BordPage
 			new PointF((float)z.Left + lb, z.Bottom),
 			new PointF(z.Left, z.Bottom)
 		};
+	}
+
+	/// <summary>Vrai si la zone à repeindre ne touche que la bande (survol) : la page n'a pas besoin de redessiner son contenu.</summary>
+	public bool SeulementBord(RectangleF clip)
+	{
+		if (Zone.IsEmpty)
+		{
+			return false;
+		}
+		int marge = Zx.P(41);
+		if (!Droite)
+		{
+			return clip.Right <= (float)(Zone.Right + marge + 1);
+		}
+		return clip.Left >= (float)(Zone.Left - marge - 1);
 	}
 
 	public bool Contient(Point p)
@@ -155,7 +171,7 @@ internal class BordPage
 				float k2 = -sens * (float)(Zx.P(3) + n * Zx.P(3));
 				Color c = ((n % 2 == 0) ? Color.FromArgb((int)(70f - 8f * (float)n), 215, 222, 255) : Color.FromArgb((int)(55f - 6f * (float)n), 10, 12, 30));
 				using Pen pt = new Pen(c, 1f);
-				g.DrawLine(pt, d0.X + k2 * 0.4f, d0.Y, d1.X + k2, d1.Y);
+				g.DrawLine(pt, d0.X + k2, d0.Y, d1.X + k2, d1.Y);
 			}
 			g.Restore(st);
 		}
@@ -171,9 +187,9 @@ internal class BordPage
 			System.Drawing.Text.TextRenderingHint th = g.TextRenderingHint;
 			g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
 			SizeF st2 = g.MeasureString(t, Police);
-			float cy = (float)Zone.Top + (float)Zone.Height * 0.55f;
+			float cy = (float)Zone.Top + (float)Zone.Height * 0.5f;
 			float largeur = LargeurA(cy, leve);
-			float x = (Droite ? ((float)Zone.Right - Math.Max(st2.Height / 2f + (float)Zx.P(12), largeur * 0.45f)) : ((float)Zone.Left + Math.Max(st2.Height / 2f + (float)Zx.P(12), largeur * 0.45f)));
+			float x = (Droite ? ((float)Zone.Right - largeur / 2f) : ((float)Zone.Left + largeur / 2f));
 			GraphicsState gs = g.Save();
 			g.TranslateTransform(x, cy);
 			g.RotateTransform(-90f);
@@ -193,10 +209,7 @@ internal class BordPage
 
 	private float LargeurA(float y, float leve)
 	{
-		float lh = (float)LargeurHaut + leve * 0.5f;
-		float lb = (float)Zone.Width - (float)Zx.P(10) + leve;
-		float t = (y - (float)Zone.Top) / Math.Max(1f, Zone.Height);
-		return lh + (lb - lh) * t;
+		return (float)Zone.Width - (float)Zx.P(10) + leve;
 	}
 
 	private static Color Mix(Color a, Color b, float t)

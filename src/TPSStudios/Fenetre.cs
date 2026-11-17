@@ -5226,6 +5226,12 @@ internal partial class Fenetre : Form
 	private void PeintBiblio(Graphics g, int dy)
 	{
 		FondPeint(g, pBiblio);
+		// animation du bord de page (survol) : seule la bande change, inutile de redessiner tout le contenu
+		if (bFlecheMods != null && bFlecheMods.SeulementBord(g.ClipBounds))
+		{
+			bFlecheMods.Dessiner(g);
+			return;
+		}
 		if (ongletB == 1)
 		{
 			Size size0 = Lang.MeasureText("Mods", fTitre);

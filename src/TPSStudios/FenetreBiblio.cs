@@ -243,15 +243,15 @@ internal partial class Fenetre
 		}
 		// la forme en diagonale occupe toute la hauteur de l'interface
 		int haut = 0;
-		int h = pBiblio.ClientSize.Height;
+		int h = pBiblio.ClientSize.Height - Zx.P(36);
 		bFlecheMods.Libelle = ((ongletB == 0) ? "Les Mods" : "Bibliothèque");
 		int x;
 		int w;
 		if (ongletB == 0)
 		{
 			// toute la bande à droite de la colonne « Mes Cartes » sert de bouton
-			x = ((rPageD.Width > 0) ? (rPageD.Right + Zx.P(12)) : (num - Zx.P(60)));
-			w = Math.Max(Zx.P(60), num - x);
+			// bande verticale collée au bord droit
+			w = Zx.P(66);
 			x = num - w;
 		}
 		else
@@ -370,7 +370,7 @@ internal partial class Fenetre
 		int num2 = Zx.P(28);
 		// la flèche « Les Mods » garde toujours sa place au bord droit, même dans une petite fenêtre
 		// bande cliquable « Les Mods » à droite : flèche + texte
-		int reserveFleche = Zx.P(190);
+		int reserveFleche = Zx.P(66) + Zx.P(16);
 		int num3 = Math.Max(Zx.P(480), (int)((double)(width - 2 * num - num2) * 0.58));
 		int wD = Math.Min((int)((double)(width - 2 * num - num3 - num2) * 0.82), width - num - num3 - num2 - reserveFleche);
 		if (wD < Zx.P(300))
