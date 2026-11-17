@@ -5027,9 +5027,16 @@ internal partial class Fenetre : Form
 		return tuile;
 	}
 
+	/// <summary>
+	/// Animations du lanceur (bannières animées, décors des fêtes, transitions). Elles ne dépendent plus de l'option
+	/// Windows « Afficher les animations » (souvent coupée sur les PC réglés « meilleures performances », ce qui
+	/// figeait tout chez ces joueurs) : seul le réglage du lanceur compte, activé par défaut.
+	/// </summary>
+	public static bool AnimationsCoupees = Config.Lire("animations") == "0";
+
 	private static bool AnimationActive()
 	{
-		return SystemInformation.UIEffectsEnabled;
+		return !AnimationsCoupees;
 	}
 
 	private PanelFond PanelVisible()
