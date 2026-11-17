@@ -221,6 +221,7 @@ internal partial class Fenetre
 			}
 		}
 		ongletB = (versMods ? 1 : 0);
+		rail?.Invalidate();
 		RemplirBiblio();
 		if (bitmap != null)
 		{

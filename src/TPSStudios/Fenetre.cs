@@ -1354,6 +1354,16 @@ internal partial class Fenetre : Form
 		zone.Controls.Add(pBiblio);
 		base.Controls.Add(zone);
 		base.Controls.Add(avis);
+		// barre de navigation commune (ajoutée après la zone : elle est ancrée à gauche avant que la zone remplisse le reste)
+		rail = new NavRail();
+		rail.Logo = logo;
+		rail.Infobulle = bulle;
+		rail.ClicLogo = delegate
+		{
+			ShowVue(Vue.Accueil);
+		};
+		base.Controls.Add(rail);
+		MajRail();
 		InstallerBarreTitre();
 		string value3 = Config.Lire("jeu");
 		if (!string.IsNullOrEmpty(value3))
@@ -4793,6 +4803,7 @@ internal partial class Fenetre : Form
 		nAccueil.Invalidate();
 		nJeux.Invalidate();
 		nBiblio.Invalidate();
+		rail?.Invalidate();
 		switch (v)
 		{
 		case Vue.Accueil:
@@ -5184,7 +5195,8 @@ internal partial class Fenetre : Form
 	private void FondPeint(Graphics g, PanelFond p)
 	{
 		ThemeBase themeBase = ((p == pAccueil) ? noel : ((p == pJeux) ? themeJeux : null));
-		if (themeBase != null && themeBase.ATeinte)
+		// fond mesh bleu partout, même pendant les fêtes (les thèmes n'ajoutent que leurs décors)
+		if (themeBase != null && themeBase.ATeinte && !FondAnime.Mesh)
 		{
 			fond.PeindreTeinte(g, p.ClientRectangle, themeBase.Id, themeBase.Teinter);
 		}
@@ -8490,46 +8502,8 @@ internal partial class Fenetre : Form
 			cacheProfil.Dispose();
 			cacheProfil = null;
 		}
-		// barre de navigation à gauche (remplace les grosses tuiles du menu)
-		Tuile tuile = Menu("\ue80f", "Accueil", "Accueil", delegate
-		{
-		});
-		tuile.Choisie = true;
-		Menu("\ue768", "Jouer", "Choisir un jeu, puis une carte", delegate
-		{
-			ShowVue(Vue.Jeux);
-		});
-		if (Opt("boutique") != "0")
-		{
-			Menu("\ue719", "Boutique", Social.Vip ? ("DLC et cosmétiques  ·  " + Social.Points + " points VIP") : "DLC et cosmétiques TPS Groupe", delegate
-			{
-				Boutique();
-			});
-		}
-		Menu("\ue716", "Amis", "Vos amis TPS Groupe", delegate
-		{
-			OuvrirAmis();
-		});
-		Menu("\ue713", "Réglages", "Affichage, mises à jour, dossiers, Discord", delegate
-		{
-			Parametres();
-		});
-		if (Comptes.EstAdmin)
-		{
-			Menu("\ue7ef", "Admin", "Pages du catalogue", delegate
-			{
-				Admin();
-			});
-		}
-		Menu("\ue7e8", "Quitter", "Fermer le lanceur", delegate
-		{
-			Quitter();
-		});
-		foreach (Tuile tr in tuilesA)
-		{
-			tr.Rail = true;
-			bulle.SetToolTip(tr, tr.Sous);
-		}
+		// la navigation est dans la barre commune à gauche (NavRail)
+		MajRail();
 		if (cat != null)
 		{
 			Dictionary<string, int> dictionary = new Dictionary<string, int>();
