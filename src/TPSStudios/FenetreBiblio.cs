@@ -221,8 +221,9 @@ internal partial class Fenetre
 		{
 			num -= SystemInformation.VerticalScrollBarWidth;
 		}
-		int haut = Zx.P(110);
-		int h = Math.Max(Zx.P(110), pBiblio.ClientSize.Height - haut - Zx.P(30));
+		// la forme en diagonale occupe toute la hauteur de l'interface
+		int haut = 0;
+		int h = pBiblio.ClientSize.Height;
 		bFlecheMods.Libelle = ((ongletB == 0) ? "Les Mods" : "");
 		int x;
 		int w;
@@ -235,9 +236,9 @@ internal partial class Fenetre
 		}
 		else
 		{
-			// page Mods : la bande de gauche ramène à la page du jeu
+			// page Mods : la diagonale de gauche ramène à la page du jeu (étroite pour ne pas couvrir les cartes)
 			x = 0;
-			w = Zx.P(52);
+			w = Zx.P(56);
 		}
 		Rectangle r = new Rectangle(x, haut, w, h);
 		if (bFlecheMods.Bounds != r)
@@ -352,7 +353,7 @@ internal partial class Fenetre
 		int num2 = Zx.P(28);
 		// la flèche « Les Mods » garde toujours sa place au bord droit, même dans une petite fenêtre
 		// bande cliquable « Les Mods » à droite : flèche + texte
-		int reserveFleche = Zx.P(30) + Zx.P(26) + Lang.MeasureText("Les Mods", FlecheBord.PoliceLibelle).Width + Zx.P(20);
+		int reserveFleche = Math.Max(Zx.P(190), Zx.P(30) + Zx.P(26) + Lang.MeasureText("Les Mods", FlecheBord.PoliceLibelle).Width + Zx.P(20));
 		int num3 = Math.Max(Zx.P(480), (int)((double)(width - 2 * num - num2) * 0.58));
 		int wD = Math.Min((int)((double)(width - 2 * num - num3 - num2) * 0.82), width - num - num3 - num2 - reserveFleche);
 		if (wD < Zx.P(300))
