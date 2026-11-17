@@ -5575,6 +5575,7 @@ internal partial class Fenetre : Form
 			demande = fenAmis.Demande;
 		}
 		dernierAmis = DateTime.MinValue;
+		VerifierMessages();
 		if (pAccueil != null)
 		{
 			pAccueil.Invalidate();

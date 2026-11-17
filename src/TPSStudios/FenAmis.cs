@@ -7,7 +7,7 @@ using System.Windows.Forms;
 
 namespace TPSStudios;
 
-internal class FenAmis : Form, IPage
+internal partial class FenAmis : Form, IPage
 {
 	public string Demande = "";
 
@@ -122,10 +122,51 @@ internal class FenAmis : Form, IPage
 		base.Controls.Add(corps);
 		corps.BringToFront();
 		int num3 = height - Zx.P(82) - Zx.P(56);
-		int num4 = Zx.P(420);
+		// à gauche : la liste des amis ; à droite : l'ami choisi (conversation, invitation…) ou l'ajout d'un ami
+		int num4 = Math.Max(Zx.P(280), Math.Min(Zx.P(360), num / 3));
 		int lx = num2 + Zx.P(24);
-		int num5 = lx + num4 + Zx.P(32);
+		int num5 = lx + num4 + Zx.P(28);
 		int num6 = num2 + num - Zx.P(24) - num5;
+		Label lListe = new Label
+		{
+			Text = "MES AMIS",
+			Font = fRub,
+			ForeColor = C.Gris,
+			BackColor = C.Fond,
+			Location = new Point(lx + Zx.P(2), Zx.P(12)),
+			AutoSize = true
+		};
+		corps.Controls.Add(lListe);
+		Bouton bAjouterAmi = new Bouton("+  Ajouter un ami")
+		{
+			Plein = false,
+			Size = new Size(Zx.P(150), Zx.P(32)),
+			Location = new Point(lx + num4 - Zx.P(150), Zx.P(4))
+		};
+		corps.Controls.Add(bAjouterAmi);
+		bAjouterAmi.Click += delegate
+		{
+			Selectionner(null);
+		};
+		pl = new Panel();
+		pl.Location = new Point(lx, Zx.P(44));
+		pl.Size = new Size(num4, num3 - Zx.P(52));
+		pl.AutoScroll = true;
+		pl.BackColor = C.Fond;
+		corps.Controls.Add(pl);
+		Theme.Sombre(pl);
+		zl = new ZoneDessin();
+		zl.Location = new Point(0, 0);
+		zl.Size = new Size(num4 - SystemInformation.VerticalScrollBarWidth - Zx.P(4), Zx.P(200));
+		zl.Dessiner = DessinerListe;
+		pl.Controls.Add(zl);
+		// panneau « ajouter un ami » (code ami, ajout par code, recherche)
+		pAjout = new Panel();
+		pAjout.Bounds = new Rectangle(num5, 0, num6, num3);
+		pAjout.BackColor = C.Fond;
+		corps.Controls.Add(pAjout);
+		int ax = 0;
+		int aw = Math.Min(num6, Zx.P(560));
 		Func<string, int, Label> func = delegate(string t, int y)
 		{
 			Label label = new Label
@@ -134,26 +175,26 @@ internal class FenAmis : Form, IPage
 				Font = fRub,
 				ForeColor = C.Gris,
 				BackColor = C.Fond,
-				Location = new Point(lx, y),
+				Location = new Point(ax, y),
 				AutoSize = true
 			};
-			corps.Controls.Add(label);
+			pAjout.Controls.Add(label);
 			return label;
 		};
 		func("VOTRE CODE AMI  ·  donnez-le à vos amis pour qu'ils vous ajoutent", Zx.P(8));
 		tCode = new Champ(multi: false, Zx.P(38));
-		tCode.Location = new Point(lx, Zx.P(30));
-		tCode.Width = num4 - Zx.P(118);
+		tCode.Location = new Point(ax, Zx.P(30));
+		tCode.Width = aw - Zx.P(118);
 		tCode.ReadOnly = true;
 		tCode.Text = "…";
-		corps.Controls.Add(tCode);
+		pAjout.Controls.Add(tCode);
 		Bouton bouton = new Bouton("Copier")
 		{
 			Plein = false,
 			Size = new Size(Zx.P(108), Zx.P(38)),
-			Location = new Point(lx + num4 - Zx.P(108), Zx.P(30))
+			Location = new Point(ax + aw - Zx.P(108), Zx.P(30))
 		};
-		corps.Controls.Add(bouton);
+		pAjout.Controls.Add(bouton);
 		bouton.Click += delegate
 		{
 			if (Social.MonId.Length == 0)
@@ -171,17 +212,17 @@ internal class FenAmis : Form, IPage
 		};
 		func("AJOUTER AVEC UN CODE AMI", Zx.P(88));
 		tAjout = new Champ(multi: false, Zx.P(38));
-		tAjout.Location = new Point(lx, Zx.P(110));
-		tAjout.Width = num4 - Zx.P(118);
+		tAjout.Location = new Point(ax, Zx.P(110));
+		tAjout.Width = aw - Zx.P(118);
 		tAjout.Indice = "ex. 1A2B-3C4D-5E6F-7A8B";
 		tAjout.MaxLength = 24;
-		corps.Controls.Add(tAjout);
+		pAjout.Controls.Add(tAjout);
 		Bouton bouton2 = new Bouton("Ajouter")
 		{
 			Size = new Size(Zx.P(108), Zx.P(38)),
-			Location = new Point(lx + num4 - Zx.P(108), Zx.P(110))
+			Location = new Point(ax + aw - Zx.P(108), Zx.P(110))
 		};
-		corps.Controls.Add(bouton2);
+		pAjout.Controls.Add(bouton2);
 		bouton2.Click += delegate
 		{
 			string id = Social.IdDepuisCode(tAjout.Text);
@@ -201,28 +242,18 @@ internal class FenAmis : Form, IPage
 		};
 		func("RECHERCHER UN JOUEUR", Zx.P(168));
 		tq = new Champ(multi: false, Zx.P(38));
-		tq.Location = new Point(lx, Zx.P(190));
-		tq.Width = num4;
+		tq.Location = new Point(ax, Zx.P(190));
+		tq.Width = aw;
 		tq.Indice = "Pseudo ou code ami (2 caractères au moins)…";
 		tq.MaxLength = 24;
-		corps.Controls.Add(tq);
+		pAjout.Controls.Add(tq);
 		zr = new ZoneDessin();
-		zr.Location = new Point(lx, Zx.P(242));
-		zr.Size = new Size(num4, num3 - Zx.P(242) - Zx.P(12));
+		zr.Location = new Point(ax, Zx.P(242));
+		zr.Size = new Size(aw, num3 - Zx.P(242) - Zx.P(12));
 		zr.Dessiner = DessinerRecherche;
-		corps.Controls.Add(zr);
-		pl = new Panel();
-		pl.Location = new Point(num5, 0);
-		pl.Size = new Size(num6, num3 - Zx.P(8));
-		pl.AutoScroll = true;
-		pl.BackColor = C.Fond;
-		corps.Controls.Add(pl);
-		Theme.Sombre(pl);
-		zl = new ZoneDessin();
-		zl.Location = new Point(0, 0);
-		zl.Size = new Size(num6 - SystemInformation.VerticalScrollBarWidth - Zx.P(4), Zx.P(200));
-		zl.Dessiner = DessinerListe;
-		pl.Controls.Add(zl);
+		pAjout.Controls.Add(zr);
+		// panneau de l'ami choisi : en-tête, actions, conversation
+		ConstruireDiscussion(corps, new Rectangle(num5, 0, num6, num3));
 		ZoneDessin[] array = new ZoneDessin[2] { zr, zl };
 		foreach (ZoneDessin zoneDessin in array)
 		{
@@ -394,6 +425,25 @@ internal class FenAmis : Form, IPage
 			{
 				Message("Votre pseudo TPS : " + Social.Pseudo + "  ·  vos amis voient votre statut et vos mods, personne d'autre.", C.Gris);
 			}
+			// l'ami choisi : on garde la sélection à jour (statut…), ou on revient à l'ajout s'il n'est plus ami
+			if (selAmi != null)
+			{
+				Ami maj = Social.Amis.Find((Ami x) => x.Id == selAmi.Id);
+				if (maj == null)
+				{
+					Selectionner(null);
+				}
+				else
+				{
+					selAmi = maj;
+					zTete.Invalidate();
+				}
+			}
+			else if (premier && Social.Amis.Count > 0)
+			{
+				Selectionner(Social.Amis.Find((Ami x) => x.EnLigne) ?? Social.Amis[0]);
+			}
+			MajNonLus();
 			MajTaille();
 		});
 	}
@@ -512,12 +562,7 @@ internal class FenAmis : Form, IPage
 
 	private void MajTaille()
 	{
-		int w = zl.Width;
-		int num = Zx.P(8);
-		num += HauteurSection(Social.Recues.Count, w);
-		num += Math.Max(HauteurSection(Math.Max(1, Social.Amis.Count), w), Zx.P(120));
-		num += HauteurSection(Social.Envoyees.Count, w);
-		zl.Height = Math.Max(pl.ClientSize.Height - 4, num);
+		zl.Height = Math.Max(pl.ClientSize.Height - 4, HauteurListe());
 		zl.Invalidate();
 	}
 
@@ -927,42 +972,4 @@ internal class FenAmis : Form, IPage
 		return y + (l.Count + cols - 1) / cols * (HautCarte + gap);
 	}
 
-	private void DessinerListe(Graphics g, int w, int h)
-	{
-		g.SmoothingMode = SmoothingMode.AntiAlias;
-		g.InterpolationMode = InterpolationMode.HighQualityBilinear;
-		clicsL.Clear();
-		int num = Zx.P(8);
-		List<Ami> list = new List<Ami>(Social.Amis);
-		list.Sort((Ami a, Ami b) => (a.EnLigne != b.EnLigne) ? ((!a.EnLigne) ? 1 : (-1)) : string.Compare(a.Pseudo, b.Pseudo, StringComparison.OrdinalIgnoreCase));
-		if (Social.Recues.Count > 0)
-		{
-			Lang.DrawText(g, "DEMANDES REÇUES  ·  " + Social.Recues.Count, fRub, new Point(Zx.P(2), num), C.Orange);
-			num = Grille(g, Social.Recues, num + Zx.P(26), w, "recue") + Zx.P(14);
-		}
-		int num2 = 0;
-		foreach (Ami item in list)
-		{
-			if (item.EnLigne)
-			{
-				num2++;
-			}
-		}
-		Lang.DrawText(g, "MES AMIS  ·  " + list.Count + "   (" + num2 + " en ligne)", fRub, new Point(Zx.P(2), num), C.Gris);
-		num += Zx.P(26);
-		if (list.Count == 0)
-		{
-			Lang.DrawText(g, "Pas encore d'amis : ajoutez-les avec leur code ami ou cherchez-les à gauche.", fSt, new Rectangle(Zx.P(4), num + Zx.P(6), w - Zx.P(8), Zx.P(48)), C.Gris, TextFormatFlags.WordBreak | TextFormatFlags.NoPadding);
-			num += Zx.P(70);
-		}
-		else
-		{
-			num = Grille(g, list, num, w, "ami") + Zx.P(14);
-		}
-		if (Social.Envoyees.Count > 0)
-		{
-			Lang.DrawText(g, "DEMANDES ENVOYÉES  ·  " + Social.Envoyees.Count, fRub, new Point(Zx.P(2), num), C.Gris);
-			Grille(g, Social.Envoyees, num + Zx.P(26), w, "envoyee");
-		}
-	}
 }

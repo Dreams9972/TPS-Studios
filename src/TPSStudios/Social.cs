@@ -597,6 +597,122 @@ internal static class Social
 		return null;
 	}
 
+	/// <summary>Message d'une conversation entre amis (texte ou invitation à jouer).</summary>
+	public class MessageAmi
+	{
+		public long Id;
+
+		public bool Moi;
+
+		public string Texte = "";
+
+		public string Type = "texte";
+
+		public string Extra = "";
+
+		public long Cree;
+	}
+
+	/// <summary>Messages non lus d'un ami.</summary>
+	public class NonLu
+	{
+		public string Id = "";
+
+		public string Pseudo = "";
+
+		public int N;
+
+		public long Dernier;
+
+		public int Invitations;
+	}
+
+	private static long Long(object o)
+	{
+		long.TryParse(Convert.ToString(o, System.Globalization.CultureInfo.InvariantCulture), out var v);
+		return v;
+	}
+
+	/// <summary>Conversation avec un ami : les messages après « apres » (0 : les derniers). Les messages reçus passent en « lus ».</summary>
+	public static List<MessageAmi> Messages(string ami, long apres)
+	{
+		int st;
+		Dictionary<string, object> r = AppelAuth("GET", "/v1/messages/" + ami + "?apres=" + apres, null, out st);
+		if (st != 200)
+		{
+			throw new Exception(Msg(r, "conversation indisponible"));
+		}
+		List<MessageAmi> l = new List<MessageAmi>();
+		if (r != null && r.TryGetValue("messages", out var v) && v is System.Collections.ArrayList al)
+		{
+			foreach (object o in al)
+			{
+				if (o is Dictionary<string, object> d)
+				{
+					l.Add(new MessageAmi
+					{
+						Id = Long(d.ContainsKey("id") ? d["id"] : 0),
+						Moi = d.ContainsKey("moi") && Convert.ToBoolean(d["moi"]),
+						Texte = (d.ContainsKey("texte") ? Convert.ToString(d["texte"]) : ""),
+						Type = (d.ContainsKey("type") ? Convert.ToString(d["type"]) : "texte"),
+						Extra = (d.ContainsKey("extra") ? Convert.ToString(d["extra"]) : ""),
+						Cree = Long(d.ContainsKey("cree") ? d["cree"] : 0)
+					});
+				}
+			}
+		}
+		return l;
+	}
+
+	/// <summary>Envoie un message (ou une invitation à jouer, type « invitation », extra = identifiant du mod). Null si tout va bien, sinon l'erreur.</summary>
+	public static string EnvoyerMessage(string ami, string texte, string type = "texte", string extra = "")
+	{
+		int st;
+		Dictionary<string, object> r = AppelAuth("POST", "/v1/messages/" + ami, new Dictionary<string, object>
+		{
+			{ "texte", texte ?? "" },
+			{ "type", type },
+			{ "extra", extra ?? "" }
+		}, out st);
+		if (st != 200 && st != 201)
+		{
+			return Msg(r, "message non envoyé");
+		}
+		return null;
+	}
+
+	/// <summary>Messages non lus, par ami (vide si le serveur ne répond pas).</summary>
+	public static List<NonLu> NonLus()
+	{
+		List<NonLu> l = new List<NonLu>();
+		try
+		{
+			int st;
+			Dictionary<string, object> r = AppelAuth("GET", "/v1/messages", null, out st);
+			if (st == 200 && r != null && r.TryGetValue("non_lus", out var v) && v is System.Collections.ArrayList al)
+			{
+				foreach (object o in al)
+				{
+					if (o is Dictionary<string, object> d)
+					{
+						l.Add(new NonLu
+						{
+							Id = Convert.ToString(d["id"]),
+							Pseudo = (d.ContainsKey("pseudo") ? Convert.ToString(d["pseudo"]) : ""),
+							N = (int)Long(d.ContainsKey("n") ? d["n"] : 0),
+							Dernier = Long(d.ContainsKey("dernier") ? d["dernier"] : 0),
+							Invitations = (int)Long(d.ContainsKey("invitations") ? d["invitations"] : 0)
+						});
+					}
+				}
+			}
+		}
+		catch
+		{
+		}
+		return l;
+	}
+
 	public static string VerifierVip(string id)
 	{
 		int statut;

@@ -240,6 +240,96 @@ internal partial class Fenetre
 
 	private bool PageListe => couches.Count == 0 && vue == Vue.Biblio && ongletB == 1;
 
+	private int nbNonLus;
+
+	private readonly Dictionary<string, long> messagesVus = new Dictionary<string, long>();
+
+	private Timer tMessages;
+
+	private bool premiereLecture = true;
+
+	/// <summary>
+	/// Toutes les 30 s : messages non lus des amis (pastille sur « Amis » dans le menu) et notification
+	/// à l'arrivée d'un nouveau message ou d'une invitation à jouer.
+	/// </summary>
+	private void DemarrerMessages()
+	{
+		FenAmis.ModsInvitables = delegate
+		{
+			List<KeyValuePair<string, string>> l = new List<KeyValuePair<string, string>>();
+			if (cat == null)
+			{
+				return l;
+			}
+			string omsi = null;
+			try
+			{
+				omsi = Omsi.DetecteOmsi();
+			}
+			catch
+			{
+			}
+			foreach (Projet p in cat.Projets)
+			{
+				if (p.Installable && p.StatutEffectif != "masque" && omsi != null && Omsi.Installee(p, omsi) != null)
+				{
+					l.Add(new KeyValuePair<string, string>(p.Id, p.Nom));
+				}
+			}
+			return l;
+		};
+		FenAmis.NomMod = (string id) => (cat != null) ? cat.Projets.Find((Projet p) => p.Id == id)?.Nom : null;
+		if (tMessages != null || ModeCapture)
+		{
+			return;
+		}
+		tMessages = new Timer();
+		tMessages.Interval = 30000;
+		tMessages.Tick += delegate
+		{
+			VerifierMessages();
+		};
+		tMessages.Start();
+		VerifierMessages();
+	}
+
+	private void VerifierMessages()
+	{
+		if (!Social.Actif || Social.MonId.Length == 0)
+		{
+			return;
+		}
+		System.Threading.Thread th = new System.Threading.Thread((System.Threading.ThreadStart)delegate
+		{
+			List<Social.NonLu> l = Social.NonLus();
+			Sur(delegate
+			{
+				int total = 0;
+				foreach (Social.NonLu n in l)
+				{
+					total += n.N;
+					messagesVus.TryGetValue(n.Id, out var vu);
+					if (n.Dernier > vu)
+					{
+						messagesVus[n.Id] = n.Dernier;
+						if (!premiereLecture && CoucheOuverte() != typeof(FenAmis))
+						{
+							Toast((n.Invitations > 0) ? ("🎮  " + n.Pseudo + Lang.T(" vous invite à jouer : ouvrez Amis")) : ("💬  " + Lang.T("Nouveau message de ") + n.Pseudo), C.Bleu, 6000);
+						}
+					}
+				}
+				premiereLecture = false;
+				if (total != nbNonLus)
+				{
+					nbNonLus = total;
+					rail?.Invalidate();
+				}
+			});
+		});
+		th.IsBackground = true;
+		th.Start();
+	}
+
 	/// <summary>Éléments du menu latéral (selon les droits et les options du catalogue).</summary>
 	private void MajRail()
 	{
@@ -326,7 +416,8 @@ internal partial class Fenetre
 			{
 				Naviguer(OuvrirAmis, typeof(FenAmis));
 			},
-			Actif = () => CoucheOuverte() == typeof(FenAmis)
+			Actif = () => CoucheOuverte() == typeof(FenAmis),
+			Badge = () => nbNonLus
 		});
 		l.Add(new NavRail.Element
 		{
@@ -387,6 +478,7 @@ internal partial class Fenetre
 			}
 		});
 		rail.Definir(l);
+		DemarrerMessages();
 	}
 
 	/// <summary>Les derniers mods publiés, pour la bannière.</summary>
