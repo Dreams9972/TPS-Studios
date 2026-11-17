@@ -136,7 +136,7 @@
       "bus_defaut": "",
       "hof_defaut": "",
       "consigne": "Choisissez votre bus et la ligne, puis lancez.",
-      "description": "Lignes de Paris:\n23 Gare de Lyon <-> Gare de l'Est\n34 Gare de Lyon <-> Chatelet\n36 Republique <-> Nation\n41 Opera <-> Chatelet\n50 Gare de Lyon <-> Porte de la Muette\n65 Chatelet <-> Gare de l'Est/Bastille\n78 Bastille <-> Porte de la Muette\n79 Clemenceau <-> Nation\n81 Etoile <-> Denfert-Rochereau\n90 Gare de Lyon <-> Charles de Gaulle Etoile\n149 Etoile <-> Bercy\n\nCarte réalisée par TPS Groupe.",
+      "description": "Lignes de Paris:\n23 Gare de Lyon <-> Gare de l'Est\n34 Gare de Lyon <-> Chatelet\n50 Gare de Lyon <-> Porte de la Muette\n78 Bastille <-> Porte de la Muette\n\nCarte réalisée par TPS Groupe.",
       "editeur": "· TPS Groupe",
       "version": "V1.1",
       "date": "08/11/2026 12:22",
