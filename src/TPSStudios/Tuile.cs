@@ -36,6 +36,26 @@ internal class Tuile : Control, ILisse
 
 	public Image Img;
 
+	/// <summary>
+	/// Nouveau mod pas encore découvert : la couverture est cachée derrière un rideau sombre portant son nom,
+	/// qui s'ouvre au premier survol (une seule fois, Devoile est alors appelé pour s'en souvenir).
+	/// </summary>
+	public string Rideau = "";
+
+	public Action Devoile;
+
+	private double ouverture;
+
+	private Stopwatch rideauSw;
+
+	private Timer rideauTm;
+
+	private const double RideauDuree = 950.0;
+
+	private static readonly Font fRideau = new Font("Segoe UI Semibold", Zx.P(15f));
+
+	private static readonly Font fRideauP = new Font("Segoe UI Semibold", Zx.P(8f));
+
 	public bool Compacte;
 
 	/// <summary>Bouton de la barre de navigation (accueil) : icône et libellé courts, fond seulement au survol.</summary>
@@ -341,8 +361,97 @@ internal class Tuile : Control, ILisse
 		BackColor = Color.Transparent;
 	}
 
+	private void OuvrirRideau()
+	{
+		if (Rideau.Length == 0 || rideauSw != null)
+		{
+			return;
+		}
+		if (!Fenetre.Fluide)
+		{
+			Rideau = "";
+			Invalidate();
+			Devoile?.Invoke();
+			return;
+		}
+		rideauSw = Stopwatch.StartNew();
+		rideauTm = new Timer();
+		rideauTm.Interval = 12;
+		rideauTm.Tick += delegate
+		{
+			ouverture = Math.Min(1.0, rideauSw.Elapsed.TotalMilliseconds / RideauDuree);
+			Invalidate();
+			if (ouverture >= 1.0)
+			{
+				rideauTm.Stop();
+				rideauTm.Dispose();
+				Rideau = "";
+				Devoile?.Invoke();
+			}
+		};
+		Disposed += delegate
+		{
+			rideauTm?.Dispose();
+		};
+		rideauTm.Start();
+	}
+
+	/// <summary>Les deux pans du rideau (ouverture de 0 à 1) avec le nom du mod au milieu tant qu'il est fermé.</summary>
+	private void PeindreRideau(Graphics g, Rectangle r)
+	{
+		double t = ouverture;
+		double e = (t < 0.5) ? (4.0 * t * t * t) : (1.0 - Math.Pow(-2.0 * t + 2.0, 3.0) / 2.0);
+		int moitie = r.Width / 2;
+		int recul = (int)Math.Round((moitie + Zx.P(6)) * e);
+		Rectangle rg = new Rectangle(r.X - recul, r.Y, moitie + 1, r.Height);
+		Rectangle rd = new Rectangle(r.X + moitie + recul, r.Y, r.Width - moitie, r.Height);
+		foreach (Rectangle p in new Rectangle[2] { rg, rd })
+		{
+			if (p.Right <= r.X || p.X >= r.Right)
+			{
+				continue;
+			}
+			using (LinearGradientBrush lg = new LinearGradientBrush(p, Color.FromArgb(38, 42, 58), Color.FromArgb(26, 29, 42), 90f))
+			{
+				g.FillRectangle(lg, p);
+			}
+			// plis du tissu
+			int pli = Zx.P(16);
+			for (int x = p.X; x < p.Right; x += pli)
+			{
+				Rectangle rp = new Rectangle(x, p.Y, pli, p.Height);
+				using LinearGradientBrush lp = new LinearGradientBrush(new Rectangle(rp.X, rp.Y, rp.Width + 1, rp.Height), Color.FromArgb(26, 255, 255, 255), Color.FromArgb(34, 0, 0, 0), 0f);
+				g.FillRectangle(lp, rp);
+			}
+		}
+		// ombre sur les bords qui s'écartent
+		if (e > 0.0 && e < 1.0)
+		{
+			using SolidBrush o = new SolidBrush(Color.FromArgb((int)(90.0 * (1.0 - e)), 0, 0, 0));
+			g.FillRectangle(o, rg.Right, r.Y, Math.Max(0, rd.X - rg.Right), r.Height);
+		}
+		if (t < 0.35)
+		{
+			int a = (int)(255.0 * (1.0 - t / 0.35));
+			Size sn = Lang.MeasureText(Rideau, fRideau, new Size(r.Width - Zx.P(40), Zx.P(80)), TextFormatFlags.WordBreak | TextFormatFlags.NoPadding);
+			int y = r.Y + (r.Height - sn.Height) / 2;
+			string nouveau = Lang.T("NOUVEAU");
+			Size sp = Lang.MeasureText(nouveau, fRideauP);
+			Rectangle rp = new Rectangle(r.X + (r.Width - sp.Width - Zx.P(18)) / 2, y - Zx.P(34), sp.Width + Zx.P(18), Zx.P(22));
+			using (GraphicsPath pp = Bouton.Rond(rp, rp.Height / 2))
+			{
+				using SolidBrush bp = new SolidBrush(Color.FromArgb(a, C.Orange));
+				g.FillPath(bp, pp);
+			}
+			Lang.DrawText(g, nouveau, fRideauP, rp, Color.FromArgb(a, Color.White), TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+			Lang.DrawText(g, Rideau, fRideau, new Rectangle(r.X + Zx.P(20), y, r.Width - Zx.P(40), sn.Height + Zx.P(4)), Color.FromArgb(a, Color.White), TextFormatFlags.HorizontalCenter | TextFormatFlags.WordBreak | TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding);
+			Lang.DrawText(g, "Survolez pour découvrir", F.Etat, new Rectangle(r.X, y + sn.Height + Zx.P(10), r.Width, Zx.P(18)), Color.FromArgb(a * 2 / 3, 200, 206, 230), TextFormatFlags.HorizontalCenter | TextFormatFlags.NoPadding);
+		}
+	}
+
 	protected override void OnMouseEnter(EventArgs e)
 	{
+		OuvrirRideau();
 		survol = true;
 		Anime();
 		Invalidate();
@@ -434,6 +543,10 @@ internal class Tuile : Control, ILisse
 					}
 					g.SetClip(rectangle, CombineMode.Intersect);
 					g.DrawImageUnscaled(cacheImg, 0, 0);
+					if (Rideau.Length > 0)
+					{
+						PeindreRideau(g, rectangle);
+					}
 				}
 				else
 				{

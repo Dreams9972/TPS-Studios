@@ -17,3 +17,8 @@ name = "SALLE"
 class_name = "Salle"
 
 # La classe Salle existe déjà sur le Worker déployé : ne pas ajouter de nouvelle migration.
+
+# photos et vidéos de la communauté (envoyées depuis le lanceur, visibles après validation)
+[[r2_buckets]]
+binding = "MEDIA"
+bucket_name = "tps-communaute"

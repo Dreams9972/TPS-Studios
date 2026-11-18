@@ -586,7 +586,155 @@ async function route(request, env) {
     return rep({ ok: true });
   }
 
+  // ───────────── Communauté : photos et vidéos des joueurs (stockées dans R2, visibles après validation) ─────────────
+  if (chemin === '/v1/communaute' || chemin.startsWith('/v1/communaute/')) return communaute(request, env, url, chemin, m, moi);
+
   return erreur(404, 'introuvable');
+}
+
+const PUB_PHOTO_MAX = 10 * 1024 * 1024, PUB_VIDEO_MAX = 90 * 1024 * 1024, PUB_TITRE_MAX = 80;
+const PUB_TYPES = { 'image/jpeg': ['photo', 'jpg'], 'image/png': ['photo', 'png'], 'image/webp': ['photo', 'webp'], 'video/mp4': ['video', 'mp4'], 'video/webm': ['video', 'webm'] };
+let tablePubs = false;
+async function assurePubs(env) {
+  if (tablePubs) return;
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS publications (id INTEGER PRIMARY KEY AUTOINCREMENT, joueur_id TEXT NOT NULL, type TEXT NOT NULL, titre TEXT NOT NULL DEFAULT '', mod_id TEXT NOT NULL DEFAULT '', cle TEXT NOT NULL, mime TEXT NOT NULL, taille INTEGER NOT NULL, statut TEXT NOT NULL DEFAULT 'attente', cree INTEGER NOT NULL, valide_par TEXT, valide_le INTEGER)").run();
+  await env.DB.prepare('CREATE INDEX IF NOT EXISTS publications_statut ON publications (statut, id)').run();
+  await env.DB.prepare('CREATE INDEX IF NOT EXISTS publications_joueur ON publications (joueur_id, id)').run();
+  await env.DB.prepare('CREATE TABLE IF NOT EXISTS likes_pub (pub_id INTEGER NOT NULL, joueur_id TEXT NOT NULL, cree INTEGER NOT NULL, PRIMARY KEY (pub_id, joueur_id))').run();
+  tablePubs = true;
+}
+const estModo = (moi) => !!moi && (!!moi.admin || moi.role === 'modo');
+const PUB_SELECT = 'SELECT p.id, p.joueur_id, p.type, p.titre, p.mod_id, p.mime, p.taille, p.statut, p.cree, j.pseudo, j.niveau, (SELECT COUNT(*) FROM likes_pub l WHERE l.pub_id = p.id) AS likes, (SELECT 1 FROM likes_pub l WHERE l.pub_id = p.id AND l.joueur_id = ?) AS aime FROM publications p JOIN joueurs j ON j.id = p.joueur_id ';
+const pubJson = (x, moi) => ({ id: x.id, type: x.type, titre: x.titre, mod: x.mod_id, mime: x.mime, taille: x.taille, statut: x.statut, cree: x.cree, auteur: x.pseudo, auteur_id: x.joueur_id, niveau: x.niveau, likes: x.likes || 0, aime: !!x.aime, moi: !!moi && x.joueur_id === moi.id });
+// signature des fichiers : on ne garde que de vraies images / vidéos
+function signatureOk(octets, mime) {
+  const b = (i) => octets[i];
+  if (mime === 'image/jpeg') return b(0) === 0xff && b(1) === 0xd8 && b(2) === 0xff;
+  if (mime === 'image/png') return b(0) === 0x89 && b(1) === 0x50 && b(2) === 0x4e && b(3) === 0x47;
+  if (mime === 'image/webp') return b(0) === 0x52 && b(1) === 0x49 && b(2) === 0x46 && b(3) === 0x46 && b(8) === 0x57 && b(9) === 0x45 && b(10) === 0x42 && b(11) === 0x50;
+  if (mime === 'video/mp4') return b(4) === 0x66 && b(5) === 0x74 && b(6) === 0x79 && b(7) === 0x70;   // « ftyp »
+  if (mime === 'video/webm') return b(0) === 0x1a && b(1) === 0x45 && b(2) === 0xdf && b(3) === 0xa3;
+  return false;
+}
+
+async function communaute(request, env, url, chemin, m, moi) {
+  if (!env.MEDIA) return erreur(503, 'la communauté n\'est pas encore activée sur le serveur');
+  await assurePubs(env);
+  const modo = estModo(moi);
+
+  // envoi d'une photo ou d'une vidéo (corps brut, type dans Content-Type, titre et mod dans l'adresse)
+  if (chemin === '/v1/communaute' && m === 'POST') {
+    if (!moi) return erreur(401, 'jeton absent ou invalide');
+    const mime = (request.headers.get('content-type') || '').split(';')[0].trim().toLowerCase(), t = PUB_TYPES[mime];
+    if (!t) return erreur(415, 'format non accepté : photos JPG, PNG ou WEBP, vidéos MP4 ou WEBM');
+    const taille = parseInt(request.headers.get('content-length') || '0', 10);
+    const max = t[0] === 'photo' ? PUB_PHOTO_MAX : PUB_VIDEO_MAX;
+    if (!(taille > 16)) return erreur(411, 'taille du fichier inconnue');
+    if (taille > max) return erreur(413, t[0] === 'photo' ? 'photo trop lourde (10 Mo au plus)' : 'vidéo trop lourde (90 Mo au plus)');
+    if (!modo && !(await limite(env, 'pub:' + moi.id, 10, 86400))) return erreur(429, '10 publications par jour au plus : réessayez demain');
+    const enAttente = await env.DB.prepare("SELECT COUNT(*) AS n FROM publications WHERE joueur_id = ? AND statut = 'attente'").bind(moi.id).first();
+    if (!modo && enAttente.n >= 10) return erreur(429, 'vous avez déjà 10 publications en attente de validation');
+    const titre = propre(url.searchParams.get('titre'), PUB_TITRE_MAX);
+    const mod = propre(url.searchParams.get('mod'), 40).toLowerCase();
+    if (mod && !MOD.test(mod)) return erreur(400, 'mod invalide');
+    const cle = 'pub/' + moi.id + '/' + hex(alea(12)) + '.' + t[1];
+    // on lit le début du fichier pour vérifier que c'est bien une image / une vidéo, puis on envoie tout dans R2 sans le garder en mémoire
+    const lecteur = request.body.getReader(), debut = []; let lu = 0;
+    while (lu < 12) { const { value, done } = await lecteur.read(); if (done) break; debut.push(value); lu += value.length; }
+    const tete = new Uint8Array(Math.min(lu, 64)); { let k = 0; for (const c of debut) { for (let i = 0; i < c.length && k < tete.length; i++) tete[k++] = c[i]; } }
+    if (!signatureOk(tete, mime)) { while (!(await lecteur.read()).done) { /* on vide la requête avant de répondre */ } return erreur(415, 'fichier invalide : ce n\'est pas une vraie ' + (t[0] === 'photo' ? 'image' : 'vidéo')); }
+    const suite = new ReadableStream({
+      async pull(ctrl) { if (debut.length) { ctrl.enqueue(debut.shift()); return; } const { value, done } = await lecteur.read(); if (done) ctrl.close(); else ctrl.enqueue(value); },
+      cancel() { return lecteur.cancel(); },
+    });
+    const flux = new FixedLengthStream(taille);
+    const copie = suite.pipeTo(flux.writable);
+    await env.MEDIA.put(cle, flux.readable, { httpMetadata: { contentType: mime } });
+    await copie;
+    const statut = modo ? 'ok' : 'attente';
+    const res = await env.DB.prepare('INSERT INTO publications (joueur_id, type, titre, mod_id, cle, mime, taille, statut, cree, valide_par, valide_le) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').bind(moi.id, t[0], titre, mod, cle, mime, taille, statut, maintenant(), modo ? moi.id : null, modo ? maintenant() : null).run();
+    return rep({ id: res.meta.last_row_id, statut }, 201);
+  }
+
+  // liste des publications validées (récentes ou populaires), mes publications, ou celles à valider
+  if (chemin === '/v1/communaute' && m === 'GET') {
+    const vue = url.searchParams.get('vue') || 'recentes', lim = Math.max(1, Math.min(60, parseInt(url.searchParams.get('limite') || '30', 10) || 30));
+    const avant = parseInt(url.searchParams.get('avant') || '0', 10) || 0, moiId = moi ? moi.id : '';
+    let l;
+    if (vue === 'miennes') {
+      if (!moi) return erreur(401, 'jeton absent ou invalide');
+      l = await env.DB.prepare(PUB_SELECT + "WHERE p.joueur_id = ? AND p.statut <> 'refuse' AND (? = 0 OR p.id < ?) ORDER BY p.id DESC LIMIT ?").bind(moiId, moi.id, avant, avant, lim).all();
+    } else if (vue === 'attente') {
+      if (!modo) return erreur(403, 'réservé aux administrateurs et modérateurs');
+      l = await env.DB.prepare(PUB_SELECT + "WHERE p.statut = 'attente' ORDER BY p.id ASC LIMIT ?").bind(moiId, lim).all();
+    } else if (vue === 'populaires') {
+      l = await env.DB.prepare(PUB_SELECT + "WHERE p.statut = 'ok' AND p.cree > ? ORDER BY likes DESC, p.id DESC LIMIT ?").bind(moiId, maintenant() - 30 * 86400, lim).all();
+    } else {
+      l = await env.DB.prepare(PUB_SELECT + "WHERE p.statut = 'ok' AND (? = 0 OR p.id < ?) ORDER BY p.id DESC LIMIT ?").bind(moiId, avant, avant, lim).all();
+    }
+    const att = modo ? (await env.DB.prepare("SELECT COUNT(*) AS n FROM publications WHERE statut = 'attente'").first()).n : 0;
+    return rep({ publications: l.results.map((x) => pubJson(x, moi)), attente: att, modo });
+  }
+
+  // fichier d'une publication : public une fois validée ; avant, seulement pour l'auteur et les modérateurs
+  let r = chemin.match(/^\/v1\/communaute\/media\/(\d{1,10})$/);
+  if (r && (m === 'GET' || m === 'HEAD')) {
+    const p = await env.DB.prepare('SELECT joueur_id, cle, mime, statut FROM publications WHERE id = ?').bind(parseInt(r[1], 10)).first();
+    if (!p || p.statut === 'refuse') return erreur(404, 'publication introuvable');
+    if (p.statut !== 'ok' && !(moi && (modo || moi.id === p.joueur_id))) return erreur(404, 'publication introuvable');
+    const plage = request.headers.get('range'); let opt = {};
+    const mr = plage && plage.match(/^bytes=(\d*)-(\d*)$/);
+    if (mr && (mr[1] || mr[2])) opt = { range: mr[1] ? { offset: parseInt(mr[1], 10), ...(mr[2] ? { length: parseInt(mr[2], 10) - parseInt(mr[1], 10) + 1 } : {}) } : { suffix: parseInt(mr[2], 10) } };
+    const o = await env.MEDIA.get(p.cle, opt);
+    if (!o) return erreur(404, 'fichier introuvable');
+    const h = { 'content-type': p.mime, 'x-content-type-options': 'nosniff', 'accept-ranges': 'bytes', 'cache-control': p.statut === 'ok' ? 'public, max-age=86400' : 'no-store' };
+    if (o.range && mr) {
+      const deb = o.range.offset ?? (o.size - o.range.suffix), lon = o.range.length ?? (o.size - deb);
+      h['content-range'] = 'bytes ' + deb + '-' + (deb + lon - 1) + '/' + o.size; h['content-length'] = String(lon);
+      return new Response(m === 'HEAD' ? null : o.body, { status: 206, headers: h });
+    }
+    h['content-length'] = String(o.size);
+    return new Response(m === 'HEAD' ? null : o.body, { status: 200, headers: h });
+  }
+
+  r = chemin.match(/^\/v1\/communaute\/(\d{1,10})(\/aimer|\/moderer)?$/);
+  if (!r) return erreur(404, 'introuvable');
+  if (!moi) return erreur(401, 'jeton absent ou invalide');
+  const id = parseInt(r[1], 10), action = r[2] || '';
+  const p = await env.DB.prepare('SELECT id, joueur_id, cle, statut FROM publications WHERE id = ?').bind(id).first();
+  if (!p || p.statut === 'refuse') return erreur(404, 'publication introuvable');
+
+  if (action === '/aimer' && m === 'POST') {
+    if (p.statut !== 'ok') return erreur(403, 'publication pas encore validée');
+    if (!(await limite(env, 'likep:' + moi.id, 60, 60))) return erreur(429, 'trop rapide');
+    const deja = await env.DB.prepare('SELECT 1 FROM likes_pub WHERE pub_id = ? AND joueur_id = ?').bind(id, moi.id).first();
+    if (deja) await env.DB.prepare('DELETE FROM likes_pub WHERE pub_id = ? AND joueur_id = ?').bind(id, moi.id).run();
+    else await env.DB.prepare('INSERT INTO likes_pub (pub_id, joueur_id, cree) VALUES (?, ?, ?)').bind(id, moi.id, maintenant()).run();
+    const n = (await env.DB.prepare('SELECT COUNT(*) AS n FROM likes_pub WHERE pub_id = ?').bind(id).first()).n;
+    return rep({ likes: n, aime: !deja });
+  }
+  if (action === '/moderer' && m === 'POST') {
+    if (!modo) return erreur(403, 'réservé aux administrateurs et modérateurs');
+    const c = await corps(request);
+    if (c.action === 'valider') {
+      await env.DB.prepare("UPDATE publications SET statut = 'ok', valide_par = ?, valide_le = ? WHERE id = ?").bind(moi.id, maintenant(), id).run();
+      return rep({ statut: 'ok' });
+    }
+    if (c.action === 'refuser') {
+      await env.MEDIA.delete(p.cle);   // le fichier refusé ne prend plus de place
+      await env.DB.prepare("UPDATE publications SET statut = 'refuse', valide_par = ?, valide_le = ? WHERE id = ?").bind(moi.id, maintenant(), id).run();
+      return rep({ statut: 'refuse' });
+    }
+    return erreur(400, 'action inconnue (valider ou refuser)');
+  }
+  if (!action && m === 'DELETE') {
+    if (!(modo || p.joueur_id === moi.id)) return erreur(403, 'action refusée');
+    await env.MEDIA.delete(p.cle);
+    await env.DB.prepare('DELETE FROM likes_pub WHERE pub_id = ?').bind(id).run();
+    await env.DB.prepare('DELETE FROM publications WHERE id = ?').bind(id).run();
+    return rep({ ok: true });
+  }
+  return erreur(405, 'méthode non acceptée');
 }
 
 export default {

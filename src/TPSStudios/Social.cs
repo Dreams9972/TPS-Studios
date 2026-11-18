@@ -11,7 +11,7 @@ using System.Web.Script.Serialization;
 
 namespace TPSStudios;
 
-internal static class Social
+internal static partial class Social
 {
 	public static string Base = "";
 
