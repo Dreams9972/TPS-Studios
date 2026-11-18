@@ -261,7 +261,8 @@ internal partial class Fenetre
 			x = 0;
 			w = Zx.P(56);
 		}
-		Rectangle r = new Rectangle(x, haut, w, h);
+		// bandes de bord retirées : le menu de gauche fait la navigation (Jeux, Bibliothèque, Mods)
+		Rectangle r = Rectangle.Empty;
 		if (bFlecheMods.Zone != r)
 		{
 			bFlecheMods.Zone = r;
@@ -329,7 +330,7 @@ internal partial class Fenetre
 		}
 		bool page = ongletB == 0;
 		bChangerJeu.Visible = page;
-		bAccueilB.Visible = page;
+		bAccueilB.Visible = false;
 		bFlecheMods.Droite = page;
 		PlacerFleche();
 		Control[] array = new Control[5] { tRecherche, fTous, fInst, fMaj, sgTri };
@@ -371,7 +372,7 @@ internal partial class Fenetre
 		int num2 = Zx.P(28);
 		// la flèche « Les Mods » garde toujours sa place au bord droit, même dans une petite fenêtre
 		// bande cliquable « Les Mods » à droite : flèche + texte
-		int reserveFleche = Zx.P(66) + Zx.P(16);
+		int reserveFleche = 0;
 		int num3 = Math.Max(Zx.P(480), (int)((double)(width - 2 * num - num2) * 0.58));
 		int wD = Math.Min((int)((double)(width - 2 * num - num3 - num2) * 0.82), width - num - num3 - num2 - reserveFleche);
 		if (wD < Zx.P(300))

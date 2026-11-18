@@ -204,82 +204,64 @@ internal class Bouton : Control, ILisse
 		}
 	}
 
+	/// <summary>
+	/// Style moderne : boutons principaux en couleur pleine et unie (sans reflet ni contour), boutons secondaires
+	/// en verre translucide avec un liseré fin ; coins très arrondis (pastille pour les petits boutons).
+	/// </summary>
 	private void Peint(Graphics g)
 	{
 		g.SmoothingMode = SmoothingMode.AntiAlias;
 		g.PixelOffsetMode = PixelOffsetMode.HighQuality;
-		int num = Math.Max(Zx.P(4), Math.Min(Zx.P(10), base.Height / 3));
+		float num = ((base.Height <= Zx.P(44)) ? ((float)base.Height / 2f - 1f) : (float)Zx.P(14));
 		RectangleF r = new RectangleF(0.5f, 0.5f, (float)base.Width - 1.5f, (float)base.Height - 1.5f);
 		Color c = Color.White;
-		int y = 0;
 		using (GraphicsPath path = RondF(r, num))
 		{
 			if (!base.Enabled)
 			{
-				using (SolidBrush brush = new SolidBrush(Color.FromArgb(30, 36, 60)))
+				using (SolidBrush brush = new SolidBrush(Color.FromArgb(14, 255, 255, 255)))
 				{
 					g.FillPath(brush, path);
 				}
-				using (Pen pen = new Pen(Color.FromArgb(48, 56, 90)))
-				{
-					g.DrawPath(pen, path);
-				}
-				c = Color.FromArgb(118, 126, 158);
+				c = Color.FromArgb(110, 120, 150);
 			}
 			else if (Plein)
 			{
 				Color color = (Danger ? C.Rouge : Couleur);
-				Color color2 = (enfonce ? ControlPaint.Dark(color, 0.14f) : ControlPaint.Light(color, 0.16f + 0.16f * hv));
-				Color color3 = (enfonce ? ControlPaint.Dark(color, 0.32f) : Mel(ControlPaint.Dark(color, 0.16f), color, hv));
-				using (LinearGradientBrush brush2 = new LinearGradientBrush(new RectangleF(0f, 0f, base.Width, base.Height + 1), color2, color3, 90f))
+				Color fond = (enfonce ? ControlPaint.Dark(color, 0.12f) : Mel(color, ControlPaint.Light(color, 0.18f), hv));
+				using (SolidBrush brush2 = new SolidBrush(fond))
 				{
 					g.FillPath(brush2, path);
 				}
-				GraphicsState gs = g.Save();
-				g.SetClip(path, CombineMode.Intersect);
-				using (LinearGradientBrush brush3 = new LinearGradientBrush(new RectangleF(0f, 0f, base.Width, (float)base.Height * 0.55f + 1f), Color.FromArgb(enfonce ? 10 : ((int)(46f + 30f * hv)), 255, 255, 255), Color.FromArgb(0, 255, 255, 255), 90f))
+				if (!enfonce && hv > 0.01f)
 				{
-					g.FillRectangle(brush3, 0f, 0f, base.Width, (float)base.Height * 0.55f);
-				}
-				g.Restore(gs);
-				using (Pen pen2 = new Pen(Color.FromArgb(enfonce ? 70 : ((int)(110f + 70f * hv)), ControlPaint.Light(color, 0.55f)), 1f))
-				{
-					g.DrawPath(pen2, path);
+					// légère lueur au survol
+					using Pen lueur = new Pen(Color.FromArgb((int)(70f * hv), ControlPaint.Light(color, 0.6f)), 1f);
+					g.DrawPath(lueur, path);
 				}
 			}
 			else
 			{
-				Color color4 = (enfonce ? Color.FromArgb(16, 20, 44) : Mel(Color.FromArgb(32, 37, 72), Color.FromArgb(46, 54, 102), hv));
-				Color color5 = (enfonce ? Color.FromArgb(13, 16, 36) : Mel(Color.FromArgb(20, 24, 50), Color.FromArgb(32, 38, 78), hv));
-				using (LinearGradientBrush brush4 = new LinearGradientBrush(new RectangleF(0f, 0f, base.Width, base.Height + 1), color4, color5, 90f))
+				int a = (enfonce ? 10 : ((int)(16f + 18f * hv)));
+				using (SolidBrush brush4 = new SolidBrush(Danger ? Color.FromArgb(a + 6, C.Rouge) : Color.FromArgb(a, 255, 255, 255)))
 				{
 					g.FillPath(brush4, path);
 				}
-				Color color6 = (Danger ? Color.FromArgb((int)(140f + 115f * hv), C.Rouge) : Mel(Color.FromArgb(64, 74, 124), Color.FromArgb(150, 166, 255), hv));
-				using (Pen pen4 = new Pen(color6, 1f))
+				Color liseré = (Danger ? Color.FromArgb((int)(90f + 120f * hv), C.Rouge) : Color.FromArgb((int)(34f + 40f * hv), 255, 255, 255));
+				using (Pen pen4 = new Pen(liseré, 1f))
 				{
 					g.DrawPath(pen4, path);
 				}
-				if (!enfonce)
-				{
-					GraphicsState gs2 = g.Save();
-					g.SetClip(path, CombineMode.Intersect);
-					using (LinearGradientBrush brush5 = new LinearGradientBrush(new RectangleF(0f, 0f, base.Width, (float)base.Height * 0.5f + 1f), Color.FromArgb((int)(14f + 18f * hv), 255, 255, 255), Color.FromArgb(0, 255, 255, 255), 90f))
-					{
-						g.FillRectangle(brush5, 0f, 0f, base.Width, (float)base.Height * 0.5f);
-					}
-					g.Restore(gs2);
-				}
-				c = (Danger ? Color.FromArgb(245, 128, 118) : Mel(C.Texte, Color.White, hv));
+				c = (Danger ? Color.FromArgb(250, 140, 130) : Mel(Color.FromArgb(222, 228, 245), Color.White, hv));
 			}
 		}
 		if (Focused && ShowFocusCues && base.Enabled)
 		{
-			using GraphicsPath path3 = RondF(new RectangleF(Zx.P(2.5f), Zx.P(2.5f), (float)base.Width - 1f - Zx.P(5f), (float)base.Height - 1f - Zx.P(5f)), Math.Max(2, num - Zx.P(2)));
-			using Pen pen6 = new Pen(Color.FromArgb(220, 175, 190, 255), 1.6f);
+			using GraphicsPath path3 = RondF(new RectangleF(Zx.P(2.5f), Zx.P(2.5f), (float)base.Width - 1f - Zx.P(5f), (float)base.Height - 1f - Zx.P(5f)), Math.Max(2f, num - (float)Zx.P(2)));
+			using Pen pen6 = new Pen(Color.FromArgb(200, 175, 190, 255), 1.4f);
 			g.DrawPath(pen6, path3);
 		}
-		Lang.DrawText(g, Text, Font, new Rectangle(0, y, base.Width, base.Height), c, TextFormatFlags.EndEllipsis | TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+		Lang.DrawText(g, Text, Font, new Rectangle(Zx.P(6), 0, base.Width - Zx.P(12), base.Height), c, TextFormatFlags.EndEllipsis | TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
 	}
 
 	public static GraphicsPath RondF(RectangleF r, float rr)

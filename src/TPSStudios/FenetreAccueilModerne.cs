@@ -140,7 +140,9 @@ internal partial class Fenetre
 		swMesh = System.Diagnostics.Stopwatch.StartNew();
 		long dernier = 0L;
 		tMesh = new Timer();
-		tMesh.Interval = 33;
+		// le fond bouge très lentement : 15 images/s suffisent à l'œil et laissent toute la puissance
+		// aux animations, survols et transitions (60 images/s et plus)
+		tMesh.Interval = 66;
 		tMesh.Tick += delegate
 		{
 			long ms = swMesh.ElapsedMilliseconds;
@@ -221,6 +223,7 @@ internal partial class Fenetre
 	{
 		bool deja = vue == Vue.Biblio && ongletB == 1;
 		filtre = f;
+		categorie = "";
 		if (deja)
 		{
 			RemplirBiblio();
@@ -875,11 +878,11 @@ internal partial class Fenetre
 			g.SetClip(pc2, CombineMode.Intersect);
 		}
 		// voiles pour la lisibilité du texte : à gauche et en bas
-		using (LinearGradientBrush lg = new LinearGradientBrush(new Rectangle(rHero.X - 1, rHero.Y, rHero.Width / 2 + 2, rHero.Height), Color.FromArgb(215, 6, 8, 22), Color.FromArgb(0, 6, 8, 22), 0f))
+		using (LinearGradientBrush lg = new LinearGradientBrush(new Rectangle(rHero.X - 1, rHero.Y, rHero.Width / 2 + 2, rHero.Height), Color.FromArgb(240, 6, 8, 22), Color.FromArgb(0, 6, 8, 22), 0f))
 		{
 			g.FillRectangle(lg, rHero.X, rHero.Y, rHero.Width / 2 + 1, rHero.Height);
 		}
-		using (LinearGradientBrush lb = new LinearGradientBrush(new Rectangle(rHero.X, rHero.Bottom - rHero.Height / 2 - 1, rHero.Width, rHero.Height / 2 + 2), Color.FromArgb(0, 6, 8, 22), Color.FromArgb(190, 6, 8, 22), 90f))
+		using (LinearGradientBrush lb = new LinearGradientBrush(new Rectangle(rHero.X, rHero.Bottom - rHero.Height / 2 - 1, rHero.Width, rHero.Height / 2 + 2), Color.FromArgb(0, 6, 8, 22), Color.FromArgb(235, 6, 8, 22), 90f))
 		{
 			g.FillRectangle(lb, rHero.X, rHero.Bottom - rHero.Height / 2, rHero.Width, rHero.Height / 2);
 		}

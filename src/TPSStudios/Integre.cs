@@ -56,6 +56,9 @@ internal static class Integre
 
 	private static void AjouterAccueil(Bouton b)
 	{
+		// le menu de gauche (toujours visible) mène à l'Accueil : plus de bouton Accueil à côté du bouton retour
+		return;
+#pragma warning disable CS0162
 		Control parent = b.Parent;
 		if (parent == null || b.Tag is Bouton)
 		{
