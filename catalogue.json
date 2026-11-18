@@ -1,8 +1,8 @@
 {
   "lanceur": {
-    "version": "3.2.2",
-    "url": "https://raw.githubusercontent.com/Dreams9972/TPS-Studios/main/lanceur/v3.2.2/TPS.Studios.exe",
-    "sha256": "af6a995d0d867e93f8fcd405239c5aa9b118972b68eac6cd2836e3ac8e68f2d9"
+    "version": "3.2.3",
+    "url": "https://raw.githubusercontent.com/Dreams9972/TPS-Studios/main/lanceur/v3.2.3/TPS.Studios.exe",
+    "sha256": "258f907883ebfe6a307116dd3f6f99d359503bb74d637ace92731451d9a07ed2"
   },
   "projets": [
     {
