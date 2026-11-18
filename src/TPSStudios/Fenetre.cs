@@ -830,7 +830,7 @@ internal partial class Fenetre : Form
 
 	private List<KeyValuePair<Rectangle, Annonce>> rAnnonces = new List<KeyValuePair<Rectangle, Annonce>>();
 
-	private static readonly string[] NouveautesLanceur = new string[4] { "Messages entre amis réparés", "Bannière de l'accueil fluide", "Clic sur un jeu : sa fiche", "Même transition partout" };
+	private static readonly string[] NouveautesLanceur = new string[3] { "Communauté : photos et vidéos des joueurs", "Nouveaux mods dévoilés au survol", "Couvertures mieux cadrées" };
 
 	private static readonly Font fAnT2 = new Font("Segoe UI Semibold", Zx.P(11f));
 
@@ -2051,7 +2051,7 @@ internal partial class Fenetre : Form
 		return num;
 	}
 
-	private static string Depuis(long unix)
+	internal static string Depuis(long unix)
 	{
 		if (unix <= 0)
 		{
@@ -7674,6 +7674,7 @@ internal partial class Fenetre : Form
 			PeindreEnTeteAccueil(g);
 			PeindreHero(g);
 			PeindreContinuer(g);
+			PeindreCommu(g);
 		});
 		T("profil", delegate
 		{
@@ -9664,8 +9665,17 @@ internal partial class Fenetre : Form
 					tuile.Prix = projet2.PrixTexte;
 					tuile.PrixCouleur = ((projet2.Payant && !projet2.Debloque) ? C.Orange : C.Vert);
 					Projet pp = projet2;
+					if (tuile.Img != null && !ModDecouvert(projet2.Id))
+					{
+						tuile.Rideau = projet2.Nom;
+						tuile.Devoile = delegate
+						{
+							MarquerDecouvert(pp.Id);
+						};
+					}
 					tuile.Click += delegate
 					{
+						MarquerDecouvert(pp.Id);
 						Choisir(pp);
 						ShowVue(Vue.Projet);
 					};
@@ -11716,8 +11726,9 @@ internal partial class Fenetre : Form
 	public void CaptureIntegre(string dossier, bool animation)
 	{
 		ForceAnim = animation;
-		string[] array = new string[31]
+		string[] array = new string[33]
 		{
+			"partage", "publier",
 			"params", "profil", "profil_nouveau", "admin", "banniere", "jeton", "dossiers", "message", "communaute", "visionneuse",
 			"succes", "profil_apparence", "profil_comptes", "profil_vip", "profil_mods", "lies", "amis", "ami_profil", "offrir_vip", "musique",
 			"connexion_spotify", "playlists", "support", "boutique", "notifications", "jeux_admin", "admin_jeux", "admin_accueil", "admin_boutique", "admin_communaute",
@@ -11818,6 +11829,12 @@ internal partial class Fenetre : Form
 				}
 				case "amis":
 					form = new FenAmis();
+					break;
+				case "partage":
+					form = new FenPartage();
+					break;
+				case "publier":
+					form = new FenPublier(Environment.GetEnvironmentVariable("TPS_FICHIER") ?? "", new List<KeyValuePair<string, string>> { new KeyValuePair<string, string>("paris25", "Paris 25") });
 					break;
 				case "musique":
 					form = new FenMusique();
@@ -12239,6 +12256,19 @@ internal partial class Fenetre : Form
 			BeginInvoke((MethodInvoker)delegate
 			{
 				Parametres();
+			});
+			break;
+		case "partage":
+			BeginInvoke((MethodInvoker)delegate
+			{
+				OuvrirPartage();
+			});
+			break;
+		case "publier":
+			BeginInvoke((MethodInvoker)delegate
+			{
+				using FenPublier f = new FenPublier(arg ?? "", new List<KeyValuePair<string, string>> { new KeyValuePair<string, string>("paris25", "Paris 25") });
+				f.Afficher(this);
 			});
 			break;
 		case "amis":

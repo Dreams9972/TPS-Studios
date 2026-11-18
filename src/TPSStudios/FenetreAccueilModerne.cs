@@ -109,7 +109,9 @@ internal partial class Fenetre
 		int cw = (mainW - (nC - 1) * gap) / nC;
 		int ch = Math.Max(Zx.P(90), Math.Min(cw * 56 / 100 + Zx.P(54), height - yC - Zx.P(28)));
 		rContinuer.Clear();
-		List<Projet> cont = ProjetsContinuer(nC);
+		// dernière case : la communauté (photos et vidéos des joueurs)
+		rCommu = Social.Actif ? new Rectangle(xMain + (nC - 1) * (cw + gap), yC, cw, ch) : Rectangle.Empty;
+		List<Projet> cont = ProjetsContinuer(Social.Actif ? (nC - 1) : nC);
 		for (int j = 0; j < cont.Count; j++)
 		{
 			rContinuer.Add(new KeyValuePair<Rectangle, Projet>(new Rectangle(xMain + j * (cw + gap), yC, cw, ch), cont[j]));
@@ -498,6 +500,21 @@ internal partial class Fenetre
 			Actif = () => CoucheOuverte() == typeof(FenAmis),
 			Badge = () => nbNonLus
 		});
+		if (Social.Actif)
+		{
+			l.Add(new NavRail.Element
+			{
+				Glyphe = "",
+				Libelle = "Communauté",
+				Bulle = "Photos et vidéos des joueurs",
+				Action = delegate
+				{
+					Naviguer(OuvrirPartage, typeof(FenPartage));
+				},
+				Actif = () => CoucheOuverte() == typeof(FenPartage),
+				Badge = () => commuAttente
+			});
+		}
 		l.Add(new NavRail.Element
 		{
 			Glyphe = "\ue713",
@@ -784,6 +801,10 @@ internal partial class Fenetre
 		{
 			return 200;
 		}
+		if (!rCommu.IsEmpty && rCommu.Contains(p))
+		{
+			return 300;
+		}
 		return -2;
 	}
 
@@ -818,7 +839,11 @@ internal partial class Fenetre
 
 	private void InvaliderZoneAccueil(int z)
 	{
-		if (z == -1 || z >= 100)
+		if (z == 300)
+		{
+			pAccueil.Invalidate(Rectangle.Inflate(rCommu, Zx.P(8), Zx.P(8)));
+		}
+		else if (z == -1 || (z >= 100 && z < 200))
 		{
 			pAccueil.Invalidate(Rectangle.Inflate(rHero, Zx.P(6), Zx.P(6)));
 		}
@@ -848,6 +873,10 @@ internal partial class Fenetre
 		else if (z == 200)
 		{
 			ShowVue(Vue.Biblio);
+		}
+		else if (z == 300)
+		{
+			OuvrirPartage();
 		}
 		else if (z == -1 && NewsCourante != null)
 		{

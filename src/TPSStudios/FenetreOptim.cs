@@ -88,13 +88,14 @@ internal partial class Fenetre
 		double ri = (double)im.Width / (double)im.Height;
 		double ecart = Math.Max(rc, ri) / Math.Min(rc, ri);
 		InterpolationMode im0 = g.InterpolationMode;
-		if (ecart <= tolerance)
+		// image qui peut remplir la case sans trop perdre : recadrage intelligent (titre, logo et sujet gardés)
+		if (ecart <= tolerance || Couvertures.Remplit(im, r.Width, r.Height))
 		{
-			double k = Math.Max((double)r.Width / (double)im.Width, (double)r.Height / (double)im.Height);
-			int w = (int)Math.Ceiling((double)im.Width * k);
-			int h = (int)Math.Ceiling((double)im.Height * k);
 			g.InterpolationMode = InterpolationMode.HighQualityBicubic;
-			g.DrawImage(im, r.X + (r.Width - w) / 2, r.Y + (r.Height - h) / 2, w, h);
+			GraphicsState gs = g.Save();
+			g.SetClip(r, CombineMode.Intersect);
+			Couvertures.Couvrir(g, im, r);
+			g.Restore(gs);
 			g.InterpolationMode = im0;
 			return;
 		}
@@ -149,10 +150,15 @@ internal partial class Fenetre
 		{
 			graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
 			graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
-			double num = Math.Max((double)w / (double)im.Width, (double)h / (double)im.Height);
-			int num2 = (int)Math.Ceiling((double)im.Width * num);
-			int num3 = (int)Math.Ceiling((double)im.Height * num);
-			graphics.DrawImage(im, (w - num2) / 2, (h - num3) / 2, num2, num3);
+			// image adaptée au cadre : recadrage intelligent, ou image entière sur fond flouté si elle est trop différente
+			if (Couvertures.Remplit(im, w, h))
+			{
+				Couvertures.Couvrir(graphics, im, new Rectangle(0, 0, w, h));
+			}
+			else
+			{
+				DessinerAjuste(graphics, im, new Rectangle(0, 0, w, h), 1.0, 110);
+			}
 		}
 		echelles[key] = value;
 		return value;
