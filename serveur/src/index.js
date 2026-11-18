@@ -92,6 +92,19 @@ async function compteLikes(env, mod) { return (await env.DB.prepare('SELECT COUN
 const commentaireJson = (r, moi) => ({ id: r.id, auteur: r.pseudo, niveau: r.niveau, admin: !!r.admin, role: r.role || '', vip: !!r.vip, statut: r.statut || '', texte: r.texte, cree: r.cree, moi: !!moi && r.joueur_id === moi.id, likes: r.likes || 0, aime: !!r.aime });
 // J'aime sur les commentaires (v2.9) : table créée au besoin (voir migrations/0002_likes_commentaires.sql)
 let tableLikesCom = false;
+// Notes des mods (v3.2.4) : chaque joueur donne de 1 à 5 étoiles, une note par joueur et par mod
+let notesPretes = false;
+async function assureNotes(env) {
+  if (notesPretes) return;
+  await env.DB.prepare('CREATE TABLE IF NOT EXISTS notes (mod_id TEXT NOT NULL, joueur_id TEXT NOT NULL, etoiles INTEGER NOT NULL, cree INTEGER NOT NULL, PRIMARY KEY (mod_id, joueur_id))').run();
+  notesPretes = true;
+}
+async function lireNotes(env, mod, moi) {
+  await assureNotes(env);
+  const t = await env.DB.prepare('SELECT COUNT(*) AS nb, AVG(etoiles) AS moy FROM notes WHERE mod_id = ?').bind(mod).first();
+  const m = moi ? await env.DB.prepare('SELECT etoiles FROM notes WHERE mod_id = ? AND joueur_id = ?').bind(mod, moi.id).first() : null;
+  return { moyenne: t && t.nb ? Math.round(t.moy * 100) / 100 : 0, nb: t ? t.nb : 0, mienne: m ? m.etoiles : 0 };
+}
 async function assureLikesCom(env) {
   if (tableLikesCom) return;
   await env.DB.prepare('CREATE TABLE IF NOT EXISTS likes_commentaires (commentaire_id INTEGER NOT NULL, joueur_id TEXT NOT NULL, cree INTEGER NOT NULL, PRIMARY KEY (commentaire_id, joueur_id))').run();
@@ -213,7 +226,23 @@ async function route(request, env) {
     const aime = moi ? !!(await env.DB.prepare('SELECT 1 FROM likes WHERE mod_id = ? AND joueur_id = ?').bind(mod, moi.id).first()) : false;
     await assureLikesCom(env);
     const lignes = await env.DB.prepare('SELECT c.id, c.joueur_id, c.texte, c.cree, j.pseudo, j.niveau, j.admin, (SELECT r.role FROM roles r WHERE r.joueur_id = c.joueur_id) AS role, (SELECT 1 FROM vip v WHERE v.joueur_id = c.joueur_id) AS vip, (SELECT p.statut FROM presence p WHERE p.joueur_id = c.joueur_id AND p.vu > ?) AS statut, (SELECT COUNT(*) FROM likes_commentaires lc WHERE lc.commentaire_id = c.id) AS likes, (SELECT 1 FROM likes_commentaires lc WHERE lc.commentaire_id = c.id AND lc.joueur_id = ?) AS aime FROM commentaires c JOIN joueurs j ON j.id = c.joueur_id WHERE c.mod_id = ? AND c.supprime = 0 ORDER BY c.id DESC LIMIT ?').bind(maintenant() - PRESENCE, moi ? moi.id : '', mod, HISTORIQUE).all();
-    return rep({ likes, aime, commentaires: lignes.results.reverse().map((x) => commentaireJson(x, moi)) });
+    const notes = await lireNotes(env, mod, moi);
+    return rep({ likes, aime, notes, commentaires: lignes.results.reverse().map((x) => commentaireJson(x, moi)) });
+  }
+
+  r = chemin.match(/^\/v1\/mod\/([a-z0-9_-]+)\/noter$/);
+  if (r && m === 'POST') {
+    const mod = r[1]; if (!MOD.test(mod)) return erreur(400, 'identifiant de mod invalide');
+    if (!moi) return erreur(401, 'jeton absent ou invalide');
+    if (!(await limite(env, 'note:' + moi.id, 30, 60))) return erreur(429, 'trop rapide');
+    const c = await corps(request), n = Math.round(Number(c.etoiles));
+    if (!(n >= 0 && n <= 5)) return erreur(400, 'note invalide (1 à 5 étoiles)');
+    await assureNotes(env);
+    if (n === 0) await env.DB.prepare('DELETE FROM notes WHERE mod_id = ? AND joueur_id = ?').bind(mod, moi.id).run();
+    else await env.DB.prepare('INSERT INTO notes (mod_id, joueur_id, etoiles, cree) VALUES (?, ?, ?, ?) ON CONFLICT (mod_id, joueur_id) DO UPDATE SET etoiles = excluded.etoiles, cree = excluded.cree').bind(mod, moi.id, n, maintenant()).run();
+    const notes = await lireNotes(env, mod, moi);
+    await avis(env, mod, { t: 'notes', moyenne: notes.moyenne, nb: notes.nb });
+    return rep(notes);
   }
 
   r = chemin.match(/^\/v1\/mod\/([a-z0-9_-]+)\/aimer$/);

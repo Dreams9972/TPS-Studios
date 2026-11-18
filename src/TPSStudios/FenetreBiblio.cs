@@ -225,7 +225,7 @@ internal partial class Fenetre
 		RemplirBiblio();
 		if (bitmap != null)
 		{
-			Transition(bitmap, versMods ? StyleTrans.PageAvance : StyleTrans.PageRetour);
+			Transition(bitmap, versMods ? StyleTrans.Monte : StyleTrans.Descend);
 		}
 		RetirerCouvercle();
 		SuspendreVideos(s: false);
@@ -380,8 +380,9 @@ internal partial class Fenetre
 			wD = Zx.P(300);
 			num3 = Math.Max(Zx.P(360), width - num - num2 - reserveFleche - wD);
 		}
-		rPageG = new Rectangle(num, y, num3, 0);
-		rPageD = new Rectangle(num + num3 + num2, y, wD, 0);
+		// fiche du jeu seule, sur toute la largeur : les mods installés sont dans « Bibliothèque »
+		rPageG = new Rectangle(num, y, width - 2 * num, 0);
+		rPageD = Rectangle.Empty;
 		int num4 = HauteurHero();
 		int num5 = y + num4 + Zx.P(18);
 		bJouerJeu.Text = (web ? "▶  JOUER" : "▶  JOUER");
@@ -408,7 +409,7 @@ internal partial class Fenetre
 	/// <summary>La bannière prend la place qui reste pour que toute la page tienne dans la fenêtre.</summary>
 	private int HauteurHero()
 	{
-		int num = Math.Min(Zx.P(400), (int)((double)rPageG.Width * 0.36));
+		int num = Math.Min(Zx.P(460), (int)((double)rPageG.Width * 0.36));
 		int num2 = pBiblio.ClientSize.Height - rPageG.Y - Zx.P(24) - Zx.P(18) - Zx.P(78) - HauteurPhotos() - HauteurAPropos();
 		return Math.Max(Zx.P(140), Math.Min(num, num2));
 	}
@@ -522,7 +523,7 @@ internal partial class Fenetre
 		int num = nbMajJeu;
 		string omsi = omsiB;
 		int bas = PeindreColonneJeu(g, dy, list, list2, num);
-		int val = PeindreMesMods(g, dy, list2, omsi);
+		int val = 0;
 		int height = Math.Max(bas, val) + Zx.P(50);
 		if (pBiblio.AutoScrollMinSize.Height != height)
 		{

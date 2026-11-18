@@ -44,6 +44,9 @@ internal class NavRail : Control
 
 	public ToolTip Infobulle;
 
+	/// <summary>Survol d'un élément (null : plus rien de survolé), avec sa zone en coordonnées écran.</summary>
+	public Action<Element, Rectangle> Survol;
+
 	private static readonly Font fG = new Font("Segoe MDL2 Assets", Zx.P(16f));
 
 	private static readonly Font fT = new Font("Segoe UI Semibold", Zx.P(8.5f));
@@ -131,6 +134,7 @@ internal class NavRail : Control
 				Invalidate(zones[i]);
 			}
 			Infobulle?.SetToolTip(this, (i >= 0) ? (elements[i].Bulle ?? elements[i].Libelle) : null);
+			Survol?.Invoke((i >= 0) ? elements[i] : null, (i >= 0) ? RectangleToScreen(zones[i]) : Rectangle.Empty);
 		}
 		Cursor = ((i >= 0 || (ClicLogo != null && ZoneLogo.Contains(e.Location))) ? Cursors.Hand : Cursors.Default);
 		base.OnMouseMove(e);
@@ -141,6 +145,7 @@ internal class NavRail : Control
 		survol = -1;
 		appui = -1;
 		Invalidate();
+		Survol?.Invoke(null, Rectangle.Empty);
 		base.OnMouseLeave(e);
 	}
 

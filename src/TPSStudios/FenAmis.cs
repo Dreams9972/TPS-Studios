@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
 
@@ -34,6 +35,13 @@ internal partial class FenAmis : Form, IPage
 	private bool rechEnCours;
 
 	private string derniere = "";
+
+	/// <summary>Numéro de la dernière recherche lancée : une réponse plus ancienne arrivée en retard est ignorée.</summary>
+	private int rechNum;
+
+	private string rechErreur = "";
+
+	private readonly Dictionary<string, List<Ami>> rechCache = new Dictionary<string, List<Ami>>();
 
 	private List<KeyValuePair<Rectangle, Action>> clicsR = new List<KeyValuePair<Rectangle, Action>>();
 
@@ -450,38 +458,77 @@ internal partial class FenAmis : Form, IPage
 
 	private void Chercher()
 	{
-		string q = tq.Text.Trim();
+		string q = Regex.Replace(tq.Text.Trim(), "\\s+", " ");
+		// code ami tapé ou collé avec des espaces / tirets / minuscules : on le normalise
+		string code = Regex.Replace(q, "[^0-9A-Fa-f]", "");
+		if (code.Length == 16 && Regex.IsMatch(q, "^[0-9A-Fa-f\\s-]+$"))
+		{
+			q = code.ToLowerInvariant();
+		}
+		int num = ++rechNum;
+		rechErreur = "";
 		if (q.Length < 2)
 		{
-			res.Clear();
+			res = new List<Ami>();
 			derniere = "";
+			rechEnCours = false;
+			zr.Invalidate();
+		}
+		else if (rechCache.TryGetValue(q.ToLowerInvariant(), out var dejaVu))
+		{
+			res = dejaVu;
+			derniere = q;
+			rechEnCours = false;
 			zr.Invalidate();
 		}
 		else
 		{
 			if (!Social.Actif)
 			{
+				rechErreur = "Serveur social non configuré : la recherche est indisponible.";
+				zr.Invalidate();
 				return;
 			}
 			rechEnCours = true;
 			zr.Invalidate();
 			List<Ami> trouve = null;
+			string erreur = null;
 			Fond(delegate
 			{
-				string text = Social.Assurer(Comptes.Actif);
-				if (text != null)
+				try
 				{
-					return text;
+					erreur = Social.Assurer(Comptes.Actif);
+					if (erreur == null)
+					{
+						trouve = Social.Chercher(q);
+					}
 				}
-				trouve = Social.Chercher(q);
+				catch (Exception ex)
+				{
+					erreur = ex.Message;
+				}
 				return (string)null;
 			}, delegate
 			{
+				if (num != rechNum)
+				{
+					return;   // une recherche plus récente est en cours : on ignore cette réponse
+				}
 				rechEnCours = false;
 				derniere = q;
 				if (trouve != null)
 				{
 					res = trouve;
+					if (rechCache.Count > 40)
+					{
+						rechCache.Clear();
+					}
+					rechCache[q.ToLowerInvariant()] = trouve;
+				}
+				else
+				{
+					res = new List<Ami>();
+					rechErreur = "Recherche impossible : " + (erreur ?? "serveur injoignable") + ".";
 				}
 				zr.Invalidate();
 			});
@@ -506,6 +553,7 @@ internal partial class FenAmis : Form, IPage
 		}, delegate
 		{
 			MajTaille();
+			rechCache.Clear();   // l'état des liens (ami, demande envoyée…) a changé
 			Chercher();
 		});
 		Message(ok, C.Vert);
@@ -731,6 +779,11 @@ internal partial class FenAmis : Form, IPage
 		if (tq.Text.Trim().Length < 2)
 		{
 			Lang.DrawText(g, "Tapez au moins 2 lettres du pseudo d'un joueur, ou son code ami.\nLe joueur doit avoir déjà utilisé les fonctions en ligne du lanceur.", fSt, new Rectangle(Zx.P(4), Zx.P(6), w - Zx.P(8), Zx.P(60)), C.Gris, TextFormatFlags.WordBreak | TextFormatFlags.NoPadding);
+			return;
+		}
+		if (rechErreur.Length > 0)
+		{
+			Lang.DrawText(g, rechErreur, fSt, new Rectangle(Zx.P(4), Zx.P(6), w - Zx.P(8), Zx.P(60)), C.Rouge, TextFormatFlags.NoPrefix | TextFormatFlags.WordBreak | TextFormatFlags.NoPadding);
 			return;
 		}
 		if (rechEnCours && res.Count == 0)

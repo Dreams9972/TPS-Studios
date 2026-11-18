@@ -314,7 +314,12 @@ internal partial class Fenetre : Form
 	/// <summary>La barre de téléchargement / le message d'alerte occupent-ils une ligne dans la case d'achat ?</summary>
 	private bool zoneProgP;
 
-	/// <summary>Note sur 5 : 60 % selon les téléchargements (1 000 = plein), 40 % selon les J'aime (100 = plein).</summary>
+	/// <summary>
+	/// Note sur 5. Base : la moyenne des étoiles données par les joueurs. Elle est ensuite ajustée de −15 % à +15 %
+	/// selon la popularité du mod (téléchargements : 1 000 = plein, 60 % ; J'aime rapportés aux téléchargements, 40 %).
+	/// Avec peu de votes, la note tient compte de la popularité pour ne pas dépendre d'un seul avis.
+	/// Sans aucun vote : note de popularité seule.
+	/// </summary>
 	private double Note(Projet p)
 	{
 		if (p == null)
@@ -324,8 +329,98 @@ internal partial class Fenetre : Form
 		int dl = Telechargements(p);
 		int likes = Math.Max(0, soc.Likes);
 		double a = Math.Min(1.0, Math.Log10(1.0 + dl) / 3.0);
-		double b = Math.Min(1.0, Math.Log10(1.0 + likes) / 2.0);
-		return Math.Round(5.0 * (0.6 * a + 0.4 * b) * 2.0) / 2.0;
+		double taux = (dl > 0) ? Math.Min(1.0, (double)likes / Math.Max(1.0, dl * 0.2)) : Math.Min(1.0, Math.Log10(1.0 + likes) / 2.0);   // 1 J'aime pour 5 téléchargements = plein
+		double pop = 0.6 * a + 0.4 * taux;
+		if (soc.NoteNb <= 0)
+		{
+			return Math.Round(5.0 * pop * 2.0) / 2.0;
+		}
+		double poids = soc.NoteNb / (soc.NoteNb + 2.0);   // 1 vote : 33 %, 4 votes : 67 %, 18 votes : 90 %
+		double base0 = poids * soc.NoteMoy + (1.0 - poids) * (soc.NoteMoy + 5.0 * pop) / 2.0;
+		double n = base0 * (0.85 + 0.30 * pop);
+		return Math.Max(0.5, Math.Min(5.0, Math.Round(n * 10.0) / 10.0));
+	}
+
+	/// <summary>Étoile survolée (1 à 5) dans la note de la page d'un mod, 0 : aucune.</summary>
+	private int survolEtoile;
+
+	private readonly RectangleF[] rEtoile = new RectangleF[5];
+
+	private bool noteEnCours;
+
+	private int EtoileSous(Point pt)
+	{
+		for (int i = 0; i < 5; i++)
+		{
+			RectangleF r = rEtoile[i];
+			if (r.Width > 0f && RectangleF.Inflate(r, Zx.P(2), Zx.P(4)).Contains(pt))
+			{
+				return i + 1;
+			}
+		}
+		return 0;
+	}
+
+	/// <summary>Le joueur donne de 1 à 5 étoiles au mod affiché (re-cliquer sa note la retire).</summary>
+	private void Noter(int etoiles)
+	{
+		if (sel == null || !Social.Actif || noteEnCours)
+		{
+			return;
+		}
+		Compte cpt = Comptes.Actif;
+		if (cpt == null)
+		{
+			Profil(nouveau: true);
+			return;
+		}
+		if (etoiles == soc.MaNote)
+		{
+			etoiles = 0;
+		}
+		string mod = sel.Id;
+		noteEnCours = true;
+		Thread thread = new Thread((ThreadStart)delegate
+		{
+			try
+			{
+				string text = Social.Assurer(cpt);
+				if (text != null)
+				{
+					throw new Exception(text);
+				}
+				EtatSocial r = Social.Noter(mod, etoiles);
+				Sur(delegate
+				{
+					noteEnCours = false;
+					if (socMod == mod)
+					{
+						soc.NoteMoy = r.NoteMoy;
+						soc.NoteNb = r.NoteNb;
+						soc.MaNote = r.MaNote;
+					}
+					page.Invalidate();
+					Toast((etoiles == 0) ? "Votre note a été retirée." : ("Merci pour votre note : " + etoiles + " / 5"), C.Vert, 3000);
+					string key = "xp_note_" + mod;
+					if (etoiles > 0 && !cpt.Stats.ContainsKey(key))
+					{
+						cpt.Stats[key] = 1;
+						Progression.Gagner(cpt, 15, "Note sur un mod");
+					}
+				});
+			}
+			catch (Exception ex)
+			{
+				Exception e = ex;
+				Sur(delegate
+				{
+					noteEnCours = false;
+					Toast("Note impossible : " + e.Message, C.Rouge, 5000);
+				});
+			}
+		});
+		thread.IsBackground = true;
+		thread.Start();
 	}
 
 	private static readonly Font fNote = new Font("Segoe UI Semibold", Zx.P(10f));
@@ -339,15 +434,21 @@ internal partial class Fenetre : Form
 		}
 		SmoothingMode sm = g.SmoothingMode;
 		g.SmoothingMode = SmoothingMode.AntiAlias;
-		string t = note.ToString("0.0", CultureInfo.GetCultureInfo("fr-FR")) + " / 5";
+		int sv = survolEtoile;
+		if (sv > 0)
+		{
+			note = sv;
+		}
+		string t = (sv > 0) ? (sv + " / 5") : (note.ToString("0.0", CultureInfo.GetCultureInfo("fr-FR")) + " / 5");
 		Size st = Lang.MeasureText(t, fNote);
 		int d = Math.Min(r.Height, Zx.P(24));
 		int pas = d + Zx.P(4);
 		int x0 = r.Right - st.Width - Zx.P(8) - 5 * pas;
-		Color or = Color.FromArgb(255, 196, 64);
+		Color or = ((sv > 0) ? Color.FromArgb(255, 220, 120) : Color.FromArgb(255, 196, 64));
 		for (int i = 0; i < 5; i++)
 		{
 			RectangleF e = new RectangleF(x0 + i * pas, r.Y + (r.Height - d) / 2f, d, d);
+			rEtoile[i] = e;
 			using GraphicsPath etoile = Etoile(e);
 			using (SolidBrush fond = new SolidBrush(Color.FromArgb(55, 255, 255, 255)))
 			{
@@ -366,6 +467,13 @@ internal partial class Fenetre : Form
 			}
 		}
 		Txt.Dessiner(g, t, fNote, new Point(r.Right - st.Width, r.Y + (r.Height - st.Height) / 2), C.Texte);
+		// ma note : petit point doré sous l'étoile choisie ; nombre d'avis sous la note
+		if (soc.MaNote > 0 && soc.MaNote <= 5 && sv == 0)
+		{
+			RectangleF me = rEtoile[soc.MaNote - 1];
+			using SolidBrush bm = new SolidBrush(or);
+			g.FillEllipse(bm, me.X + me.Width / 2f - Zx.P(2), me.Bottom + Zx.P(2), Zx.P(4), Zx.P(4));
+		}
 		g.SmoothingMode = sm;
 	}
 
@@ -722,7 +830,7 @@ internal partial class Fenetre : Form
 
 	private List<KeyValuePair<Rectangle, Annonce>> rAnnonces = new List<KeyValuePair<Rectangle, Annonce>>();
 
-	private static readonly string[] NouveautesLanceur = new string[3] { "Les pages ne passent plus sous le menu", "Bannière de l'accueil plus nette", "Fiche de profil bien placée" };
+	private static readonly string[] NouveautesLanceur = new string[4] { "Notez les mods de 1 à 5 étoiles", "Un compte amis par profil", "Mini-lecteur de musique au survol", "Admin modernisée" };
 
 	private static readonly Font fAnT2 = new Font("Segoe UI Semibold", Zx.P(11f));
 
@@ -1361,6 +1469,31 @@ internal partial class Fenetre : Form
 		rail.ClicLogo = delegate
 		{
 			ShowVue(Vue.Accueil);
+		};
+		// survol de « Musique » : mini-lecteur (après un court délai, pour ne pas s'ouvrir en passant)
+		System.Windows.Forms.Timer delaiMusique = new System.Windows.Forms.Timer { Interval = 220 };
+		Rectangle zoneMusique = Rectangle.Empty;
+		delaiMusique.Tick += delegate
+		{
+			delaiMusique.Stop();
+			if (!zoneMusique.IsEmpty && zoneMusique.Contains(Cursor.Position) && !base.IsDisposed)
+			{
+				PanneauMusique.Montrer(this, zoneMusique);
+			}
+		};
+		rail.Survol = delegate(NavRail.Element el, Rectangle r)
+		{
+			if (el != null && el.Libelle == "Musique")
+			{
+				zoneMusique = r;
+				delaiMusique.Stop();
+				delaiMusique.Start();
+			}
+			else
+			{
+				zoneMusique = Rectangle.Empty;
+				delaiMusique.Stop();
+			}
 		};
 		base.Controls.Add(rail);
 		// placement calculé (pas d'ancrage) : le menu à gauche, la page à droite, quel que soit l'ordre d'affichage
@@ -2264,6 +2397,13 @@ internal partial class Fenetre : Form
 		case "likes":
 			soc.Likes = Convert.ToInt32(d["likes"]);
 			break;
+		case "notes":
+		{
+			int mienne = soc.MaNote;
+			Social.LireNotes(d, soc);
+			soc.MaNote = mienne;
+			break;
+		}
 		case "commentaire":
 		{
 			ComSocial c = Social.Com(d.ContainsKey("c") ? (d["c"] as Dictionary<string, object>) : null);
@@ -3442,7 +3582,25 @@ internal partial class Fenetre : Form
 					flag2 = true;
 				}
 			}
-			page.Cursor = ((flag || flag2) ? Cursors.Hand : Cursors.Default);
+			int et = (Social.Actif && sel != null) ? EtoileSous(pt2) : 0;
+			if (et != survolEtoile)
+			{
+				survolEtoile = et;
+				page.Invalidate();
+				if (bulle != null)
+				{
+					bulle.SetToolTip(page, (et > 0) ? Lang.T("Votre note : " + et + " / 5" + ((soc.NoteNb > 0) ? ("  ·  avis des joueurs : " + soc.NoteNb) : "")) : null);
+				}
+			}
+			page.Cursor = ((flag || flag2 || et > 0) ? Cursors.Hand : Cursors.Default);
+		};
+		page.MouseLeave += delegate
+		{
+			if (survolEtoile != 0)
+			{
+				survolEtoile = 0;
+				page.Invalidate();
+			}
 		};
 		page.MouseClick += delegate(object o, MouseEventArgs e)
 		{
@@ -3450,7 +3608,13 @@ internal partial class Fenetre : Form
 			{
 				Point pt = new Point(e.X, e.Y - page.AutoScrollPosition.Y);
 				List<Image> list = DiapoPage();
-				if (!rBVideo.IsEmpty && rBVideo.Contains(pt))
+				int etoile = (Social.Actif ? EtoileSous(pt) : 0);
+				if (etoile > 0)
+				{
+					Sons.Clic();
+					Noter(etoile);
+				}
+				else if (!rBVideo.IsEmpty && rBVideo.Contains(pt))
 				{
 					OuvrirVideo();
 				}
@@ -3881,26 +4045,11 @@ internal partial class Fenetre : Form
 				int height = c.ClientSize.Height;
 				if (page)
 				{
-					double p2 = (ferme ? (1.0 - vp) : vp);
-					if (!ferme)
-					{
-						using SolidBrush brush3 = new SolidBrush(Color.FromArgb((int)(110.0 * vp), 2, 3, 10));
-						g.FillRectangle(brush3, 0, 0, width, height);
-					}
-					int num2 = ((!ferme) ? ((int)Math.Round(36.0 * (1.0 - vp))) : 0);
-					using (GraphicsPath path = Zone(width, height, p2, !ferme))
-					{
-						GraphicsState gstate = g.Save();
-						g.SetClip(path, CombineMode.Replace);
-						g.DrawImageUnscaled(snap, sp.X + num2, sp.Y);
-						if (num2 > 0)
-						{
-							using SolidBrush brush4 = new SolidBrush(C.Fond);
-							g.FillRectangle(brush4, 0, 0, num2, height);
-						}
-						g.Restore(gstate);
-					}
-					Bord(g, width, height, p2);
+					// même transition que entre les menus : la page monte en s'ouvrant, redescend en se fermant
+					int dy = (int)Math.Round((double)height * (1.0 - vp));
+					Assombrir(g, new Rectangle(0, 0, width, height), 0.55 * vp);
+					OmbreV(g, dy, width);
+					g.DrawImageUnscaled(snap, sp.X, sp.Y + dy);
 				}
 				else if (vp > 0.003)
 				{
@@ -4058,7 +4207,7 @@ internal partial class Fenetre : Form
 			}
 			if (snap != null)
 			{
-				Jouer(page ? 240 : 170, delegate(double p)
+				Jouer(page ? 280 : 170, delegate(double p)
 				{
 					vp = p;
 					c.Invalidate(invalidateChildren: false);
@@ -4111,7 +4260,7 @@ internal partial class Fenetre : Form
 			snap = snapFin;
 			sp = posFin;
 			ferme = true;
-			Jouer(page ? 200 : 130, delegate(double p)
+			Jouer(page ? 280 : 130, delegate(double p)
 			{
 				vp = 1.0 - p;
 				c.Invalidate(invalidateChildren: false);
@@ -5294,7 +5443,7 @@ internal partial class Fenetre : Form
 		}
 		else
 		{
-			EnTete(g, NomJeu(jeuId), "Fiche du jeu  ·  informations, photos et vos cartes", dy, 0);
+			EnTete(g, NomJeu(jeuId), "Fiche du jeu  ·  informations, photos et bande-annonce", dy, 0);
 		}
 		if (ongletB == 0)
 		{

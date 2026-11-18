@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -92,7 +93,8 @@ internal class FenJeux : Form
 			});
 		}
 		Text = "Jeux du lanceur";
-		base.ClientSize = new Size(Zx.P(1200), Zx.P(900));
+		base.ClientSize = new Size(Zx.P(1240), Zx.P(1036));
+		SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer | ControlStyles.ResizeRedraw, value: true);
 		base.FormBorderStyle = FormBorderStyle.FixedDialog;
 		base.MaximizeBox = false;
 		base.MinimizeBox = false;
@@ -108,17 +110,22 @@ internal class FenJeux : Form
 		{
 		}
 		Theme.Fenetre(this);
-		Lb("Jeux du lanceur", Zx.P(28), Zx.P(20), Zx.P(600), Zx.P(34), new Font("Segoe UI Semibold", Zx.P(17f)), C.Texte);
-		Lb("Jeux en ligne affichés dans la page « Jeux ». « Prochainement » et « Masqué » : seuls les administrateurs peuvent les ouvrir.", Zx.P(28), Zx.P(58), Zx.P(800), Zx.P(22), new Font("Segoe UI", Zx.P(9.5f)), C.Gris);
+		Lb("Jeux du lanceur", Zx.P(28), Zx.P(18), Zx.P(600), Zx.P(34), new Font("Segoe UI Semibold", Zx.P(17f)), C.Texte);
+		Lb("Jeux en ligne affichés dans la page « Jeux ». « Prochainement » et « Masqué » : seuls les administrateurs peuvent les ouvrir.", Zx.P(28), Zx.P(54), Zx.P(900), Zx.P(22), new Font("Segoe UI", Zx.P(9.5f)), C.Gris);
+		Groupe("Jeux");
 		liste = new ListBox();
-		liste.Location = new Point(Zx.P(28), Zx.P(94));
-		liste.Size = new Size(Zx.P(240), Zx.P(650));
+		liste.Location = new Point(Zx.P(44), Zx.P(132));
+		liste.Size = new Size(Zx.P(216), Zx.P(700));
 		liste.BorderStyle = BorderStyle.None;
 		liste.BackColor = C.Carte;
 		liste.ForeColor = C.Texte;
 		liste.Font = new Font("Segoe UI", Zx.P(10.5f));
 		liste.IntegralHeight = false;
+		liste.DrawMode = DrawMode.OwnerDrawFixed;
+		liste.ItemHeight = Zx.P(46);
+		liste.DrawItem += DessinerJeu;
 		base.Controls.Add(liste);
+		Membre(liste);
 		Theme.Sombre(liste);
 		liste.SelectedIndexChanged += delegate
 		{
@@ -126,8 +133,9 @@ internal class FenJeux : Form
 		};
 		Bouton bouton = new Bouton("＋  Nouveau jeu");
 		bouton.Plein = false;
-		bouton.Size = new Size(Zx.P(240), Zx.P(38));
-		bouton.Location = new Point(Zx.P(28), Zx.P(752));
+		bouton.Size = new Size(Zx.P(216), Zx.P(38));
+		bouton.Location = new Point(Zx.P(44), Zx.P(844));
+		Membre(bouton);
 		bouton.Click += delegate
 		{
 			Nouveau();
@@ -136,61 +144,70 @@ internal class FenJeux : Form
 		Bouton bouton2 = new Bouton("Retirer ce jeu");
 		bouton2.Plein = false;
 		bouton2.Danger = true;
-		bouton2.Size = new Size(Zx.P(240), Zx.P(38));
-		bouton2.Location = new Point(Zx.P(28), Zx.P(796));
+		bouton2.Size = new Size(Zx.P(216), Zx.P(38));
+		bouton2.Location = new Point(Zx.P(44), Zx.P(890));
+		Membre(bouton2);
 		bouton2.Click += delegate
 		{
 			Retirer();
 		};
 		base.Controls.Add(bouton2);
-		int num = Zx.P(296);
-		int num2 = Zx.P(536);
-		tId = ChampL("Identifiant (lettres minuscules, chiffres, - et _)", num, Zx.P(90), Zx.P(260), 40);
-		tNom = ChampL("Nom affiché", num, Zx.P(160), num2, 60);
-		tSous = ChampL("Sous-titre (une ligne)", num, Zx.P(230), num2, 120);
-		tUrl = ChampL("Adresse du jeu (http:// ou https://)", num, Zx.P(300), num2, 300);
+		int num = Zx.P(312);
+		int num2 = Zx.P(532);
+		Groupe("Identité");
+		tId = ChampL("Identifiant (lettres minuscules, chiffres, - et _)", num, Zx.P(128), Zx.P(260), 40);
+		tNom = ChampL("Nom affiché", num, Zx.P(190), num2, 60);
+		tSous = ChampL("Sous-titre (une ligne)", num, Zx.P(252), num2, 120);
+		tUrl = ChampL("Adresse du jeu (http:// ou https://)", num, Zx.P(314), num2, 300);
+		Groupe("Médias");
 		int num3 = Zx.P(150);
 		int num4 = num2 - num3 - Zx.P(10);
-		tImage = ChampL("Image : logo ou bannière (adresse ou fichier jpg / png)", num, Zx.P(370), num4, 300);
+		tImage = ChampL("Image : logo ou bannière (adresse ou fichier jpg / png)", num, Zx.P(448), num4, 300);
 		Bouton bouton3 = new Bouton("Importer…");
 		bouton3.Plein = false;
 		bouton3.Size = new Size(num3, Zx.P(36));
-		bouton3.Location = new Point(num + num4 + Zx.P(10), Zx.P(392));
+		bouton3.Location = new Point(num + num4 + Zx.P(10), Zx.P(470));
+		Membre(bouton3);
 		bouton3.Click += delegate
 		{
 			ImporterImage();
 		};
 		base.Controls.Add(bouton3);
-		Lb("Photos : une adresse par ligne (10 au maximum), ou « Ajouter des photos… »", num, Zx.P(440), num2, Zx.P(20), new Font("Segoe UI", Zx.P(9f)), C.Gris);
+		Lb("Photos : une adresse par ligne (10 au maximum), ou « Ajouter des photos… »", num, Zx.P(512), num2, Zx.P(20), new Font("Segoe UI", Zx.P(9f)), C.Gris);
 		tPhotos = new Champ(multi: true, Zx.P(96));
-		tPhotos.Location = new Point(num, Zx.P(462));
+		tPhotos.Location = new Point(num, Zx.P(534));
+		Membre(tPhotos);
 		tPhotos.Width = num2;
 		tPhotos.MaxLength = 3000;
 		base.Controls.Add(tPhotos);
 		Bouton bouton4 = new Bouton("＋  Ajouter des photos…");
 		bouton4.Plein = false;
 		bouton4.Size = new Size(Zx.P(220), Zx.P(36));
-		bouton4.Location = new Point(num, Zx.P(566));
+		bouton4.Location = new Point(num, Zx.P(638));
+		Membre(bouton4);
 		bouton4.Click += delegate
 		{
 			ImporterPhotos();
 		};
 		base.Controls.Add(bouton4);
-		tVideo = ChampL("Bande-annonce MP4 (adresse https://… ou fichier)", num, Zx.P(616), num4, 400);
+		tVideo = ChampL("Bande-annonce MP4 (adresse https://… ou fichier)", num, Zx.P(688), num4, 400);
 		Bouton bouton5 = new Bouton("Importer…");
 		bouton5.Plein = false;
 		bouton5.Size = new Size(num3, Zx.P(36));
-		bouton5.Location = new Point(num + num4 + Zx.P(10), Zx.P(638));
+		bouton5.Location = new Point(num + num4 + Zx.P(10), Zx.P(710));
+		Membre(bouton5);
 		bouton5.Click += delegate
 		{
 			ImporterVideo();
 		};
 		base.Controls.Add(bouton5);
-		Lb("Statut", num, Zx.P(690), Zx.P(200), Zx.P(20), new Font("Segoe UI", Zx.P(9f)), C.Gris);
+		Groupe("Publication");
+		Lb("Statut", num, Zx.P(828), Zx.P(200), Zx.P(20), new Font("Segoe UI", Zx.P(9f)), C.Gris);
 		sgStatut = new Segments();
 		sgStatut.Items = statutsNom;
 		sgStatut.Etire = true;
-		sgStatut.Location = new Point(num, Zx.P(712));
+		sgStatut.Location = new Point(num, Zx.P(850));
+		Membre(sgStatut);
 		sgStatut.Width = num2;
 		sgStatut.Changed += delegate
 		{
@@ -198,33 +215,37 @@ internal class FenJeux : Form
 		};
 		base.Controls.Add(sgStatut);
 		cPlein = new Option("Plein écran", "Le jeu s'ouvre en plein écran (F11 pour en sortir).", val: true);
-		cPlein.Location = new Point(num - Zx.P(10), Zx.P(762));
+		cPlein.Location = new Point(num - Zx.P(10), Zx.P(898));
 		cPlein.Width = num2 + Zx.P(10);
+		Membre(cPlein);
 		cPlein.Changed += delegate
 		{
 			Enregistrer();
 		};
 		base.Controls.Add(cPlein);
 		boutonsMedias = new Bouton[3] { bouton3, bouton4, bouton5 };
-		Lb("Catégories de tri des mods", Zx.P(870), Zx.P(90), Zx.P(300), Zx.P(20), new Font("Segoe UI Semibold", Zx.P(9.5f)), C.Texte);
-		Lb("Une catégorie par ligne (12 au maximum). Elles servent de filtres dans « Mods » et de choix dans les pages de ce jeu.", Zx.P(870), Zx.P(112), Zx.P(300), Zx.P(54), new Font("Segoe UI", Zx.P(9f)), C.Gris);
-		tCats = new Champ(multi: true, Zx.P(250));
-		tCats.Location = new Point(Zx.P(870), Zx.P(170));
-		tCats.Width = Zx.P(300);
+		Groupe("Catégories de tri des mods");
+		Lb("Une catégorie par ligne (12 au maximum). Elles servent de filtres dans « Mods » et de choix dans les pages de ce jeu.", Zx.P(900), Zx.P(128), Zx.P(292), Zx.P(54), new Font("Segoe UI", Zx.P(9f)), C.Gris);
+		tCats = new Champ(multi: true, Zx.P(180));
+		tCats.Location = new Point(Zx.P(900), Zx.P(186));
+		tCats.Width = Zx.P(292);
+		Membre(tCats);
 		tCats.MaxLength = 1000;
 		base.Controls.Add(tCats);
-		int xd = Zx.P(870);
-		int wd = Zx.P(300);
-		Lb("Fiche « À propos » du jeu", xd, Zx.P(432), wd, Zx.P(22), new Font("Segoe UI Semibold", Zx.P(9.5f)), C.Texte);
-		tSteam = ChampL("AppID Steam (remplit automatiquement la fiche)", xd, Zx.P(456), wd, 12);
+		int xd = Zx.P(900);
+		int wd = Zx.P(292);
+		Groupe("Fiche « À propos » du jeu");
+		tSteam = ChampL("AppID Steam (remplit automatiquement la fiche)", xd, Zx.P(448), wd, 12);
 		tSteam.Indice = "ex. 252530";
-		tEditeur = ChampL("Éditeur / développeur", xd, Zx.P(518), wd, 120);
+		tEditeur = ChampL("Éditeur / développeur", xd, Zx.P(510), wd, 120);
 		int wm = (wd - Zx.P(10)) / 2;
-		tSortie = ChampL("Date de sortie", xd, Zx.P(580), wm, 40);
-		tGenres = ChampL("Genres", xd + wm + Zx.P(10), Zx.P(580), wm, 120);
-		Lb("Description (remplace celle de Steam)", xd, Zx.P(642), wd, Zx.P(20), new Font("Segoe UI", Zx.P(9f)), C.Gris);
-		tDescJ = new Champ(multi: true, Zx.P(170));
-		tDescJ.Location = new Point(xd, Zx.P(664));
+		tSortie = ChampL("Date de sortie", xd, Zx.P(572), wm, 40);
+		tGenres = ChampL("Genres", xd + wm + Zx.P(10), Zx.P(572), wm, 120);
+		Lb("Description (remplace celle de Steam)", xd, Zx.P(634), wd, Zx.P(20), new Font("Segoe UI", Zx.P(9f)), C.Gris);
+		tDescJ = new Champ(multi: true, Zx.P(240));
+		tDescJ.Location = new Point(xd, Zx.P(656));
+		Membre(tDescJ);
+		groupeCourant = null;
 		tDescJ.Width = wd;
 		tDescJ.MaxLength = 4000;
 		base.Controls.Add(tDescJ);
@@ -240,13 +261,13 @@ internal class FenJeux : Form
 		{
 			Dock = DockStyle.Bottom,
 			Height = Zx.P(56),
-			BackColor = C.Cote
+			BackColor = C.Fond
 		};
 		base.Controls.Add(panel);
 		lErr = new Label();
 		lErr.Font = new Font("Segoe UI", Zx.P(9.5f));
 		lErr.ForeColor = C.Rouge;
-		lErr.BackColor = C.Cote;
+		lErr.BackColor = C.Fond;
 		lErr.Location = new Point(Zx.P(146), Zx.P(10));
 		lErr.Size = new Size(Zx.P(530), Zx.P(36));
 		lErr.AutoEllipsis = true;
@@ -331,6 +352,116 @@ internal class FenJeux : Form
 		}
 	}
 
+	/// <summary>Cartes de la page (titre + contrôles) : dessinées derrière les contrôles, elles suivent leur place.</summary>
+	private readonly List<KeyValuePair<string, List<Control>>> groupes = new List<KeyValuePair<string, List<Control>>>();
+
+	private List<Control> groupeCourant;
+
+	private void Groupe(string titre)
+	{
+		groupeCourant = new List<Control>();
+		groupes.Add(new KeyValuePair<string, List<Control>>(titre, groupeCourant));
+	}
+
+	private void Membre(Control c)
+	{
+		if (groupeCourant == null || groupeCourant.Contains(c))
+		{
+			return;
+		}
+		groupeCourant.Add(c);
+		if (!(c is Bouton))
+		{
+			c.BackColor = C.Carte;
+		}
+	}
+
+	private Rectangle Carte(List<Control> l)
+	{
+		Rectangle r = Rectangle.Empty;
+		foreach (Control c in l)
+		{
+			r = (r.IsEmpty ? c.Bounds : Rectangle.Union(r, c.Bounds));
+		}
+		if (r.IsEmpty)
+		{
+			return r;
+		}
+		return Rectangle.FromLTRB(r.Left - Zx.P(16), r.Top - Zx.P(46), r.Right + Zx.P(16), r.Bottom + Zx.P(14));
+	}
+
+	protected override void OnPaint(PaintEventArgs e)
+	{
+		base.OnPaint(e);
+		Graphics g = e.Graphics;
+		g.SmoothingMode = SmoothingMode.AntiAlias;
+		// colonnes de même hauteur sur une même ligne : on aligne le bas des cartes voisines
+		List<Rectangle> rs = new List<Rectangle>();
+		foreach (KeyValuePair<string, List<Control>> gr in groupes)
+		{
+			rs.Add(Carte(gr.Value));
+		}
+		for (int i = 0; i < groupes.Count; i++)
+		{
+			Rectangle r = rs[i];
+			if (r.IsEmpty)
+			{
+				continue;
+			}
+			using (GraphicsPath path = Bouton.Rond(r, Zx.P(14)))
+			{
+				using (SolidBrush brush = new SolidBrush(C.Carte))
+				{
+					g.FillPath(brush, path);
+				}
+				using Pen pen = new Pen(Color.FromArgb(40, 255, 255, 255));
+				g.DrawPath(pen, path);
+			}
+			using (SolidBrush brush2 = new SolidBrush(C.Jade))
+			{
+				g.FillRectangle(brush2, r.X + Zx.P(16), r.Y + Zx.P(19), Zx.P(3), Zx.P(14));
+			}
+			Lang.DrawText(g, Lang.T(groupes[i].Key).ToUpperInvariant(), F.Rubrique, new Point(r.X + Zx.P(26), r.Y + Zx.P(17)), C.Gris);
+		}
+	}
+
+	private static readonly Font fNomJeu = new Font("Segoe UI Semibold", Zx.P(10f));
+
+	private void DessinerJeu(object o, DrawItemEventArgs e)
+	{
+		Graphics g = e.Graphics;
+		g.SmoothingMode = SmoothingMode.AntiAlias;
+		using (SolidBrush fond = new SolidBrush(C.Carte))
+		{
+			g.FillRectangle(fond, e.Bounds);
+		}
+		if (e.Index < 0 || e.Index >= Jeux.Count)
+		{
+			return;
+		}
+		Dictionary<string, string> j = Jeux[e.Index];
+		bool sel = (e.State & DrawItemState.Selected) != 0;
+		Rectangle r = new Rectangle(e.Bounds.X + Zx.P(2), e.Bounds.Y + Zx.P(3), e.Bounds.Width - Zx.P(4), e.Bounds.Height - Zx.P(6));
+		if (sel)
+		{
+			using GraphicsPath p = Bouton.Rond(r, Zx.P(10));
+			using SolidBrush b = new SolidBrush(Color.FromArgb(60, C.Jade));
+			g.FillPath(b, p);
+			using SolidBrush b2 = new SolidBrush(C.Jade);
+			g.FillRectangle(b2, r.X, r.Y + Zx.P(10), Zx.P(3), r.Height - Zx.P(20));
+		}
+		string statut = V(j, "statut");
+		Color point = ((statut == "bientot") ? C.Orange : ((statut == "masque") ? C.Gris : C.Vert));
+		using (SolidBrush bp = new SolidBrush(point))
+		{
+			g.FillEllipse(bp, r.X + Zx.P(14), r.Y + r.Height / 2 - Zx.P(4), Zx.P(8), Zx.P(8));
+		}
+		string nom = (V(j, "nom").Length > 0) ? V(j, "nom") : V(j, "id");
+		string etat = ((statut == "bientot") ? "Prochainement" : ((statut == "masque") ? "Masqué" : "Disponible"));
+		Lang.DrawText(g, nom, fNomJeu, new Rectangle(r.X + Zx.P(30), r.Y + Zx.P(4), r.Width - Zx.P(36), Zx.P(20)), C.Texte, TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding);
+		Lang.DrawText(g, etat, F.Etat, new Rectangle(r.X + Zx.P(30), r.Y + Zx.P(22), r.Width - Zx.P(36), Zx.P(16)), C.Gris, TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding);
+	}
+
 	private Label Lb(string t, int x, int y, int w, int h, Font f, Color c)
 	{
 		Label label = new Label();
@@ -341,6 +472,7 @@ internal class FenJeux : Form
 		label.ForeColor = c;
 		label.BackColor = C.Fond;
 		base.Controls.Add(label);
+		Membre(label);
 		return label;
 	}
 
@@ -352,6 +484,7 @@ internal class FenJeux : Form
 		champ.Width = w;
 		champ.MaxLength = max;
 		base.Controls.Add(champ);
+		Membre(champ);
 		return champ;
 	}
 

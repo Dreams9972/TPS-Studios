@@ -193,6 +193,10 @@ internal class FenAdmin : Form, IPage
 
 	private static readonly string[] OngletsNoms = new string[6] { "Jeux", "Mods", "Accueil", "Boutique · VIP", "Communauté", "Maintenance" };
 
+	private static readonly Font fTitreAdm = new Font("Segoe UI Semibold", Zx.P(20f));
+
+	private static readonly Font fSousAdm = new Font("Segoe UI", Zx.P(9.5f));
+
 	public FenAdmin()
 	{
 		Text = "Administration · pages du catalogue";
@@ -220,18 +224,18 @@ internal class FenAdmin : Form, IPage
 		entete = new Panel();
 		entete.Dock = DockStyle.Top;
 		entete.Height = Zx.P(132);
-		entete.BackColor = C.Cote;
+		entete.BackColor = C.Fond;
 		base.Controls.Add(entete);
-		entete.Controls.Add(Integre.Retour(delegate
-		{
-			Close();
-		}, Zx.P(20), Zx.P(17)));
 		entete.Paint += delegate(object o, PaintEventArgs e)
 		{
 			Graphics graphics = e.Graphics;
 			graphics.SmoothingMode = SmoothingMode.AntiAlias;
-			Lang.DrawText(graphics, "Administration", new Font("Segoe UI Semibold", Zx.P(18f)), new Point(Zx.P(140), Zx.P(10)), C.Texte);
-			Lang.DrawText(graphics, "Catalogue TPS Groupe  ·  github.com/Dreams9972/TPS-Studios", new Font("Segoe UI", Zx.P(9.5f)), new Point(Zx.P(142), Zx.P(49)), C.Gris);
+			Lang.DrawText(graphics, "Administration", fTitreAdm, new Point(Zx.P(24), Zx.P(12)), C.Texte);
+			Lang.DrawText(graphics, "Catalogue TPS Groupe  ·  github.com/Dreams9972/TPS-Studios", fSousAdm, new Point(Zx.P(26), Zx.P(50)), C.Gris);
+			using (Pen sep = new Pen(Color.FromArgb(22, 255, 255, 255)))
+			{
+				graphics.DrawLine(sep, 0, entete.Height - 1, entete.Width, entete.Height - 1);
+			}
 			int num5 = entete.Width - Zx.P(24);
 			string[] array = new string[2]
 			{
@@ -300,7 +304,12 @@ internal class FenAdmin : Form, IPage
 		pied = new Panel();
 		pied.Dock = DockStyle.Bottom;
 		pied.Height = Zx.P(70);
-		pied.BackColor = C.Cote;
+		pied.BackColor = C.Fond;
+		pied.Paint += delegate(object o, PaintEventArgs e)
+		{
+			using Pen sep = new Pen(Color.FromArgb(22, 255, 255, 255));
+			e.Graphics.DrawLine(sep, 0, 0, pied.Width, 0);
+		};
 		base.Controls.Add(pied);
 		bSauver = new Bouton("Enregistrer et publier");
 		bSauver.Size = new Size(Zx.P(210), Zx.P(40));
@@ -406,7 +415,7 @@ internal class FenAdmin : Form, IPage
 		lEtat = new Label();
 		lEtat.Font = new Font("Segoe UI", Zx.P(9f));
 		lEtat.ForeColor = C.Gris;
-		lEtat.BackColor = C.Cote;
+		lEtat.BackColor = C.Fond;
 		lEtat.Location = new Point(Zx.P(156), Zx.P(15));
 		lEtat.Size = new Size(Math.Max(Zx.P(120), base.ClientSize.Width - Zx.P(24) - Zx.P(210) - Zx.P(10) - Zx.P(160) - Zx.P(10) - Zx.P(180) - Zx.P(10) - Zx.P(140) - Zx.P(12) - Zx.P(156)), Zx.P(40));
 		lEtat.AutoEllipsis = true;

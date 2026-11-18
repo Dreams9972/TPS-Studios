@@ -482,7 +482,7 @@ internal partial class Fenetre
 		{
 			Glyphe = "\ue8d6",
 			Libelle = "Musique",
-			Bulle = "Ouvrir votre lecteur de musique",
+			Bulle = "",
 			EnBas = true,
 			Action = delegate
 			{
