@@ -167,8 +167,28 @@ internal partial class Fenetre
 
 	private NavRail rail;
 
+	/// <summary>Le menu de gauche et, à sa droite, la zone des pages : toute la hauteur de la fenêtre.</summary>
+	private void PlacerMenuEtPage()
+	{
+		if (rail == null || zone == null || base.WindowState == FormWindowState.Minimized)
+		{
+			return;
+		}
+		int lr = LargeurMenu;
+		Rectangle rr = new Rectangle(0, 0, rail.Width, base.ClientSize.Height);
+		Rectangle rz = new Rectangle(lr, 0, Math.Max(1, base.ClientSize.Width - lr), base.ClientSize.Height);
+		if (rail.Bounds != rr)
+		{
+			rail.Bounds = rr;
+		}
+		if (zone.Bounds != rz)
+		{
+			zone.Bounds = rz;
+		}
+	}
+
 	/// <summary>Largeur du menu latéral (0 s'il est caché).</summary>
-	internal int LargeurMenu => (rail != null && rail.Visible) ? rail.Width : 0;
+	internal int LargeurMenu => (rail != null) ? rail.Width : 0;
 
 	/// <summary>Place disponible pour une page intégrée (Réglages, Profil…) : à droite du menu.</summary>
 	internal Size TailleHote => new Size(Math.Max(Zx.P(600), base.ClientSize.Width - LargeurMenu), base.ClientSize.Height);
@@ -606,7 +626,7 @@ internal partial class Fenetre
 			tHeroFondu.Interval = 16;
 			tHeroFondu.Tick += delegate
 			{
-				heroFondu = Math.Min(1.0, heroFondu + 0.07);
+				heroFondu = Math.Min(1.0, heroFondu + 0.1);
 				pAccueil.Invalidate(Rectangle.Inflate(rHero, Zx.P(4), Zx.P(4)));
 				if (heroFondu >= 1.0)
 				{
@@ -892,6 +912,11 @@ internal partial class Fenetre
 			g.FillRectangle(bs, rHero);
 		}
 		g.Restore(st2);
+		// pendant le fondu entre deux images, pas de texte (sinon le titre du nouveau mod s'affiche sur l'ancienne image)
+		if (heroFondu < 1.0)
+		{
+			return;
+		}
 		int x = rHero.X + Zx.P(32);
 		int largeur = Math.Min(rHero.Width * 55 / 100, Zx.P(560));
 		// étiquette
@@ -973,7 +998,8 @@ internal partial class Fenetre
 			}
 			int hi = Math.Max(Zx.P(40), r.Height - Zx.P(58));
 			Rectangle ri = new Rectangle(r.X + Zx.P(6), r.Y + Zx.P(6), r.Width - Zx.P(12), hi - Zx.P(6));
-			Image im = ImageProjet(p);
+			// une capture du mod (sans logo ni texte incrusté) plutôt que son affiche, qui serait coupée
+			Image im = ImageHeroAcc(p);
 			if (im != null)
 			{
 				DessinerArrondi(g, im, ri, Zx.P(10));

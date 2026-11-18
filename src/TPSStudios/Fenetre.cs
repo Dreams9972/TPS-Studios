@@ -1363,6 +1363,19 @@ internal partial class Fenetre : Form
 			ShowVue(Vue.Accueil);
 		};
 		base.Controls.Add(rail);
+		// placement calculé (pas d'ancrage) : le menu à gauche, la page à droite, quel que soit l'ordre d'affichage
+		rail.Dock = DockStyle.None;
+		zone.Dock = DockStyle.None;
+		rail.BringToFront();
+		PlacerMenuEtPage();
+		base.Shown += delegate
+		{
+			PlacerMenuEtPage();
+		};
+		base.Resize += delegate
+		{
+			PlacerMenuEtPage();
+		};
 		MajRail();
 		InstallerBarreTitre();
 		string value3 = Config.Lire("jeu");
