@@ -5874,10 +5874,13 @@ internal partial class Fenetre : Form
 			return;
 		}
 		int width = Math.Max(rProfil.Width, Zx.P(360));
-		int num = Math.Min(Zx.P(452), pAccueil.ClientSize.Height - rProfil.Y - Zx.P(84));
+		// fiche alignée sur le bord droit de la pastille, juste en dessous : elle reste dans la fenêtre
+		int fx = Math.Max(Zx.P(12), Math.Min(rProfil.Right, pAccueil.ClientSize.Width - Zx.P(16)) - width);
+		int fy = rProfil.Bottom + Zx.P(8);
+		int num = Math.Min(Zx.P(452), pAccueil.ClientSize.Height - fy - Zx.P(24));
 		if (!rAmisA.IsEmpty && rAmisA.Height > 0)
 		{
-			num = Math.Min(num, rAmisA.Y - rProfil.Y - Zx.P(14));
+			num = Math.Min(num, rAmisA.Y - fy - Zx.P(14));
 		}
 		if (num < Zx.P(260))
 		{
@@ -5902,26 +5905,26 @@ internal partial class Fenetre : Form
 		}
 		double num2 = ficheAp;
 		double num3 = 1.0 - Math.Pow(1.0 - num2, 3.0);
-		int num4 = (int)Math.Round((double)rProfil.Height + (double)(num - rProfil.Height) * num3);
+		int num4 = (int)Math.Round((double)Zx.P(40) + (double)(num - Zx.P(40)) * num3);
 		int num5 = (int)Math.Round((double)width * (0.96 + 0.04 * num3));
-		int num6 = rProfil.X + (width - num5) / 2;
-		rFiche = new Rectangle(rProfil.X, rProfil.Y, width, num);
+		int num6 = fx + (width - num5) / 2;
+		rFiche = new Rectangle(fx, fy, width, num);
 		for (int i = 1; i <= 7; i++)
 		{
-			using GraphicsPath path = Bouton.Rond(new Rectangle(num6 - i * 2 + Zx.P(2), rProfil.Y - i * 2 + Zx.P(8), num5 + i * 4 - Zx.P(4), num4 + i * 4 - Zx.P(4)), Zx.P(16) + i * 2);
+			using GraphicsPath path = Bouton.Rond(new Rectangle(num6 - i * 2 + Zx.P(2), fy - i * 2 + Zx.P(8), num5 + i * 4 - Zx.P(4), num4 + i * 4 - Zx.P(4)), Zx.P(16) + i * 2);
 			using SolidBrush brush = new SolidBrush(Color.FromArgb((int)((double)((8 - i) * 10) * num3), 0, 0, 6));
 			g.FillPath(brush, path);
 		}
 		if (num3 >= 0.999)
 		{
 			GraphicsState gstate = g.Save();
-			g.SetClip(new Rectangle(num6, rProfil.Y, num5, num4));
-			g.DrawImageUnscaled(ficheBmp, num6, rProfil.Y);
+			g.SetClip(new Rectangle(num6, fy, num5, num4));
+			g.DrawImageUnscaled(ficheBmp, num6, fy);
 			g.Restore(gstate);
 		}
 		else
 		{
-			AlphaDraw(g, ficheBmp, new Rectangle(num6, rProfil.Y, num5, num4), (float)Math.Min(1.0, num3 * 1.25));
+			AlphaDraw(g, ficheBmp, new Rectangle(num6, fy, num5, num4), (float)Math.Min(1.0, num3 * 1.25));
 		}
 	}
 
@@ -6823,7 +6826,7 @@ internal partial class Fenetre : Form
 				amPlusSurvol = flag6;
 				pAccueil.Invalidate(Rectangle.Inflate(rAmisPlus, Zx.P(8), Zx.P(8)));
 			}
-			bool flag7 = Comptes.Actif != null && (rProfil.Contains(e.Location) || (ficheAp > 0.4 && !rFiche.IsEmpty && rFiche.Contains(e.Location)));
+			bool flag7 = Comptes.Actif != null && (rProfil.Contains(e.Location) || (ficheAp > 0.4 && !rFiche.IsEmpty && Rectangle.Union(rProfil, rFiche).Contains(e.Location)));
 			if (flag7 != ficheSurvol)
 			{
 				ficheSurvol = flag7;
