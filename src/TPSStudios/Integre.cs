@@ -17,7 +17,7 @@ internal static class Integre
 			{
 				return new Size(1280, 760);
 			}
-			return principale.ClientSize;
+			return principale.TailleHote;
 		}
 	}
 

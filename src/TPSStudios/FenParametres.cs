@@ -151,7 +151,7 @@ internal class FenParametres : Form, IPage
 		Theme.Sombre(contenu);
 		cw = num2 - SystemInformation.VerticalScrollBarWidth - Zx.P(2);
 		y = 0;
-		Cadre cadre = Section("Affichage", Zx.P(600));
+		Cadre cadre = Section("Affichage", Zx.P(482));
 		cSons = Opt(cadre, 0, "Sons de l'interface", "Un léger son à chaque clic sur un bouton ou un onglet.", Sons.Actifs);
 		Etiquette(cadre, "Page affichée au démarrage", Zx.P(24), Zx.P(116));
 		sgPage = new Segments();
@@ -162,80 +162,30 @@ internal class FenParametres : Form, IPage
 		string text = Config.Lire("page_demarrage");
 		sgPage.Index = ((text == "biblio") ? 1 : ((text == "recent") ? 2 : 0));
 		cadre.Controls.Add(sgPage);
-		Etiquette(cadre, "Thème des fêtes  ·  Automatique : selon le calendrier (Noël, Halloween, Pâques…)", Zx.P(24), Zx.P(196));
-		sgTheme = new Segments();
-		sgTheme.Items = new string[5]
-		{
-			Themes.Noms[0],
-			Themes.Noms[1],
-			Themes.Noms[2],
-			Themes.Noms[3],
-			Themes.Noms[4]
-		};
-		sgTheme.Location = new Point(Zx.P(24), Zx.P(222));
-		sgTheme.Width = cw - Zx.P(48);
-		sgTheme.Etire = true;
-		sgTheme2 = new Segments();
-		sgTheme2.Items = new string[5]
-		{
-			Themes.Noms[5],
-			Themes.Noms[6],
-			Themes.Noms[7],
-			Themes.Noms[8],
-			Themes.Noms[9]
-		};
-		sgTheme2.Location = new Point(Zx.P(24), Zx.P(262));
-		sgTheme2.Width = cw - Zx.P(48);
-		sgTheme2.Etire = true;
-		string value3 = Config.Lire("theme") ?? "auto";
-		int num3 = Math.Max(0, Array.IndexOf(Themes.Ids, value3));
-		sgTheme.Index = ((num3 < 5) ? num3 : (-1));
-		sgTheme2.Index = ((num3 >= 5) ? (num3 - 5) : (-1));
-		bool bascule = false;
-		sgTheme.Changed += delegate
-		{
-			if (!bascule && sgTheme.Index >= 0)
-			{
-				bascule = true;
-				sgTheme2.Index = -1;
-				bascule = false;
-			}
-		};
-		sgTheme2.Changed += delegate
-		{
-			if (!bascule && sgTheme2.Index >= 0)
-			{
-				bascule = true;
-				sgTheme.Index = -1;
-				bascule = false;
-			}
-		};
-		cadre.Controls.Add(sgTheme);
-		cadre.Controls.Add(sgTheme2);
-		Etiquette(cadre, "Langue du lanceur", Zx.P(24), Zx.P(314));
+		Etiquette(cadre, "Langue du lanceur", Zx.P(24), Zx.P(196));
 		sgLangue = new Segments();
 		sgLangue.Items = Lang.Noms;
 		sgLangue.MinW = Zx.P(40);
-		sgLangue.Location = new Point(Zx.P(24), Zx.P(340));
+		sgLangue.Location = new Point(Zx.P(24), Zx.P(222));
 		sgLangue.Width = cw - Zx.P(48);
 		sgLangue.Etire = true;
 		sgLangue.Index = Math.Max(0, Array.IndexOf(Lang.Codes, Lang.Code));
 		cadre.Controls.Add(sgLangue);
-		Etiquette(cadre, "Taille de l'interface  ·  Automatique : selon votre écran (" + (int)Math.Round(Zx.Auto() * 100f) + " % ici)  ·  s'applique tout de suite", Zx.P(24), Zx.P(394));
+		Etiquette(cadre, "Taille de l'interface  ·  Automatique : selon votre écran (" + (int)Math.Round(Zx.Auto() * 100f) + " % ici)  ·  s'applique tout de suite", Zx.P(24), Zx.P(276));
 		sgTaille = new Segments();
 		sgTaille.Items = Zx.Noms;
-		sgTaille.Location = new Point(Zx.P(24), Zx.P(420));
+		sgTaille.Location = new Point(Zx.P(24), Zx.P(302));
 		sgTaille.Width = cw - Zx.P(48);
 		sgTaille.Etire = true;
 		sgTaille.MinW = Zx.P(40);
 		sgTaille.Index = Math.Max(0, Array.IndexOf(Zx.Ids, Config.Lire("taille_interface") ?? "auto"));
 		cadre.Controls.Add(sgTaille);
-		cAnim = new Option("Animations", "Bannières animées, décors des fêtes et transitions. Désactivez-les seulement sur un PC peu puissant.", !Fenetre.AnimationsCoupees);
-		cAnim.Location = new Point(Zx.P(8), Zx.P(466));
+		cAnim = new Option("Animations", "Fond bleu animé, bannières animées et transitions. Désactivez-les seulement sur un PC peu puissant.", !Fenetre.AnimationsCoupees);
+		cAnim.Location = new Point(Zx.P(8), Zx.P(348));
 		cAnim.Width = cw - Zx.P(16);
 		cadre.Controls.Add(cAnim);
 		cBarre = new Option("Barre de titre intégrée", "Boutons réduire, agrandir et fermer au style du lanceur. Désactivez-la pour retrouver la barre Windows classique (au prochain démarrage).", Config.Lire("barre_classique") != "1");
-		cBarre.Location = new Point(Zx.P(8), Zx.P(528));
+		cBarre.Location = new Point(Zx.P(8), Zx.P(410));
 		cBarre.Width = cw - Zx.P(16);
 		cadre.Controls.Add(cBarre);
 		Cadre cadre2 = Section("Mises à jour", Zx.P(40) + Zx.P(62) + 2 * Zx.P(62) + Zx.P(4));
@@ -645,7 +595,6 @@ internal class FenParametres : Form, IPage
 			Config.Ecrire("taille_interface", text2);
 			Relancer = true;
 		}
-		Config.Ecrire("theme", Themes.Ids[(sgTheme.Index >= 0) ? sgTheme.Index : ((sgTheme2.Index >= 0) ? (5 + sgTheme2.Index) : 0)]);
 		Config.Ecrire("page_demarrage", (sgPage.Index == 1) ? "biblio" : ((sgPage.Index == 2) ? "recent" : "accueil"));
 		if (cDem.Checked != Demarrage.Actif)
 		{

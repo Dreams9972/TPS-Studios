@@ -25,6 +25,9 @@ internal class NavRail : Control
 		public Func<bool> Actif;
 
 		public bool EnBas;
+
+		/// <summary>Pastille rouge (nombre de messages non lus…), 0 : rien.</summary>
+		public Func<int> Badge;
 	}
 
 	private readonly List<Element> elements = new List<Element>();
@@ -220,6 +223,19 @@ internal class NavRail : Control
 			Color ci = ((actif || sv) ? Color.White : Color.FromArgb(170, 182, 210));
 			int hg = Math.Min(Zx.P(26), z.Height - Zx.P(24));
 			Txt.Dessiner(g, el.Glyphe, fG, new Rectangle(z.X, z.Y + Zx.P(8), z.Width, hg), ci, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+			int nb = ((el.Badge != null) ? el.Badge() : 0);
+			if (nb > 0)
+			{
+				string tb = ((nb > 9) ? "9+" : nb.ToString());
+				Size sb = TextRenderer.MeasureText(tb, fT);
+				Rectangle rbg = new Rectangle(z.X + z.Width / 2 + Zx.P(4), z.Y + Zx.P(4), Math.Max(Zx.P(18), sb.Width + Zx.P(8)), Zx.P(18));
+				using (GraphicsPath pb = Bouton.Rond(rbg, Zx.P(9)))
+				{
+					using SolidBrush bb = new SolidBrush(C.Rouge);
+					g.FillPath(bb, pb);
+				}
+				Txt.Dessiner(g, tb, fT, rbg, Color.White, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+			}
 			Txt.Dessiner(g, el.Libelle, fT, new Rectangle(z.X + Zx.P(2), z.Y + Zx.P(8) + hg + Zx.P(2), z.Width - Zx.P(4), Zx.P(18)), (actif || sv) ? Color.FromArgb(235, 240, 255) : Color.FromArgb(145, 156, 186), TextFormatFlags.HorizontalCenter | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPadding);
 		}
 	}

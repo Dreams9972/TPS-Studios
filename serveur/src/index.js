@@ -29,6 +29,16 @@ async function assureRoles(env) {
   await env.DB.prepare('CREATE TABLE IF NOT EXISTS roles (joueur_id TEXT PRIMARY KEY, role TEXT NOT NULL, par TEXT, cree INTEGER NOT NULL)').run();
   tableRoles = true;
 }
+// messagerie entre amis (messages et invitations à jouer), table créée à la première utilisation
+let tableMessages = false;
+async function assureMessages(env) {
+  if (tableMessages) return;
+  await env.DB.prepare('CREATE TABLE IF NOT EXISTS messages (id INTEGER PRIMARY KEY AUTOINCREMENT, de TEXT NOT NULL, a TEXT NOT NULL, texte TEXT NOT NULL, type TEXT NOT NULL DEFAULT \'texte\', extra TEXT, cree INTEGER NOT NULL, lu INTEGER NOT NULL DEFAULT 0)').run();
+  await env.DB.prepare('CREATE INDEX IF NOT EXISTS messages_a ON messages (a, lu)').run();
+  await env.DB.prepare('CREATE INDEX IF NOT EXISTS messages_conv ON messages (de, a, id)').run();
+  tableMessages = true;
+}
+const MESSAGE_MAX = 500;
 const COMMENTAIRE_MAX = 500, CORPS_MAX = 4096, HISTORIQUE = 100;
 const ENTETES = { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', 'x-content-type-options': 'nosniff', 'referrer-policy': 'no-referrer' };
 
@@ -378,7 +388,39 @@ async function route(request, env) {
     if (!moi) return erreur(401, 'jeton absent ou invalide');
     const id = r[1], [a, b2] = moi.id < id ? [moi.id, id] : [id, moi.id];
     await env.DB.prepare('DELETE FROM amis WHERE a = ? AND b = ?').bind(a, b2).run();
+    await assureMessages(env);
+    await env.DB.prepare('DELETE FROM messages WHERE (de = ? AND a = ?) OR (de = ? AND a = ?)').bind(moi.id, id, id, moi.id).run();
     return rep({ ok: true });
+  }
+
+  // messagerie : conversation avec un ami (lecture : nouveaux messages après « apres » ; envoi : texte ou invitation à jouer)
+  r = chemin.match(/^\/v1\/messages\/([0-9a-f]{16})$/);
+  if (r && (m === 'GET' || m === 'POST')) {
+    if (!moi) return erreur(401, 'jeton absent ou invalide');
+    await assureMessages(env);
+    const id = r[1], [a, b2] = moi.id < id ? [moi.id, id] : [id, moi.id];
+    const lien = await env.DB.prepare('SELECT etat FROM amis WHERE a = ? AND b = ?').bind(a, b2).first();
+    if (!lien || lien.etat !== 'ami') return erreur(403, 'vous n\'êtes pas amis');
+    if (m === 'GET') {
+      const apres = Math.max(0, parseInt(url.searchParams.get('apres') || '0', 10) || 0);
+      const l = await env.DB.prepare('SELECT id, de, texte, type, extra, cree FROM messages WHERE ((de = ? AND a = ?) OR (de = ? AND a = ?)) AND id > ? ORDER BY id DESC LIMIT 80').bind(moi.id, id, id, moi.id, apres).all();
+      await env.DB.prepare('UPDATE messages SET lu = 1 WHERE de = ? AND a = ? AND lu = 0').bind(id, moi.id).run();
+      return rep({ messages: l.results.reverse().map((x) => ({ id: x.id, moi: x.de === moi.id, texte: x.texte, type: x.type, extra: x.extra || '', cree: x.cree })) });
+    }
+    if (!(await limite(env, 'msg:' + moi.id, 40, 60))) return erreur(429, 'vous envoyez trop de messages : patientez un peu');
+    const c = await corps(request), type = c.type === 'invitation' ? 'invitation' : 'texte';
+    const texte = String(c.texte ?? '').replace(/[\u0000-\u0008\u000b-\u001f\u007f\u200b-\u200f\u202a-\u202e\u2060-\u2069\ufeff]/g, ' ').trim().slice(0, MESSAGE_MAX);
+    const extra = propre(c.extra, 80);
+    if (type === 'texte' && !texte) return erreur(400, 'message vide');
+    const res = await env.DB.prepare('INSERT INTO messages (de, a, texte, type, extra, cree, lu) VALUES (?, ?, ?, ?, ?, ?, 0)').bind(moi.id, id, texte, type, extra, maintenant()).run();
+    return rep({ id: res.meta.last_row_id, cree: maintenant() }, 201);
+  }
+  // messages non lus, par ami (badge du menu, notifications)
+  if (chemin === '/v1/messages' && m === 'GET') {
+    if (!moi) return erreur(401, 'jeton absent ou invalide');
+    await assureMessages(env);
+    const l = await env.DB.prepare("SELECT m.de, COUNT(*) AS n, MAX(m.id) AS dernier, SUM(CASE WHEN m.type = 'invitation' THEN 1 ELSE 0 END) AS inv, j.pseudo FROM messages m JOIN joueurs j ON j.id = m.de WHERE m.a = ? AND m.lu = 0 GROUP BY m.de").bind(moi.id).all();
+    return rep({ non_lus: l.results.map((x) => ({ id: x.de, pseudo: x.pseudo, n: x.n, dernier: x.dernier, invitations: x.inv || 0 })) });
   }
 
   // support : un joueur décrit son souci depuis la page d'un mod ; le ticket part dans le salon Discord de TPS Studios (webhook gardé sur le serveur)

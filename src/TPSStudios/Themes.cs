@@ -92,6 +92,11 @@ internal static class Themes
 
 	public static string Courant()
 	{
+		// thèmes de fête retirés du lanceur : le fond bleu reste toute l'année
+		if (Environment.GetEnvironmentVariable("TPS_THEME") == null)
+		{
+			return null;
+		}
 		if (CoupeAdmin)
 		{
 			return null;
