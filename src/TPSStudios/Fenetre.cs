@@ -830,7 +830,7 @@ internal partial class Fenetre : Form
 
 	private List<KeyValuePair<Rectangle, Annonce>> rAnnonces = new List<KeyValuePair<Rectangle, Annonce>>();
 
-	private static readonly string[] NouveautesLanceur = new string[3] { "Communauté : photos et vidéos des joueurs", "Nouveaux mods dévoilés au survol", "Couvertures mieux cadrées" };
+	private static readonly string[] NouveautesLanceur = new string[3] { "Accueil 8 fois plus rapide", "Défilement et survols plus fluides", "Couvertures sans bandes" };
 
 	private static readonly Font fAnT2 = new Font("Segoe UI Semibold", Zx.P(11f));
 
@@ -7668,12 +7668,21 @@ internal partial class Fenetre : Form
 				}
 			}
 		});
-		T("logo", delegate
+		T("en-tete", delegate
 		{
 			PeindreRailFond(g);
 			PeindreEnTeteAccueil(g);
+		});
+		T("banniere", delegate
+		{
 			PeindreHero(g);
+		});
+		T("cartes", delegate
+		{
 			PeindreContinuer(g);
+		});
+		T("communaute", delegate
+		{
 			PeindreCommu(g);
 		});
 		T("profil", delegate
@@ -12129,18 +12138,36 @@ internal partial class Fenetre : Form
 		Application.DoEvents();
 		StringBuilder stringBuilder = new StringBuilder();
 		stringBuilder.AppendLine("MESURE RÉELLE · fenêtre " + base.ClientSize.Width + "x" + base.ClientSize.Height + " · peinture à l'écran, au maximum de ce que permet le processeur");
-		string[] array = new string[3] { "Accueil", "Jeux", "Bibliothèque" };
-		Vue[] array2 = new Vue[3]
+		string[] array = new string[5] { "Accueil", "Jeux", "Fiche du jeu", "Liste des mods", "Page d'un mod" };
+		Vue[] array2 = new Vue[5]
 		{
 			Vue.Accueil,
 			Vue.Jeux,
-			Vue.Biblio
+			Vue.Biblio,
+			Vue.Biblio,
+			Vue.Projet
 		};
 		for (int i = 0; i < array2.Length; i++)
 		{
+			if (i == 2 || i == 3)
+			{
+				ongletB = (i == 2) ? 0 : 1;
+			}
+			if (i == 4 && cat != null && cat.Projets.Count > 0)
+			{
+				Choisir(cat.Projets[0]);
+			}
 			ShowVue(array2[i]);
-			Application.DoEvents();
-			PanelFond panelFond = PanelVisible();
+			if (array2[i] == Vue.Biblio)
+			{
+				RemplirBiblio();
+			}
+			for (int k = 0; k < 10; k++)
+			{
+				Thread.Sleep(30);
+				Application.DoEvents();
+			}
+			Control panelFond = (array2[i] == Vue.Projet) ? ((Control)page) : ((Control)PanelVisible());
 			List<double> list = new List<double>();
 			if (i == 0)
 			{

@@ -744,7 +744,8 @@ internal partial class Fenetre
 		{
 			ChargerGalerie(p);
 		}
-		return ImageProjet(p);
+		// image déjà chargée en mémoire (jamais relue sur le disque pendant la peinture)
+		return images.TryGetValue(p.Id, out var img) ? img : null;
 	}
 
 	/// <summary>Articles du site affichés dans la bannière (2 au plus), après les nouveaux mods.</summary>
@@ -999,7 +1000,11 @@ internal partial class Fenetre
 			Lang.DrawText(g, "Chargement des nouveautés…", fAccHeroSous, rHero, C.Gris, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
 			return;
 		}
-		Bitmap cur = Slide(heroIdx);
+		Bitmap cur = null;
+		T("h-slide", delegate
+		{
+			cur = Slide(heroIdx);
+		});
 		if (heroFondu < 1.0 && heroPrec >= 0 && heroPrec < NbHero && heroPrec != heroIdx)
 		{
 			// glissement horizontal : l'ancienne diapo part, la nouvelle arrive (sens selon le choix)
@@ -1025,7 +1030,10 @@ internal partial class Fenetre
 		}
 		else if (cur != null)
 		{
-			g.DrawImageUnscaled(cur, rHero.X, rHero.Y);
+			T("h-dessin", delegate
+			{
+				g.DrawImageUnscaled(cur, rHero.X, rHero.Y);
+			});
 		}
 		if (survolAccueil == -1 && heroFondu >= 1.0)
 		{
@@ -1159,10 +1167,17 @@ internal partial class Fenetre
 			int hi = Math.Max(Zx.P(40), r.Height - Zx.P(58));
 			Rectangle ri = new Rectangle(r.X + Zx.P(6), r.Y + Zx.P(6), r.Width - Zx.P(12), hi - Zx.P(6));
 			// une capture du mod (sans logo ni texte incrusté) plutôt que son affiche, qui serait coupée
-			Image im = ImageHeroAcc(p);
+			Image im = null;
+			T("c-img", delegate
+			{
+				im = ImageHeroAcc(p);
+			});
 			if (im != null)
 			{
-				DessinerArrondi(g, im, ri, Zx.P(10));
+				T("c-arrondi", delegate
+				{
+					DessinerArrondi(g, im, ri, Zx.P(10));
+				});
 			}
 			else
 			{

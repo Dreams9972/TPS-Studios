@@ -57,6 +57,14 @@ internal class FenPartage : Form, IPage
 
 	private static readonly HashSet<long> enCours = new HashSet<long>();
 
+	private readonly Dictionary<long, Bitmap> aTaille = new Dictionary<long, Bitmap>();
+
+	private readonly List<Rectangle> cartes = new List<Rectangle>();
+
+	private int survolClic = -1;
+
+	private int survolCarte = -1;
+
 	/// <summary>Publication ouverte en grand (null : la grille).</summary>
 	private Social.Publication ouverte;
 
@@ -158,8 +166,16 @@ internal class FenPartage : Form, IPage
 		z.MouseMove += delegate(object o, MouseEventArgs e)
 		{
 			souris = e.Location;
-			z.Cursor = clics.Exists((KeyValuePair<Rectangle, Action> k) => k.Key.Contains(e.Location)) ? Cursors.Hand : Cursors.Default;
-			z.Invalidate();
+			int ic = clics.FindIndex((KeyValuePair<Rectangle, Action> k) => k.Key.Contains(e.Location));
+			int ir = cartes.FindIndex((Rectangle r) => r.Contains(e.Location));
+			z.Cursor = (ic >= 0) ? Cursors.Hand : Cursors.Default;
+			// on ne repeint que si la case ou le bouton survolé change
+			if (ic != survolClic || ir != survolCarte)
+			{
+				survolClic = ic;
+				survolCarte = ir;
+				z.Invalidate();
+			}
 		};
 		z.MouseLeave += delegate
 		{
@@ -193,8 +209,13 @@ internal class FenPartage : Form, IPage
 			{
 				return;
 			}
+			int avant = defile;
 			defile = Math.Max(0, Math.Min(Math.Max(0, hauteurContenu - z.Height), defile - e.Delta * Zx.P(90) / 120));
-			z.Invalidate();
+			if (defile != avant)
+			{
+				survolClic = -2;
+				z.Invalidate();
+			}
 		};
 		KeyPreview = true;
 		KeyDown += delegate(object o, KeyEventArgs e)
@@ -218,6 +239,14 @@ internal class FenPartage : Form, IPage
 		Shown += delegate
 		{
 			Charger();
+		};
+		FormClosed += delegate
+		{
+			foreach (Bitmap b in aTaille.Values)
+			{
+				b.Dispose();
+			}
+			aTaille.Clear();
 		};
 	}
 
@@ -439,6 +468,7 @@ internal class FenPartage : Form, IPage
 	{
 		g.SmoothingMode = SmoothingMode.AntiAlias;
 		clics.Clear();
+		cartes.Clear();
 		int largeur = Math.Max(Math.Min(w, Zx.P(900)), Math.Min(w - Zx.P(48), Zx.P(2400)));
 		int x0 = (w - largeur) / 2 + Zx.P(24);
 		int lu = largeur - Zx.P(48);
@@ -477,6 +507,7 @@ internal class FenPartage : Form, IPage
 			{
 				continue;
 			}
+			cartes.Add(r);
 			DessinerCarte(g, pubs[i], r, ih);
 		}
 		hauteurContenu = Zx.P(8) + (pubs.Count + nc - 1) / nc * (ch + gap) + Zx.P(20);
@@ -509,8 +540,20 @@ internal class FenPartage : Form, IPage
 		}
 		if (miniatures.TryGetValue(p.Id, out var mini))
 		{
-			g.InterpolationMode = InterpolationMode.HighQualityBilinear;
-			g.DrawImage(mini, ri);
+			// miniature mise à la taille exacte de la case une seule fois : le défilement ne fait que la poser
+			if (!aTaille.TryGetValue(p.Id, out var pret) || pret.Width != ri.Width || pret.Height != ri.Height)
+			{
+				pret?.Dispose();
+				pret = new Bitmap(ri.Width, ri.Height, System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
+				using (Graphics gp = Graphics.FromImage(pret))
+				{
+					gp.InterpolationMode = InterpolationMode.HighQualityBicubic;
+					gp.PixelOffsetMode = PixelOffsetMode.HighQuality;
+					gp.DrawImage(mini, new Rectangle(0, 0, ri.Width, ri.Height));
+				}
+				aTaille[p.Id] = pret;
+			}
+			g.DrawImageUnscaled(pret, ri.X, ri.Y);
 		}
 		else
 		{

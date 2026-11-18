@@ -150,37 +150,49 @@ internal partial class Fenetre
 		{
 			graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
 			graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
-			// image adaptée au cadre : recadrage intelligent, ou image entière sur fond flouté si elle est trop différente
-			if (Couvertures.Remplit(im, w, h))
-			{
-				Couvertures.Couvrir(graphics, im, new Rectangle(0, 0, w, h));
-			}
-			else
-			{
-				DessinerAjuste(graphics, im, new Rectangle(0, 0, w, h), 1.0, 110);
-			}
+			// recadrage intelligent : la case est toujours remplie (pas de bandes), en gardant la zone la plus détaillée
+			Couvertures.Couvrir(graphics, im, new Rectangle(0, 0, w, h));
 		}
 		echelles[key] = value;
 		return value;
 	}
 
-	/// <summary>Dessine une image recadrée dans un rectangle arrondi (sans redimensionner à chaque fois).</summary>
+	/// <summary>Image recadrée aux coins déjà arrondis (transparents), prête à être posée telle quelle.</summary>
+	private readonly Dictionary<string, Bitmap> arrondis = new Dictionary<string, Bitmap>();
+
+	/// <summary>Dessine une image recadrée dans un rectangle arrondi : préparée une fois, puis simplement posée (aucun découpage à chaque image).</summary>
 	private void DessinerArrondi(Graphics g, Image im, Rectangle r, int rayon)
 	{
-		using GraphicsPath graphicsPath = Bouton.Rond(r, rayon);
-		GraphicsState gstate = g.Save();
-		g.SetClip(graphicsPath, CombineMode.Intersect);
-		Bitmap bitmap = Couvrir(im, r.Width, r.Height);
-		if (bitmap != null)
+		if (im == null || r.Width < 1 || r.Height < 1)
 		{
-			g.DrawImageUnscaled(bitmap, r.X, r.Y);
-		}
-		else
-		{
+			using GraphicsPath gp = Bouton.Rond(r, rayon);
 			using LinearGradientBrush brush = new LinearGradientBrush(r, C.Ligne, C.Carte, 45f);
-			g.FillRectangle(brush, r);
+			g.FillPath(brush, gp);
+			return;
 		}
-		g.Restore(gstate);
+		string key = RuntimeHelpers.GetHashCode(im) + "|" + r.Width + "x" + r.Height + "|" + rayon;
+		if (!arrondis.TryGetValue(key, out var b))
+		{
+			if (arrondis.Count > 60)
+			{
+				foreach (Bitmap v in arrondis.Values)
+				{
+					v.Dispose();
+				}
+				arrondis.Clear();
+			}
+			Bitmap src = Couvrir(im, r.Width, r.Height);
+			b = new Bitmap(r.Width, r.Height, PixelFormat.Format32bppPArgb);
+			using (Graphics gb = Graphics.FromImage(b))
+			{
+				gb.SmoothingMode = SmoothingMode.AntiAlias;
+				using TextureBrush tb = new TextureBrush(src);
+				using GraphicsPath p = Bouton.Rond(new Rectangle(0, 0, r.Width, r.Height), rayon);
+				gb.FillPath(tb, p);
+			}
+			arrondis[key] = b;
+		}
+		g.DrawImageUnscaled(b, r.X, r.Y);
 	}
 
 	/// <summary>Zone à repeindre quand le survol change (et pas toute la page).</summary>
