@@ -96,7 +96,8 @@ internal partial class FenAmis
 		{
 			Envoyer();
 		};
-		tMsg.KeyDown += delegate(object o, KeyEventArgs e)
+		// la touche Entrée arrive dans la zone de texte intérieure, pas dans le Champ
+		tMsg.Box.KeyDown += delegate(object o, KeyEventArgs e)
 		{
 			if (e.KeyCode == Keys.Return)
 			{

@@ -2,7 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
+using System.Diagnostics;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 using System.Windows.Forms;
 
 namespace TPSStudios;
@@ -80,11 +83,13 @@ internal partial class Fenetre
 		bool flag0 = MajAAfficher || Opt("alerte").Length > 0 || Maintenance;
 		// en-tête : bienvenue à gauche ; cloche et profil (compact) à droite
 		int lp = Math.Min(Zx.P(240), mainW / 3);
-		rProfil = new Rectangle(xMain + mainW - lp, Zx.P(28), lp, Zx.P(60));
-		rCloche = new Rectangle(rProfil.X - Zx.P(56), Zx.P(36), Zx.P(44), Zx.P(44));
-		rEnTeteA = new Rectangle(xMain, Zx.P(28), Math.Max(Zx.P(200), rCloche.X - Zx.P(16) - xMain), Zx.P(64));
+		// sous les boutons de la fenêtre (réduire / agrandir / fermer), qui occupent le haut à droite
+		int yTete = Zx.P(44);
+		rProfil = new Rectangle(xMain + mainW - lp, yTete, lp, Zx.P(56));
+		rCloche = new Rectangle(rProfil.X - Zx.P(56), yTete + Zx.P(6), Zx.P(44), Zx.P(44));
+		rEnTeteA = new Rectangle(xMain, yTete - Zx.P(4), Math.Max(Zx.P(200), rCloche.X - Zx.P(16) - xMain), Zx.P(64));
 		rHorloge = rEnTeteA;
-		int y0 = Zx.P(116);
+		int y0 = Zx.P(124);
 		rBandeau = new Rectangle(xMain, y0, mainW, Zx.P(36));
 		rMajA = (MajAAfficher ? new Rectangle(xMain, y0 - Zx.P(4), mainW, Zx.P(48)) : Rectangle.Empty);
 		if (flag0)
@@ -238,18 +243,69 @@ internal partial class Fenetre
 		}
 	}
 
+	/// <summary>Fiche d'un jeu (bande-annonce, photos, infos, Jouer) : jamais la liste des mods.</summary>
+	private void OuvrirFicheJeu(string jid)
+	{
+		jeuId = jid;
+		Config.Ecrire("jeu", jid);
+		filtre = 0;
+		categorie = "";
+		if (vue == Vue.Biblio)
+		{
+			if (ongletB == 1)
+			{
+				BasculerMods(versMods: false);
+			}
+			else
+			{
+				RemplirBiblio();
+				pBiblio.Invalidate();
+			}
+		}
+		else
+		{
+			ongletB = 0;
+			ShowVue(Vue.Biblio);
+		}
+		rail?.Invalidate();
+	}
+
 	/// <summary>Liste des mods (page Mods / Bibliothèque) avec le filtre voulu : 0 tous les mods, 1 mods téléchargés.</summary>
 	private void AllerListeMods(int f)
 	{
 		bool deja = vue == Vue.Biblio && ongletB == 1;
-		filtre = f;
-		categorie = "";
+		bool change = filtre != f || couvercle != null;
+		int ancien = filtre;
 		if (deja)
 		{
+			// Bibliothèque ↔ Mods : même page, autre liste ; même transition que entre les menus
+			Bitmap avant = null;
+			if (change && couches.Count == 0 && !enTransition && Animer())
+			{
+				try
+				{
+					avant = Figer();
+				}
+				catch
+				{
+					avant = null;
+				}
+			}
+			filtre = f;
+			categorie = "";
 			RemplirBiblio();
 			pBiblio.Invalidate();
+			if (avant != null)
+			{
+				Transition(avant, (f == 1 && ancien != 1) ? StyleTrans.Monte : StyleTrans.Descend);
+			}
+			RetirerCouvercle();
+			rail?.Invalidate();
+			return;
 		}
-		else if (vue == Vue.Biblio)
+		filtre = f;
+		categorie = "";
+		if (vue == Vue.Biblio)
 		{
 			BasculerMods(versMods: true);
 		}
@@ -604,36 +660,49 @@ internal partial class Fenetre
 		}
 	}
 
+	/// <summary>Sens du glissement de la bannière : vers la gauche (diapo suivante) ou la droite (précédente).</summary>
+	private bool heroVersGauche = true;
+
+	private readonly Stopwatch heroChrono = new Stopwatch();
+
+	private const double HeroDuree = 560.0;
+
 	private void AllerHero(int i)
 	{
 		if (i == heroIdx || i < 0 || i >= NbHero)
 		{
 			return;
 		}
+		// diapo suivante (y compris le retour au début en défilement auto) : vers la gauche
+		heroVersGauche = i > heroIdx || (heroIdx == NbHero - 1 && i == 0 && NbHero > 2);
 		heroPrec = heroIdx;
 		heroIdx = i;
 		heroDepuis = DateTime.Now;
 		heroFondu = 0.0;
+		Rectangle zoneH = Rectangle.Inflate(rHero, Zx.P(4), Zx.P(4));
 		if (!Fluide)
 		{
 			heroFondu = 1.0;
-			pAccueil.Invalidate(Rectangle.Inflate(rHero, Zx.P(4), Zx.P(4)));
+			pAccueil.Invalidate(zoneH);
 			return;
 		}
+		Slide(heroIdx);   // préparée avant le premier pas : pas d'à-coup au départ
 		if (tHeroFondu == null)
 		{
 			tHeroFondu = new Timer();
-			tHeroFondu.Interval = 16;
+			tHeroFondu.Interval = 10;
 			tHeroFondu.Tick += delegate
 			{
-				heroFondu = Math.Min(1.0, heroFondu + 0.1);
+				heroFondu = Math.Min(1.0, heroChrono.Elapsed.TotalMilliseconds / HeroDuree);
 				pAccueil.Invalidate(Rectangle.Inflate(rHero, Zx.P(4), Zx.P(4)));
 				if (heroFondu >= 1.0)
 				{
 					tHeroFondu.Stop();
+					heroChrono.Reset();
 				}
 			};
 		}
+		heroChrono.Restart();
 		tHeroFondu.Start();
 	}
 
@@ -846,14 +915,119 @@ internal partial class Fenetre
 		Lang.DrawText(g, jour + "   ·   " + n.ToString("HH:mm:ss"), fBonjourSous, new Point(rEnTeteA.X + Zx.P(2), rEnTeteA.Y + Zx.P(42)), C.Gris, TextFormatFlags.NoPadding);
 	}
 
+	/// <summary>Diapos de la bannière déjà dessinées (une image par diapo) : le défilement ne fait que les déplacer.</summary>
+	private readonly Dictionary<int, KeyValuePair<string, Bitmap>> slides = new Dictionary<int, KeyValuePair<string, Bitmap>>();
+
+	private Bitmap Slide(int idx)
+	{
+		if (idx < 0 || idx >= NbHero)
+		{
+			return null;
+		}
+		Projet p = (idx < heroProjets.Count) ? heroProjets[idx] : null;
+		Diapo dn = null;
+		if (p == null)
+		{
+			int kn = idx - heroProjets.Count;
+			List<Diapo> ln = NewsHero();
+			dn = (kn >= 0 && kn < ln.Count) ? ln[kn] : null;
+		}
+		Image im = ((dn != null) ? dn.Img : ImageHeroAcc(p));
+		string cle = rHero.Width + "x" + rHero.Height + "|" + ((p != null) ? (p.Id + p.Nom + p.SousTitre + p.Version) : ((dn != null) ? dn.Titre : "")) + "|" + ((im != null) ? RuntimeHelpers.GetHashCode(im) : 0) + "|" + Lang.Code;
+		if (slides.TryGetValue(idx, out var kv) && kv.Key == cle)
+		{
+			return kv.Value;
+		}
+		if (slides.ContainsKey(idx))
+		{
+			slides[idx].Value?.Dispose();
+		}
+		Bitmap b = new Bitmap(rHero.Width, rHero.Height, PixelFormat.Format32bppPArgb);
+		using (Graphics g = Graphics.FromImage(b))
+		{
+			g.SmoothingMode = SmoothingMode.AntiAlias;
+			g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
+			PeindreSlide(g, new Rectangle(0, 0, rHero.Width, rHero.Height), idx);
+		}
+		slides[idx] = new KeyValuePair<string, Bitmap>(cle, b);
+		return b;
+	}
+
 	private void PeindreHero(Graphics g)
 	{
 		if (rHero.Width < Zx.P(100) || rHero.Height < Zx.P(80))
 		{
 			return;
 		}
-		Projet p = HeroCourant;
-		Diapo dn = ((p == null) ? NewsCourante : null);
+		int rayon = Zx.P(18);
+		if (NbHero == 0)
+		{
+			using (GraphicsPath path = Bouton.Rond(rHero, rayon))
+			{
+				using SolidBrush b0 = new SolidBrush(C.Carte);
+				g.FillPath(b0, path);
+			}
+			Lang.DrawText(g, "Chargement des nouveautés…", fAccHeroSous, rHero, C.Gris, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+			return;
+		}
+		Bitmap cur = Slide(heroIdx);
+		if (heroFondu < 1.0 && heroPrec >= 0 && heroPrec < NbHero && heroPrec != heroIdx)
+		{
+			// glissement horizontal : l'ancienne diapo part, la nouvelle arrive (sens selon le choix)
+			Bitmap prec = Slide(heroPrec);
+			double e = heroFondu;
+			e = (e < 0.5) ? (4.0 * e * e * e) : (1.0 - Math.Pow(-2.0 * e + 2.0, 3.0) / 2.0);
+			int ecart = Zx.P(16);
+			int course = rHero.Width + ecart;
+			int sens = heroVersGauche ? 1 : -1;
+			int off = (int)Math.Round(course * e) * sens;
+			GraphicsState st = g.Save();
+			g.SetClip(rHero, CombineMode.Intersect);
+			g.InterpolationMode = InterpolationMode.NearestNeighbor;
+			if (prec != null)
+			{
+				g.DrawImageUnscaled(prec, rHero.X - off, rHero.Y);
+			}
+			if (cur != null)
+			{
+				g.DrawImageUnscaled(cur, rHero.X - off + sens * course, rHero.Y);
+			}
+			g.Restore(st);
+		}
+		else if (cur != null)
+		{
+			g.DrawImageUnscaled(cur, rHero.X, rHero.Y);
+		}
+		if (survolAccueil == -1 && heroFondu >= 1.0)
+		{
+			using GraphicsPath ph = Bouton.Rond(rHero, rayon);
+			using SolidBrush bs = new SolidBrush(Color.FromArgb(14, 255, 255, 255));
+			g.FillPath(bs, ph);
+		}
+		// points du défilement
+		if (NbHero > 1)
+		{
+			for (int i = 0; i < NbHero; i++)
+			{
+				Rectangle rp = PointHero(i);
+				using GraphicsPath pp = Bouton.Rond(rp, rp.Height / 2);
+				using SolidBrush bp = new SolidBrush((i == heroIdx) ? Color.White : Color.FromArgb((survolAccueil == 100 + i) ? 200 : 110, 255, 255, 255));
+				g.FillPath(bp, pp);
+			}
+		}
+	}
+
+	/// <summary>Dessine la diapo n° idx de la bannière (image, voiles, textes, bouton) dans rHero.</summary>
+	private void PeindreSlide(Graphics g, Rectangle rHero, int idx)
+	{
+		Projet p = (idx >= 0 && idx < heroProjets.Count) ? heroProjets[idx] : null;
+		Diapo dn = null;
+		if (p == null)
+		{
+			int kn = idx - heroProjets.Count;
+			List<Diapo> ln = NewsHero();
+			dn = (kn >= 0 && kn < ln.Count) ? ln[kn] : null;
+		}
 		int rayon = Zx.P(18);
 		using (GraphicsPath path = Bouton.Rond(rHero, rayon))
 		{
@@ -866,29 +1040,7 @@ internal partial class Fenetre
 			return;
 		}
 		Image im = ((dn != null) ? dn.Img : ImageHeroAcc(p));
-		if (heroFondu < 1.0 && heroPrec >= 0 && heroPrec < NbHero)
-		{
-			Image ip = ((heroPrec < heroProjets.Count) ? ImageHeroAcc(heroProjets[heroPrec]) : null);
-			if (ip != null)
-			{
-				DessinerArrondi(g, ip, rHero, rayon);
-			}
-			if (im != null)
-			{
-				Bitmap c = Couvrir(im, rHero.Width, rHero.Height);
-				if (c != null)
-				{
-					GraphicsState st = g.Save();
-					using (GraphicsPath pc = Bouton.Rond(rHero, rayon))
-					{
-						g.SetClip(pc, CombineMode.Intersect);
-					}
-					AlphaDraw(g, c, rHero, (float)heroFondu);
-					g.Restore(st);
-				}
-			}
-		}
-		else if (im != null)
+		if (im != null)
 		{
 			DessinerArrondi(g, im, rHero, rayon);
 		}
@@ -906,26 +1058,16 @@ internal partial class Fenetre
 		{
 			g.FillRectangle(lb, rHero.X, rHero.Bottom - rHero.Height / 2, rHero.Width, rHero.Height / 2);
 		}
-		if (survolAccueil == -1)
-		{
-			using SolidBrush bs = new SolidBrush(Color.FromArgb(18, 255, 255, 255));
-			g.FillRectangle(bs, rHero);
-		}
 		g.Restore(st2);
-		// pendant le fondu entre deux images, pas de texte (sinon le titre du nouveau mod s'affiche sur l'ancienne image)
-		if (heroFondu < 1.0)
-		{
-			return;
-		}
 		int x = rHero.X + Zx.P(32);
 		int largeur = Math.Min(rHero.Width * 55 / 100, Zx.P(560));
 		// étiquette
-		string etiq = ((dn != null) ? "ACTUALITÉ" : ((heroIdx == 0) ? "NOUVEAUTÉ" : "À DÉCOUVRIR"));
+		string etiq = ((dn != null) ? "ACTUALITÉ" : ((idx == 0) ? "NOUVEAUTÉ" : "À DÉCOUVRIR"));
 		Size se = Lang.MeasureText(etiq, fAccHeroPetit);
 		Rectangle re = new Rectangle(x, rHero.Y + Zx.P(26), se.Width + Zx.P(20), Zx.P(24));
 		using (GraphicsPath pe = Bouton.Rond(re, Zx.P(12)))
 		{
-			using SolidBrush be = new SolidBrush((heroIdx == 0) ? C.Orange : Color.FromArgb(120, 90, 110, 230));
+			using SolidBrush be = new SolidBrush((idx == 0) ? C.Orange : Color.FromArgb(120, 90, 110, 230));
 			g.FillPath(be, pe);
 		}
 		Txt.Dessiner(g, etiq, fAccHeroPetit, re, Color.White, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
@@ -953,21 +1095,10 @@ internal partial class Fenetre
 		Rectangle rb = new Rectangle(rHero.Right - Zx.P(32) - sb.Width - Zx.P(36), rHero.Y + Zx.P(24), sb.Width + Zx.P(36), Zx.P(38));
 		using (GraphicsPath pb = Bouton.Rond(rb, Zx.P(19)))
 		{
-			using SolidBrush bb = new SolidBrush((survolAccueil == -1) ? Color.White : Color.FromArgb(232, 240, 244, 255));
+			using SolidBrush bb = new SolidBrush(Color.FromArgb(240, 244, 255));
 			g.FillPath(bb, pb);
 		}
 		Txt.Dessiner(g, bt, fCarteNom, rb, Color.FromArgb(14, 18, 40), TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
-		// points du défilement
-		if (NbHero > 1)
-		{
-			for (int i = 0; i < NbHero; i++)
-			{
-				Rectangle rp = PointHero(i);
-				using GraphicsPath pp = Bouton.Rond(rp, rp.Height / 2);
-				using SolidBrush bp = new SolidBrush((i == heroIdx) ? Color.White : Color.FromArgb((survolAccueil == 100 + i) ? 200 : 110, 255, 255, 255));
-				g.FillPath(bp, pp);
-			}
-		}
 	}
 
 	private void PeindreContinuer(Graphics g)

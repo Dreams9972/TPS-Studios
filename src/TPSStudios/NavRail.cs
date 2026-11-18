@@ -51,6 +51,8 @@ internal class NavRail : Control
 
 	private static readonly Font fT = new Font("Segoe UI Semibold", Zx.P(8.5f));
 
+	private static readonly Font fVer = new Font("Segoe UI", Zx.P(7.5f));
+
 	public static int Largeur => Zx.P(84);
 
 	public NavRail()
@@ -80,10 +82,10 @@ internal class NavRail : Control
 		int nHaut = elements.FindAll((Element e) => !e.EnBas).Count;
 		int nBas = elements.Count - nHaut;
 		int y0 = Zx.P(92);
-		int place = h - y0 - nBas * hi - Zx.P(28);
+		int place = h - y0 - nBas * hi - Zx.P(40);
 		int pas = ((nHaut > 0) ? Math.Max(Zx.P(48), Math.Min(hi + Zx.P(4), place / Math.Max(1, nHaut))) : hi);
 		int y = y0;
-		int yb = h - Zx.P(20) - nBas * hi;
+		int yb = h - Zx.P(30) - nBas * hi;   // la version du lanceur s'affiche dessous
 		foreach (Element e in elements)
 		{
 			if (e.EnBas)
@@ -196,6 +198,8 @@ internal class NavRail : Control
 		{
 			g.DrawLine(p, w - 1, 0, w - 1, h);
 		}
+		// version du lanceur, tout en bas du menu (plus jamais par-dessus le contenu des pages)
+		Lang.DrawText(g, "v" + Config.VERSION, fVer, new Rectangle(0, h - Zx.P(24), w, Zx.P(18)), Color.FromArgb(110, 120, 150), TextFormatFlags.HorizontalCenter | TextFormatFlags.NoPadding);
 		if (Logo != null)
 		{
 			Rectangle rl = ZoneLogo;

@@ -258,8 +258,8 @@ internal static class Social
 	}
 
 	/// <summary>
-	/// L'ancien compte (commun à tous les profils) revient au profil qui porte son pseudo,
-	/// ou au seul profil s'il n'y en a qu'un ; les autres profils reçoivent un nouveau compte.
+	/// L'ancien compte (commun à tous les profils) revient au profil actif (ou au seul profil) ;
+	/// les autres profils reçoivent un nouveau compte.
 	/// </summary>
 	private static bool ReprendreAncien(string pseudoAncien, string jetonAncien, HashSet<string> pris)
 	{
@@ -278,20 +278,8 @@ internal static class Social
 			{
 				return true;
 			}
-			string moi = pseudoSouhaite.ToLowerInvariant();
-			string ancien = (pseudoAncien ?? "").Trim().ToLowerInvariant();
-			if (ancien == moi)
-			{
-				return true;
-			}
-			foreach (Compte c in tous)
-			{
-				if (PseudoServeur(c.Pseudo).ToLowerInvariant() == ancien)
-				{
-					return false;
-				}
-			}
-			// pseudo inconnu (profil renommé) : il revient au profil actif
+			// le compte commun (amis, historique) revient au profil utilisé au moment de la mise à jour,
+			// pas au profil dont il porte le pseudo (c'est souvent juste le dernier profil ouvert)
 			return Comptes.ActifId == compteCle;
 		}
 		catch
@@ -787,7 +775,7 @@ internal static class Social
 			throw new Exception(Msg(r, "conversation indisponible"));
 		}
 		List<MessageAmi> l = new List<MessageAmi>();
-		if (r != null && r.TryGetValue("messages", out var v) && v is System.Collections.ArrayList al)
+		if (r != null && r.TryGetValue("messages", out var v) && v is System.Collections.IEnumerable al && !(v is string))
 		{
 			foreach (object o in al)
 			{
@@ -833,7 +821,7 @@ internal static class Social
 		{
 			int st;
 			Dictionary<string, object> r = AppelAuth("GET", "/v1/messages", null, out st);
-			if (st == 200 && r != null && r.TryGetValue("non_lus", out var v) && v is System.Collections.ArrayList al)
+			if (st == 200 && r != null && r.TryGetValue("non_lus", out var v) && v is System.Collections.IEnumerable al && !(v is string))
 			{
 				foreach (object o in al)
 				{
@@ -1388,9 +1376,9 @@ internal static class Social
 	{
 		int st;
 		Dictionary<string, object> d = AppelAuth("POST", "/v1/mod/" + mod + "/noter", new Dictionary<string, object> { { "etoiles", etoiles } }, out st);
-		if (st == 404 && (d == null || !d.ContainsKey("erreur")))
+		if (st == 404)
 		{
-			throw new Exception("les notes ne sont pas encore activées sur le serveur");
+			throw new Exception("les notes ne sont pas encore activées sur le serveur (mise à jour du serveur à faire)");
 		}
 		if (st != 200 || d == null)
 		{
