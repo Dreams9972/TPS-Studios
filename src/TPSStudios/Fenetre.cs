@@ -722,7 +722,7 @@ internal partial class Fenetre : Form
 
 	private List<KeyValuePair<Rectangle, Annonce>> rAnnonces = new List<KeyValuePair<Rectangle, Annonce>>();
 
-	private static readonly string[] NouveautesLanceur = new string[4] { "Amis : discussion et invitations à jouer", "Accueil épuré", "Bibliothèque = vos mods, Mods = tout le catalogue", "Menu toujours visible" };
+	private static readonly string[] NouveautesLanceur = new string[3] { "Boutons au style moderne", "Pages plus claires, sans doublons", "Plus fluide" };
 
 	private static readonly Font fAnT2 = new Font("Segoe UI Semibold", Zx.P(11f));
 
