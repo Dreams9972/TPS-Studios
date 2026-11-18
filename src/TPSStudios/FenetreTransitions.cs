@@ -54,20 +54,33 @@ internal partial class Fenetre
 			break;
 		case StyleTrans.Monte:
 		{
+			// copie directe des deux pages (aucun mélange de transparence plein écran) : rapide même en 4K
 			int num20 = (int)Math.Round((double)height * (1.0 - vp));
-			g.DrawImageUnscaled(avant, 0, -(int)Math.Round((double)height * 0.3 * vp));
-			Assombrir(g, new Rectangle(0, 0, width, height), 0.55 * vp);
+			int haut = (int)Math.Round((double)height * 0.3 * vp);
+			CompositingMode cm = g.CompositingMode;
+			g.CompositingMode = CompositingMode.SourceCopy;
+			if (num20 > 0)
+			{
+				g.DrawImage(avant, new Rectangle(0, 0, width, num20), 0, haut, width, num20, GraphicsUnit.Pixel);
+			}
+			g.DrawImage(apres, new Rectangle(0, num20, width, height - num20), 0, 0, width, height - num20, GraphicsUnit.Pixel);
+			g.CompositingMode = cm;
 			OmbreV(g, num20, width);
-			g.DrawImageUnscaled(apres, 0, num20);
 			break;
 		}
 		case StyleTrans.Descend:
 		{
 			int num21 = (int)Math.Round((double)height * vp);
-			g.DrawImageUnscaled(apres, 0, -(int)Math.Round((double)height * 0.3 * (1.0 - vp)));
-			Assombrir(g, new Rectangle(0, 0, width, height), 0.55 * (1.0 - vp));
+			int haut2 = (int)Math.Round((double)height * 0.3 * (1.0 - vp));
+			CompositingMode cm2 = g.CompositingMode;
+			g.CompositingMode = CompositingMode.SourceCopy;
+			if (num21 > 0)
+			{
+				g.DrawImage(apres, new Rectangle(0, 0, width, num21), 0, haut2, width, num21, GraphicsUnit.Pixel);
+			}
+			g.DrawImage(avant, new Rectangle(0, num21, width, height - num21), 0, 0, width, height - num21, GraphicsUnit.Pixel);
+			g.CompositingMode = cm2;
 			OmbreV(g, num21, width);
-			g.DrawImageUnscaled(avant, 0, num21);
 			break;
 		}
 		case StyleTrans.Pousse:

@@ -140,7 +140,9 @@ internal partial class Fenetre
 	/// </summary>
 	private void DemarrerMesh()
 	{
-		if (tMesh != null)
+		// le fond reste fixe : l'animer obligeait à redessiner toute la page 15 fois par seconde,
+		// ce qui ralentissait la navigation et les animations sur les grands écrans
+		if (tMesh != null || Config.Lire("fond_anime") != "1")
 		{
 			return;
 		}
