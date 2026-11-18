@@ -830,7 +830,7 @@ internal partial class Fenetre : Form
 
 	private List<KeyValuePair<Rectangle, Annonce>> rAnnonces = new List<KeyValuePair<Rectangle, Annonce>>();
 
-	private static readonly string[] NouveautesLanceur = new string[4] { "Notez les mods de 1 à 5 étoiles", "Un compte amis par profil", "Mini-lecteur de musique au survol", "Admin modernisée" };
+	private static readonly string[] NouveautesLanceur = new string[4] { "Messages entre amis réparés", "Bannière de l'accueil fluide", "Clic sur un jeu : sa fiche", "Même transition partout" };
 
 	private static readonly Font fAnT2 = new Font("Segoe UI Semibold", Zx.P(11f));
 
@@ -935,8 +935,7 @@ internal partial class Fenetre : Form
 			return;
 		}
 		avis.Poser(t, c);
-		int lv = Lang.MeasureText("Lanceur v" + Config.VERSION, fVersion).Width;
-		avis.Location = new Point(Math.Max(0, base.ClientSize.Width - Zx.P(20) - lv - Zx.P(14) - avis.Width), base.ClientSize.Height - avis.Height - Zx.P(6));
+		avis.Location = new Point(Math.Max(0, base.ClientSize.Width - Zx.P(24) - avis.Width), base.ClientSize.Height - avis.Height - Zx.P(20));
 		avis.Visible = true;
 		avis.BringToFront();
 		if (tAvis == null)
@@ -4006,6 +4005,7 @@ internal partial class Fenetre : Form
 				bg = null;
 			}
 		}
+		RetirerCouvercle();   // page précédente figée (navigation depuis le menu) : déjà capturée dans bg
 		PanelFond c = new PanelFond();
 		c.BackColor = C.Fond;
 		// à droite du menu latéral, qui reste visible et cliquable
@@ -4043,9 +4043,20 @@ internal partial class Fenetre : Form
 			{
 				int width = c.ClientSize.Width;
 				int height = c.ClientSize.Height;
-				if (page)
+				if (page && bg != null && bg.Size == snap.Size && sp == Point.Empty)
 				{
-					// même transition que entre les menus : la page monte en s'ouvrant, redescend en se fermant
+					// exactement la transition des menus (Accueil ↔ Jeux) : la page monte en s'ouvrant, redescend en se fermant
+					if (!ferme)
+					{
+						PeindreTrans(g, StyleTrans.Monte, bg, snap, vp);
+					}
+					else
+					{
+						PeindreTrans(g, StyleTrans.Descend, snap, bg, 1.0 - vp);
+					}
+				}
+				else if (page)
+				{
 					int dy = (int)Math.Round((double)height * (1.0 - vp));
 					Assombrir(g, new Rectangle(0, 0, width, height), 0.55 * vp);
 					OmbreV(g, dy, width);
@@ -4212,7 +4223,7 @@ internal partial class Fenetre : Form
 					vp = p;
 					c.Invalidate(invalidateChildren: false);
 					c.Update();
-				}, page);
+				}, false);
 			}
 			if (snap != null)
 			{
@@ -4255,6 +4266,39 @@ internal partial class Fenetre : Form
 				Thread.Sleep(3);
 			}
 		}
+		if (apresCouches != null && page && snapFin != null && couches.Count == 1 && !base.IsDisposed)
+		{
+			// clic dans le menu pendant que cette page est ouverte : elle reste figée à l'écran,
+			// et la page demandée arrive ensuite avec la transition des menus (une seule animation)
+			Bitmap fige = snapFin;
+			snapFin = null;
+			try
+			{
+				RetirerCouvercle();
+				couvercle = new Voile();
+				couvercle.Bounds = new Rectangle(0, 0, zone.ClientSize.Width, zone.ClientSize.Height);
+				couvercle.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom;
+				couvercle.Peindre = delegate(Graphics gg)
+				{
+					gg.DrawImageUnscaled(fige, 0, 0);
+				};
+				couvercle.Disposed += delegate
+				{
+					fige.Dispose();
+				};
+				zone.Controls.Add(couvercle);
+				couvercle.BringToFront();
+			}
+			catch
+			{
+				RetirerCouvercle();
+			}
+		}
+		else if (apresCouches != null && snapFin != null)
+		{
+			snapFin.Dispose();
+			snapFin = null;
+		}
 		if (snapFin != null && !base.IsDisposed)
 		{
 			snap = snapFin;
@@ -4265,7 +4309,7 @@ internal partial class Fenetre : Form
 				vp = 1.0 - p;
 				c.Invalidate(invalidateChildren: false);
 				c.Update();
-			}, page);
+			}, false);
 		}
 		couches.Remove(c);
 		if (!base.IsDisposed)
@@ -4278,7 +4322,17 @@ internal partial class Fenetre : Form
 		{
 			Action suite = apresCouches;
 			apresCouches = null;
-			BeginInvoke(suite);
+			BeginInvoke((MethodInvoker)delegate
+			{
+				try
+				{
+					suite();
+				}
+				finally
+				{
+					RetirerCouvercle();
+				}
+			});
 		}
 		if (VersAccueil && couches.Count == 0)
 		{
@@ -4953,7 +5007,8 @@ internal partial class Fenetre : Form
 		{
 			noel.Fige = true;
 		}
-		if (v != vue && couches.Count == 0 && !enTransition && Animer())
+		bool depuisPage = couvercle != null;   // une page intégrée (Réglages, Amis…) vient d'être quittée par le menu
+		if ((v != vue || depuisPage) && couches.Count == 0 && !enTransition && Animer())
 		{
 			try
 			{
@@ -5003,7 +5058,7 @@ internal partial class Fenetre : Form
 		}
 		if (bitmap != null)
 		{
-			Transition(bitmap, ChoisirStyle(ancienne, v));
+			Transition(bitmap, (depuisPage && ancienne == v) ? StyleTrans.Descend : ChoisirStyle(ancienne, v));
 		}
 		RetirerCouvercle();
 		SuspendreVideos(s: false);
@@ -5379,7 +5434,7 @@ internal partial class Fenetre : Form
 		{
 			fond.Peindre(g, p.ClientRectangle);
 		}
-		Lang.DrawText(g, "Lanceur v" + Config.VERSION, fVersion, new Rectangle(p.ClientSize.Width - Zx.P(240), p.ClientSize.Height - Zx.P(30), Zx.P(220), Zx.P(20)), Color.FromArgb(150, 160, 178), TextFormatFlags.Right | TextFormatFlags.NoPadding);
+		// la version du lanceur est affichée en bas du menu latéral
 	}
 
 	private void EnTete(Graphics g, string titre, string sous, int dy, int dx = 0)
@@ -7461,10 +7516,7 @@ internal partial class Fenetre : Form
 				string jid = item4;
 				list.Add(NouvelleDiapo("Jeu", Color.FromArgb(40, 150, 210), NomJeu(item4), SousJeu(item4), num3 + ((num3 > 1) ? " mods disponibles" : " mod disponible") + "  ·  " + num4 + ((num4 > 1) ? " installés" : " installé"), CouvertureJeu(item4), "Ouvrir la bibliothèque", delegate
 				{
-					jeuId = jid;
-					Config.Ecrire("jeu", jid);
-					filtre = 0;
-					ShowVue(Vue.Biblio);
+					OuvrirFicheJeu(jid);
 				}));
 			}
 			foreach (Projet item5 in list3)
@@ -7601,7 +7653,6 @@ internal partial class Fenetre : Form
 				int width = pAccueil.ClientSize.Width;
 				int height = pAccueil.ClientSize.Height;
 				noel.PeindreFond(g, width, height);
-				Lang.DrawText(g, "Lanceur v" + Config.VERSION, fVersion, new Rectangle(width - Zx.P(240), height - Zx.P(30), Zx.P(220), Zx.P(20)), Color.FromArgb(90, 100, 130), TextFormatFlags.Right | TextFormatFlags.NoPadding);
 			});
 		}
 		T("calottes", delegate
@@ -8981,10 +9032,7 @@ internal partial class Fenetre : Form
 			string jid2 = item2;
 			tuile.Click += delegate
 			{
-				jeuId = jid2;
-				Config.Ecrire("jeu", jid2);
-				filtre = 0;
-				ShowVue(Vue.Biblio);
+				OuvrirFicheJeu(jid2);
 			};
 			if (item2 == "omsi2")
 			{
@@ -9057,10 +9105,7 @@ internal partial class Fenetre : Form
 					}
 					else
 					{
-						jeuId = jid;
-						Config.Ecrire("jeu", jid);
-						filtre = 0;
-						ShowVue(Vue.Biblio);
+						OuvrirFicheJeu(jid);
 					}
 				};
 				pJeux.Controls.Add(tuile2);
