@@ -170,6 +170,7 @@ internal static class Comptes
 				D.Actif = id;
 				compte.Derniere = DateTime.Now.ToString("dd/MM/yyyy HH:mm");
 				Sauver();
+				Social.ChoisirCompte(compte);   // chaque profil a son propre compte amis
 				break;
 			}
 		}

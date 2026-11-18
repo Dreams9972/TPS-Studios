@@ -184,7 +184,7 @@ internal partial class Fenetre
 		{
 			return Rectangle.Empty;
 		}
-		if (z.R.X >= rPageD.X)
+		if (rPageD.Width > 0 && z.R.X >= rPageD.X)
 		{
 			return new Rectangle(rPageD.X, z.R.Y - Zx.P(48), rPageD.Width + Zx.P(4), z.R.Height + Zx.P(96));
 		}

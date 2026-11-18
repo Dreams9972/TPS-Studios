@@ -46,6 +46,44 @@ internal static class Social
 
 	private static string pseudoSouhaite = "";
 
+	/// <summary>Profil du lanceur dont le compte amis est chargé : chaque profil a son propre compte.</summary>
+	private static string compteCle = "";
+
+	/// <summary>Clé du compte dans social.dat : serveur + profil (ancienne forme : serveur seul).</summary>
+	private static string Cle => (compteCle.Length > 0) ? (Base + "|" + compteCle) : Base;
+
+	/// <summary>
+	/// Charge le compte amis du profil donné (chaque profil a le sien : amis, messages, demandes).
+	/// Sans compte pour ce profil, un nouveau est créé à la prochaine action en ligne.
+	/// </summary>
+	public static void ChoisirCompte(Compte c)
+	{
+		string id = (c != null) ? (c.Id ?? "") : "";
+		if (id.Length == 0 || id == compteCle)
+		{
+			return;
+		}
+		lock (verrouCompte)
+		{
+			compteCle = id;
+			jeton = "";
+			Pseudo = "";
+			EstAdmin = false;
+			Role = "";
+			pseudoEnvoye = "";
+			niveauEnvoye = -1;
+			pseudoSouhaite = PseudoServeur(c.Pseudo);
+			Amis = new List<Ami>();
+			Recues = new List<Ami>();
+			Envoyees = new List<Ami>();
+			CadeauxVip = new List<string>();
+			Vip = false;
+			Lire();
+		}
+	}
+
+	private static readonly object verrouCompte = new object();
+
 	public static List<Ami> Amis = new List<Ami>();
 
 	public static List<Ami> Recues = new List<Ami>();
@@ -123,8 +161,27 @@ internal static class Social
 
 	private static void Lire()
 	{
+		if (compteCle.Length == 0)
+		{
+			try
+			{
+				Compte actif = Comptes.Actif;
+				if (actif != null && !string.IsNullOrEmpty(actif.Id))
+				{
+					compteCle = actif.Id;
+					pseudoSouhaite = PseudoServeur(actif.Pseudo);
+				}
+			}
+			catch
+			{
+			}
+		}
 		string[] array = LireFichier();
 		if (array.Length == 0)
+		{
+			return;
+		}
+		if (array[0] == "v2" && LireV2(array))
 		{
 			return;
 		}
@@ -137,17 +194,11 @@ internal static class Social
 			for (int i = 2; i < array.Length; i++)
 			{
 				string[] array2 = array[i].Split('\t');
-				if (array2.Length >= 4 && array2[0] == Base && Base.Length > 0)
-				{
-					jeton = array2[1];
-					Pseudo = array2[2];
-					EstAdmin = array2[3] == "1";
-				}
 			}
 		}
 		else
 		{
-			if (array.Length >= 4 && array[0] == Base && Base.Length > 0)
+			if (array.Length >= 4 && array[0] == Base && Base.Length > 0 && ReprendreAncien(array[2], array[1], null))
 			{
 				jeton = array[1];
 				Pseudo = array[2];
@@ -157,6 +208,95 @@ internal static class Social
 			{
 				cleAdmin = array[4];
 			}
+		}
+	}
+
+	/// <summary>Fichier v2 : compte de ce profil, sinon l'ancien compte commun (une seule fois, au profil du même pseudo).</summary>
+	private static bool LireV2(string[] array)
+	{
+		if (array.Length > 1 && array[1].Length > 0)
+		{
+			cleAdmin = array[1];
+		}
+		if (Base.Length == 0)
+		{
+			return true;
+		}
+		string[] ancien = null;
+		HashSet<string> pris = new HashSet<string>();
+		for (int i = 2; i < array.Length; i++)
+		{
+			string[] l = array[i].Split('\t');
+			if (l.Length < 4)
+			{
+				continue;
+			}
+			if (l[0] == Cle)
+			{
+				jeton = l[1];
+				Pseudo = l[2];
+				EstAdmin = l[3] == "1";
+				return true;
+			}
+			if (l[0] == Base)
+			{
+				ancien = l;
+			}
+			else if (l[0].StartsWith(Base + "|"))
+			{
+				pris.Add(l[1]);
+			}
+		}
+		if (ancien != null && compteCle.Length > 0 && ReprendreAncien(ancien[2], ancien[1], pris))
+		{
+			jeton = ancien[1];
+			Pseudo = ancien[2];
+			EstAdmin = ancien[3] == "1";
+			Ecrire();
+		}
+		return true;
+	}
+
+	/// <summary>
+	/// L'ancien compte (commun à tous les profils) revient au profil qui porte son pseudo,
+	/// ou au seul profil s'il n'y en a qu'un ; les autres profils reçoivent un nouveau compte.
+	/// </summary>
+	private static bool ReprendreAncien(string pseudoAncien, string jetonAncien, HashSet<string> pris)
+	{
+		if (compteCle.Length == 0)
+		{
+			return true;
+		}
+		if (pris != null && pris.Contains(jetonAncien))
+		{
+			return false;
+		}
+		try
+		{
+			List<Compte> tous = Comptes.Tous;
+			if (tous.Count <= 1)
+			{
+				return true;
+			}
+			string moi = pseudoSouhaite.ToLowerInvariant();
+			string ancien = (pseudoAncien ?? "").Trim().ToLowerInvariant();
+			if (ancien == moi)
+			{
+				return true;
+			}
+			foreach (Compte c in tous)
+			{
+				if (PseudoServeur(c.Pseudo).ToLowerInvariant() == ancien)
+				{
+					return false;
+				}
+			}
+			// pseudo inconnu (profil renommé) : il revient au profil actif
+			return Comptes.ActifId == compteCle;
+		}
+		catch
+		{
+			return false;
 		}
 	}
 
@@ -195,7 +335,11 @@ internal static class Social
 			}
 			if (Base.Length > 0 && jeton.Length > 0)
 			{
-				dictionary[Base] = Base + "\t" + jeton + "\t" + Pseudo.Replace("\t", " ") + "\t" + (EstAdmin ? "1" : "0");
+				if (compteCle.Length > 0 && dictionary.TryGetValue(Base, out var anc) && anc.Split('\t')[1] == jeton)
+				{
+					dictionary.Remove(Base);   // l'ancien compte commun appartient désormais à ce profil
+				}
+				dictionary[Cle] = Cle + "\t" + jeton + "\t" + Pseudo.Replace("\t", " ") + "\t" + (EstAdmin ? "1" : "0");
 			}
 			List<string> list = new List<string>();
 			list.Add("v2");
@@ -994,6 +1138,7 @@ internal static class Social
 
 	public static string Assurer(Compte c)
 	{
+		ChoisirCompte(c);
 		pseudoSouhaite = PseudoServeur((c != null) ? c.Pseudo : "Joueur");
 		if (!Connecte)
 		{
@@ -1198,6 +1343,10 @@ internal static class Social
 		EtatSocial etatSocial = new EtatSocial();
 		etatSocial.Likes = Convert.ToInt32(dictionary["likes"]);
 		etatSocial.Aime = Convert.ToBoolean(dictionary["aime"]);
+		if (dictionary.ContainsKey("notes") && dictionary["notes"] is Dictionary<string, object> notes)
+		{
+			LireNotes(notes, etatSocial);
+		}
 		if (dictionary["commentaires"] is IEnumerable enumerable)
 		{
 			foreach (object item in enumerable)
@@ -1210,6 +1359,46 @@ internal static class Social
 			}
 		}
 		return etatSocial;
+	}
+
+	public static void LireNotes(Dictionary<string, object> d, EtatSocial e)
+	{
+		try
+		{
+			if (d.ContainsKey("moyenne"))
+			{
+				e.NoteMoy = Convert.ToDouble(d["moyenne"], System.Globalization.CultureInfo.InvariantCulture);
+			}
+			if (d.ContainsKey("nb"))
+			{
+				e.NoteNb = Convert.ToInt32(d["nb"]);
+			}
+			if (d.ContainsKey("mienne"))
+			{
+				e.MaNote = Convert.ToInt32(d["mienne"]);
+			}
+		}
+		catch
+		{
+		}
+	}
+
+	/// <summary>Donne de 1 à 5 étoiles à un mod (0 : retire ma note). Renvoie l'état des notes à jour.</summary>
+	public static EtatSocial Noter(string mod, int etoiles)
+	{
+		int st;
+		Dictionary<string, object> d = AppelAuth("POST", "/v1/mod/" + mod + "/noter", new Dictionary<string, object> { { "etoiles", etoiles } }, out st);
+		if (st == 404 && (d == null || !d.ContainsKey("erreur")))
+		{
+			throw new Exception("les notes ne sont pas encore activées sur le serveur");
+		}
+		if (st != 200 || d == null)
+		{
+			throw new Exception(Msg(d, "note non enregistrée"));
+		}
+		EtatSocial e = new EtatSocial();
+		LireNotes(d, e);
+		return e;
 	}
 
 	public static int Aimer(string mod, out bool aime)
