@@ -830,7 +830,7 @@ internal partial class Fenetre : Form
 
 	private List<KeyValuePair<Rectangle, Annonce>> rAnnonces = new List<KeyValuePair<Rectangle, Annonce>>();
 
-	private static readonly string[] NouveautesLanceur = new string[3] { "Accueil 8 fois plus rapide", "Défilement et survols plus fluides", "Couvertures sans bandes" };
+	private static readonly string[] NouveautesLanceur = new string[3] { "Navigation beaucoup plus fluide", "Transitions plus légères", "Transition réparée en quittant une page par le menu" };
 
 	private static readonly Font fAnT2 = new Font("Segoe UI Semibold", Zx.P(11f));
 
@@ -4014,7 +4014,11 @@ internal partial class Fenetre : Form
 		c.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
 		c.Peindre = delegate(Graphics g, int d)
 		{
-			if (bg != null && bg.Size == c.ClientSize)
+			if (page && snap != null && bg != null && bg.Size == snap.Size && sp == Point.Empty)
+			{
+				// la transition repeint toute la surface : inutile de poser le fond avant
+			}
+			else if (bg != null && bg.Size == c.ClientSize)
 			{
 				g.DrawImageUnscaled(bg, 0, 0);
 			}
@@ -4224,6 +4228,10 @@ internal partial class Fenetre : Form
 					c.Invalidate(invalidateChildren: false);
 					c.Update();
 				}, false);
+				if (mesurePerf)
+				{
+					Journal.Ecrire("transition", new Exception("ouverture " + f.GetType().Name + " : " + StatJeu));
+				}
 			}
 			if (snap != null)
 			{
@@ -4265,6 +4273,10 @@ internal partial class Fenetre : Form
 			{
 				Thread.Sleep(3);
 			}
+		}
+		if (mesurePerf)
+		{
+			Journal.Ecrire("transition", new Exception("fermeture " + f.GetType().Name + " : suite=" + (apresCouches != null) + " page=" + page + " capture=" + (snapFin != null) + " couches=" + couches.Count));
 		}
 		if (apresCouches != null && page && snapFin != null && couches.Count == 1 && !base.IsDisposed)
 		{
@@ -4324,13 +4336,19 @@ internal partial class Fenetre : Form
 			apresCouches = null;
 			BeginInvoke((MethodInvoker)delegate
 			{
+				Voile fige = couvercle;
 				try
 				{
 					suite();
 				}
 				finally
 				{
-					RetirerCouvercle();
+					// on ne retire que l'image figée de cette page-ci : si la suite a ouvert puis quitté
+					// une autre page, son image à elle doit rester pour la transition suivante
+					if (couvercle == fige)
+					{
+						RetirerCouvercle();
+					}
 				}
 			});
 		}
@@ -4485,9 +4503,9 @@ internal partial class Fenetre : Form
 			vo.Update();
 		}, style == StyleTrans.Diagonale || neigeTrans > 0);
 		ThemeNoel.AlphaBlocs = 1f;
-		if (IntroDossier != null)
+		if (IntroDossier != null || mesurePerf)
 		{
-			Journal.Ecrire("transition", new Exception("snapshot " + StatSnap + " ms ; " + StatJeu));
+			Journal.Ecrire("transition", new Exception(style + " : capture " + StatSnap + " ms ; " + StatJeu));
 		}
 		zone.Controls.Remove(vo);
 		vo.Dispose();
@@ -5008,6 +5026,10 @@ internal partial class Fenetre : Form
 			noel.Fige = true;
 		}
 		bool depuisPage = couvercle != null;   // une page intégrée (Réglages, Amis…) vient d'être quittée par le menu
+		if (mesurePerf)
+		{
+			Journal.Ecrire("transition", new Exception("ShowVue " + v + " depuis " + vue + " : couvercle=" + depuisPage + " couches=" + couches.Count + " enTransition=" + enTransition + " animer=" + Animer()));
+		}
 		if ((v != vue || depuisPage) && couches.Count == 0 && !enTransition && Animer())
 		{
 			try
