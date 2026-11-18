@@ -722,7 +722,7 @@ internal partial class Fenetre : Form
 
 	private List<KeyValuePair<Rectangle, Annonce>> rAnnonces = new List<KeyValuePair<Rectangle, Annonce>>();
 
-	private static readonly string[] NouveautesLanceur = new string[4] { "Amis : discussion et invitations à jouer", "Accueil épuré", "Bibliothèque = vos mods, Mods = tout le catalogue", "Menu toujours visible" };
+	private static readonly string[] NouveautesLanceur = new string[3] { "Boutons au style moderne", "Pages plus claires, sans doublons", "Plus fluide" };
 
 	private static readonly Font fAnT2 = new Font("Segoe UI Semibold", Zx.P(11f));
 
@@ -2701,8 +2701,10 @@ internal partial class Fenetre : Form
 		_ = page.ClientSize.Height;
 		bRetour.Location = new Point(num, Zx.P(26));
 		bAccueilP.Location = new Point(num + Zx.P(56), Zx.P(26));
-		lTitre.Location = new Point(num + Zx.P(118), Zx.P(40));
-		lSous.Location = new Point(num + Zx.P(122), Zx.P(96));
+		// le menu de gauche remplace le bouton Accueil : le titre se colle au bouton retour
+		bAccueilP.Visible = false;
+		lTitre.Location = new Point(num + Zx.P(62), Zx.P(40));
+		lSous.Location = new Point(num + Zx.P(66), Zx.P(96));
 		bSuivre.SetBounds(W - num - Zx.P(48), Zx.P(30), Zx.P(48), Zx.P(44));
 		bAime.SetBounds(W - num - Zx.P(48) - Zx.P(10) - Zx.P(160), Zx.P(30), Zx.P(160), Zx.P(44));
 		bSupport.SetBounds(W - num - Zx.P(48) - Zx.P(10) - Zx.P(160) - Zx.P(10) - Zx.P(140), Zx.P(30), Zx.P(140), Zx.P(44));
@@ -5279,7 +5281,7 @@ internal partial class Fenetre : Form
 		}
 		else
 		{
-			EnTete(g, "Bibliothèque", NomJeu(jeuId) + "  ·  ma bibliothèque", dy, 56);
+			EnTete(g, NomJeu(jeuId), "Fiche du jeu  ·  informations, photos et vos cartes", dy, 0);
 		}
 		if (ongletB == 0)
 		{
@@ -6071,6 +6073,51 @@ internal partial class Fenetre : Form
 		Lang.DrawText(g, t, f, r, c, fl);
 	}
 
+	private static readonly Font fProfilNom = new Font("Segoe UI Semibold", Zx.P(10.5f));
+
+	private static readonly Font fProfilSt = new Font("Segoe UI", Zx.P(8.5f));
+
+	/// <summary>Pastille de profil compacte (en-tête de l'accueil) : avatar, pseudo, niveau et statut, lisibles sur fond sombre.</summary>
+	private void PeindreProfilCompact(Graphics g, Compte actif, string statut, Color col, int niv)
+	{
+		Rectangle r = rProfil;
+		SmoothingMode sm = g.SmoothingMode;
+		g.SmoothingMode = SmoothingMode.AntiAlias;
+		using (GraphicsPath p = Bouton.Rond(r, r.Height / 2))
+		{
+			using SolidBrush b = new SolidBrush(Color.FromArgb(120, 10, 13, 34));
+			g.FillPath(b, p);
+			using Pen pn = new Pen(Color.FromArgb(34, 255, 255, 255));
+			g.DrawPath(pn, p);
+		}
+		int ta = r.Height - Zx.P(12);
+		Rectangle ra = new Rectangle(r.X + Zx.P(6), r.Y + Zx.P(6), ta, ta);
+		if (actif != null)
+		{
+			Comptes.Avatar(g, actif, ra, (float)ta * 0.36f);
+		}
+		else
+		{
+			using SolidBrush bv = new SolidBrush(C.Carte);
+			g.FillEllipse(bv, ra);
+		}
+		using (SolidBrush bp = new SolidBrush(Color.FromArgb(10, 13, 34)))
+		{
+			g.FillEllipse(bp, ra.Right - Zx.P(12), ra.Bottom - Zx.P(12), Zx.P(13), Zx.P(13));
+		}
+		using (SolidBrush bc = new SolidBrush(col))
+		{
+			g.FillEllipse(bc, ra.Right - Zx.P(10), ra.Bottom - Zx.P(10), Zx.P(9), Zx.P(9));
+		}
+		int x = ra.Right + Zx.P(10);
+		int lw = r.Right - Zx.P(14) - x;
+		string nom = ((actif != null) ? actif.Pseudo : "Créer mon profil");
+		Lang.DrawText(g, nom, fProfilNom, new Rectangle(x, r.Y + Zx.P(10), lw, Zx.P(20)), C.Texte, TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding);
+		string st = statut.TrimStart('●', ' ') + ((actif != null) ? ("  ·  Niv. " + niv) : "");
+		Lang.DrawText(g, st, fProfilSt, new Rectangle(x, r.Y + Zx.P(32), lw, Zx.P(16)), col, TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding);
+		g.SmoothingMode = sm;
+	}
+
 	private void PeindreProfil(Graphics g)
 	{
 		if (rProfil.Width < 80)
@@ -6093,6 +6140,11 @@ internal partial class Fenetre : Form
 		if (actif != null)
 		{
 			Niveau(actif, out niv, out frac, out xp, out suivant, out titre);
+		}
+		if (rProfil.Height <= Zx.P(64))
+		{
+			PeindreProfilCompact(g, actif, text, col, niv);
+			return;
 		}
 		string text2 = string.Concat(rProfil.Size, "|", (actif == null) ? "-" : (actif.Id + actif.Pseudo + niv + xp + actif.BanType + actif.BanC1 + actif.BanC2 + actif.BanAngle + actif.BanMotif + actif.CouleurPerso + actif.Couleur), "|", text);
 		if (cacheProfil == null || cleProfil != text2)
@@ -9346,7 +9398,13 @@ internal partial class Fenetre : Form
 		{
 			foreach (Projet projet in cat.Projets)
 			{
-				if (JeuDe(projet) == jeuId)
+				// les compteurs des catégories suivent le filtre (Bibliothèque : seulement les mods téléchargés)
+				int codeC = 0;
+				if (filtre != 0)
+				{
+					LibelleEtat(projet, omsi, out var _, out codeC);
+				}
+				if (JeuDe(projet) == jeuId && (filtre != 1 || codeC >= 1) && (filtre != 2 || codeC == 2))
 				{
 					dictionary.TryGetValue(projet.Categorie, out var value);
 					dictionary[projet.Categorie] = value + 1;
@@ -9437,7 +9495,7 @@ internal partial class Fenetre : Form
 		int num = Math.Max(320, Math.Min(440, (int)((double)width * 0.34)));
 		int num2 = Zx.P(132);
 		rJeuB = new Rectangle(Zx.P(40), num2, num, Zx.P(440));
-		int margeB = ((ongletB == 1) ? Zx.P(60) : 40);
+		int margeB = Zx.P(36);
 		int num3 = ((ongletB == 1) ? margeB : (rJeuB.Right + Zx.P(28)));
 		int num4 = width - margeB;
 		bChangerJeu.Location = new Point(Zx.P(40), Zx.P(30));
